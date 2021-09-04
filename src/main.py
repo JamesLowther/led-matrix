@@ -3,9 +3,12 @@
 
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw
-from views.networkmonitor import NetworkMonitor
+import urllib3
 
 from matrix import Matrix
+from views.networkmonitor import NetworkMonitor
+
+urllib3.disable_warnings()
 
 def main():
     matrix = Matrix()

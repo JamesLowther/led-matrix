@@ -25,6 +25,9 @@ class Matrix():
         self.process()
 
     def process(self):
+        """
+        Parse any command line arguments and set the matrix options.
+        """
         self.args = self.__parser.parse_args()
 
         options = RGBMatrixOptions()
@@ -42,16 +45,16 @@ class Matrix():
         options.pixel_mapper_config = self.args.led_pixel_mapper
 
         if self.args.led_show_refresh:
-          options.show_refresh_rate = 1
+            options.show_refresh_rate = 1
 
         if self.args.led_slowdown_gpio != None:
             options.gpio_slowdown = self.args.led_slowdown_gpio
 
         if self.args.led_no_hardware_pulse:
-          options.disable_hardware_pulsing = True
+            options.disable_hardware_pulsing = True
 
         if self.args.led_gpio_mapping != None:
-          options.hardware_mapping = self.args.led_gpio_mapping
+            options.hardware_mapping = self.args.led_gpio_mapping
 
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
