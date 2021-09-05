@@ -1,22 +1,39 @@
 from urllib import request
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from requests import Session
 from dotenv import dotenv_values
-import json
+import json, os
+from time import sleep
 
 class NetworkMonitor():
+    REFRESH_INTERVAL = 1
+
     def __init__(self, matrix):
         self.matrix = matrix
 
     def run(self):
-        image = Image.new("RGB", self.matrix.dimensions, color="green")
-        d = ImageDraw.Draw(image)
-        d.text((0, 0), "Hello,", fill=(255, 255, 255))
-        d.text((0, 10), "world!", fill=(255, 255, 255))
-
-        self.matrix.set_image(image)
-
         unifi = UnifiConnection()
+
+        while True:
+            _, data = unifi.update()
+
+            # print(data)
+            
+            image = Image.new("RGB", self.matrix.dimensions, color="black")
+            f = ImageFont.truetype("NotoSansMono-Regular.ttf", 8)
+            # f = ImageFont.truetype("./src/assets/font/FFFFORWA.TTF", 8)
+            d = ImageDraw.Draw(image)
+            d.fontmode = 1
+            d.text(
+                (0, 0),
+                f"{str(data['data'][0]['num_user'])} clients",
+                font=f,
+                fill=(255, 255, 255)
+            )
+
+            self.matrix.set_image(image)
+
+            sleep(self.REFRESH_INTERVAL)
 
 class UnifiConnection():
     ENDPOINT = "https://192.168.1.5:8443"
@@ -27,8 +44,6 @@ class UnifiConnection():
         self.__session = Session()
 
         self.login()
-        self.update()
-        self.logout()
 
     def login(self):
         """
