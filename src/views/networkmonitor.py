@@ -23,7 +23,6 @@ class NetworkMonitor():
             f = ImageFont.truetype("NotoSansMono-Regular.ttf", 8)
             # f = ImageFont.truetype("./src/assets/font/FFFFORWA.TTF", 8)
             d = ImageDraw.Draw(image)
-            d.fontmode = 1
             d.text(
                 (0, 0),
                 f"{str(data['data'][0]['num_user'])} clients",

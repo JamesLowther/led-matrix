@@ -1,4 +1,8 @@
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+try:
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+except ModuleNotFoundError:
+    from virtualrgbmatrix import RGBMatrix, RGBMatrixOptions
+
 import argparse
 
 class Matrix():

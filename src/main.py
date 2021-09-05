@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-
-
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw
 import urllib3
 
