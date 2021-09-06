@@ -48,7 +48,7 @@ class MatrixWindow():
         self.update_window()
 
     def update_image(self, image):
-        resized_image = image.resize((self.WIDTH, self.HEIGHT), resample=PIL.Image.BOX)
+        resized_image = image.resize((int(self.__canvas["width"]), int(self.__canvas["height"])), resample=PIL.Image.BOX)
         grid_image = self.draw_grid(resized_image)
         tk_image = ImageTk.PhotoImage(grid_image)
         self.__current_image = tk_image
@@ -56,8 +56,8 @@ class MatrixWindow():
         self.update_window()
 
     def draw_grid(self, image):
-        pixel_w = self.WIDTH // 64
-        pixel_h = self.HEIGHT // 32
+        pixel_w = int(self.__canvas["width"]) // 64
+        pixel_h = int(self.__canvas["height"]) // 32
         
         line_w_horizontal = pixel_w // 3
 
