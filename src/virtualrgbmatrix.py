@@ -60,6 +60,7 @@ class MatrixWindow():
         pixel_h = int(self.__canvas["height"]) // 32
         
         line_w_horizontal = pixel_w // 3
+        line_w_vertical = pixel_h //3
 
         draw = ImageDraw.Draw(image)
 
@@ -71,7 +72,7 @@ class MatrixWindow():
         # Vertical lines.
         for i in range(65):
             x = i * pixel_w
-            draw.line([(x, 0), (x, self.HEIGHT)], fill="black", width=line_w_horizontal)
+            draw.line([(x, 0), (x, self.HEIGHT)], fill="black", width=line_w_vertical)
         
         return image
 
