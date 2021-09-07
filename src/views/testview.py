@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import time
+import os
+from cfg import SRC_BASE
 
 class TestView():
     def __init__(self, matrix):
@@ -7,9 +9,10 @@ class TestView():
 
     def run(self):
         base = time.time()
+
         while True:
             image = Image.new("RGB", self.matrix.dimensions, color="green")
-            f = ImageFont.truetype("./assets/PixeloidSans.ttf", 9)
+            f = ImageFont.truetype(os.path.join(SRC_BASE, "assets", "PixeloidSans.ttf"), 9)
             # image.putpixel((63,31), (155,155,55))
             d = ImageDraw.Draw(image)
             d.text(
