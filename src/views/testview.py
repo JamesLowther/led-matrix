@@ -17,7 +17,7 @@ class TestView():
 
         xyz = []
         R = 16
-        MAP_WIDTH = 15
+        MAP_WIDTH = 25
         MAP_HEIGHT = 15
 
         for i in range(MAP_HEIGHT + 1):
@@ -45,8 +45,8 @@ class TestView():
 
         sphere.rotate(sphere.find_center(), matrix_fix)
 
-        theta = 0.10
-        bgcolor = "#4a4a4a"
+        theta = 0.05
+        bgcolor = "#1c1c1c"
         while True:
             image = Image.new("RGB", self.matrix.dimensions, color=bgcolor)
 
@@ -76,6 +76,7 @@ class TestView():
         #     [0, 0, 1, 0],
         #     [0, 0, 0, 1]
         # ])   
+
         matrix1 = np.array([
             [c, 0, s, 0],
             [0, 1, 0, 0],
@@ -91,7 +92,7 @@ class TestView():
         ])  
 
         obj.rotate(center, matrix1)
-        obj.rotate(center, matrix2)
+        # obj.rotate(center, matrix2)
 
 class Object:
     def __init__(self):
