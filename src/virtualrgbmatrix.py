@@ -9,10 +9,10 @@ class RGBMatrix:
         self.width = options.cols
         self.height = options.rows
 
-        self.__window = MatrixWindow()
+        self._window = MatrixWindow()
 
     def SetImage(self, image):
-        self.__window.update_image(image)
+        self._window.update_image(image)
 
 class RGBMatrixOptions:
     def __init__(self):
@@ -36,32 +36,32 @@ class MatrixWindow():
     HEIGHT = WIDTH // 2
 
     def __init__(self):
-        self.__start_time = time.time()
-        self.__frames = 0
+        self._start_time = time.time()
+        self._frames = 0
 
-        self.__root = tk.Tk()
-        self.__root.title("Virtual RGB Matrix")
-        self.__root.geometry(f"{self.WIDTH}x{self.HEIGHT}")
-        self.__root.protocol("WM_DELETE_WINDOW", self.handle_close)
+        self._root = tk.Tk()
+        self._root.title("Virtual RGB Matrix")
+        self._root.geometry(f"{self.WIDTH}x{self.HEIGHT}")
+        self._root.protocol("WM_DELETE_WINDOW", self.handle_close)
 
-        self.__canvas = tk.Canvas(self.__root, width=self.WIDTH, height=self.HEIGHT)
-        self.__canvas.pack()
+        self._canvas = tk.Canvas(self._root, width=self.WIDTH, height=self.HEIGHT)
+        self._canvas.pack()
 
-        self.__current_image = None
-        self.__image_id = self.__canvas.create_image(0, 0, anchor=tk.NW)
+        self._current_image = None
+        self._image_id = self._canvas.create_image(0, 0, anchor=tk.NW)
         self.update_window()
 
     def update_image(self, image):
-        resized_image = image.resize((int(self.__canvas["width"]), int(self.__canvas["height"])), resample=PIL.Image.BOX)
+        resized_image = image.resize((int(self._canvas["width"]), int(self._canvas["height"])), resample=PIL.Image.BOX)
         grid_image = self.draw_grid(resized_image)
         tk_image = ImageTk.PhotoImage(grid_image)
-        self.__current_image = tk_image
-        self.__canvas.itemconfig(self.__image_id, image=self.__current_image)
+        self._current_image = tk_image
+        self._canvas.itemconfig(self._image_id, image=self._current_image)
         self.update_window()
 
     def draw_grid(self, image):
-        pixel_w = int(self.__canvas["width"]) // 64
-        pixel_h = int(self.__canvas["height"]) // 32
+        pixel_w = int(self._canvas["width"]) // 64
+        pixel_h = int(self._canvas["height"]) // 32
         
         line_w_horizontal = pixel_w // 3
         line_w_vertical = pixel_h //3
@@ -82,16 +82,16 @@ class MatrixWindow():
 
     def update_window(self):
         try:
-            self.__root.title(f"Virtual RGB Matrix ({str(self.get_fps())} FPS)")
-            self.__root.update()
-            self.__root.update_idletasks()
+            self._root.title(f"Virtual RGB Matrix ({str(self.get_fps())} FPS)")
+            self._root.update()
+            self._root.update_idletasks()
 
-            self.__frames += 1
+            self._frames += 1
         except tk.TclError:
             sys.exit(0)
 
     def get_fps(self):
-        return round(self.__frames / (time.time() - self.__start_time), 2)
+        return round(self._frames / (time.time() - self._start_time), 2)
 
     def handle_close(self):
-        self.__root.destroy()
+        self._root.destroy()

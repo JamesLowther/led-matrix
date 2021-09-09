@@ -8,18 +8,18 @@ class ISSView():
     BG_COLOUR = "#1c1c1c"
 
     def __init__(self, matrix):
-        self.__matrix = matrix
-        self.__earth = Earth()
+        self._matrix = matrix
+        self._earth = Earth()
 
     def run(self):
         while True:
-            image = Image.new("RGB", self.__matrix.dimensions, color=self.BG_COLOUR)
+            image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOUR)
 
-            self.__earth.draw(image)
+            self._earth.draw(image)
 
-            self.__earth.update_spin(0.05)
-
-            self.__matrix.set_image(image)
+            self._earth.update_spin(0.05)
+            
+            self._matrix.set_image(image)
 
             self.msleep(self.REFRESH_INTERVAL)
 
@@ -34,7 +34,7 @@ class Earth():
     Y = 15
 
     def __init__(self):
-        self.__nodes = np.zeros((0, 4))
+        self._nodes = np.zeros((0, 4))
         self.add_nodes()
 
     def add_nodes(self):
@@ -54,7 +54,7 @@ class Earth():
 
         ones_column = np.ones((len(node_array), 1))
         ones_added = np.hstack((node_array, ones_column))
-        self.__nodes = np.vstack((self.__nodes, ones_added))
+        self._nodes = np.vstack((self._nodes, ones_added))
 
         # Terrible orientation fix.
         c = cos(1.5708)
@@ -69,7 +69,7 @@ class Earth():
         self.rotate(matrix_fix)
 
     def find_center(self):
-        return self.__nodes.mean(axis=0)
+        return self._nodes.mean(axis=0)
 
     def update_spin(self, theta):
         c = np.cos(theta)
@@ -94,8 +94,8 @@ class Earth():
     def rotate(self, matrix):
         center = self.find_center()
 
-        for i, node in enumerate(self.__nodes):
-            self.__nodes[i] = center + np.matmul(matrix, node - center)
+        for i, node in enumerate(self._nodes):
+            self._nodes[i] = center + np.matmul(matrix, node - center)
 
     def draw(self, image):
         
@@ -118,7 +118,7 @@ class Earth():
             [0, 0, 0, 1]
         ])
 
-        temp_nodes = np.copy(self.__nodes)
+        temp_nodes = np.copy(self._nodes)
 
         center = self.find_center()
 

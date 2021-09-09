@@ -2,7 +2,7 @@ from urllib import request
 from PIL import Image, ImageDraw, ImageFont
 from requests import Session
 from dotenv import dotenv_values
-import json, os
+import json
 from time import sleep
 
 class NetworkMonitor():
@@ -20,8 +20,7 @@ class NetworkMonitor():
             # print(data)
             
             image = Image.new("RGB", self.matrix.dimensions, color="black")
-            f = ImageFont.truetype("NotoSansMono-Regular.ttf", 8)
-            # f = ImageFont.truetype("./src/assets/font/FFFFORWA.TTF", 8)
+            f = ImageFont.truetype("./src/assets/fonts/6px-Normal.ttf", 8)
             d = ImageDraw.Draw(image)
             d.text(
                 (0, 0),
@@ -39,8 +38,8 @@ class UnifiConnection():
     SITE = "default"
 
     def __init__(self):
-        self.__config = dotenv_values()
-        self.__session = Session()
+        self._config = dotenv_values()
+        self._session = Session()
 
         self.login()
 
@@ -49,11 +48,11 @@ class UnifiConnection():
         Login to the Unifi controller.
         Sets the cookie for the session.
         """
-        self.__session.post(
+        self._session.post(
             f"{self.ENDPOINT}/api/login",
             json={
-                "username": self.__config["UNIFI_USERNAME"],
-                "password": self.__config["UNIFI_PASSWORD"]
+                "username": self._config["UNIFI_USERNAME"],
+                "password": self._config["UNIFI_PASSWORD"]
             },
             verify=False
         )
@@ -63,7 +62,7 @@ class UnifiConnection():
         Logout of the Unifi controller.
         Deletes the cookie for the session. 
         """
-        self.__session.post(
+        self._session.post(
             f"{self.ENDPOINT}/api/logout",
             verify=False
         )
@@ -75,7 +74,7 @@ class UnifiConnection():
         """
         success = False
         for i in range(retry_attempts):
-            response = self.__session.get(
+            response = self._session.get(
                 f"{self.ENDPOINT}/api/s/{self.SITE}/stat/health",
                 verify=False
             )
