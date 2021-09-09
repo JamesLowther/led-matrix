@@ -12,14 +12,14 @@ urllib3.disable_warnings()
 def main():
     matrix = Matrix()
 
-    networkmanager = NetworkMonitor(matrix)
-    networkmanager.run()
+    # networkmanager = NetworkMonitor(matrix)
+    # networkmanager.run()
 
     # testview = TestView(matrix)
     # testview.run()
 
-    # issview = ISSView(matrix)
-    # issview.run()
+    issview = ISSView(matrix)
+    issview.run()
 
     input()
 

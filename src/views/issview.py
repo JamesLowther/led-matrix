@@ -2,6 +2,8 @@ from PIL import Image
 import time
 import numpy as np
 from math import pi, sin, cos
+from cfg import SRC_BASE
+import os
 
 class ISSView():
     REFRESH_INTERVAL = 50
@@ -27,15 +29,19 @@ class ISSView():
         time.sleep(ms / 1000)
 
 class Earth():
-    RADIUS = 14
-    MAP_WIDTH = 25
-    MAP_HEIGHT = 15
+    RADIUS = 15
+    MAP_WIDTH = 100
+    MAP_HEIGHT = 100
     X = 46
     Y = 15
 
     def __init__(self):
         self._nodes = np.zeros((0, 4))
+        self._map = []
+        
         self.add_nodes()
+        self.convert_map()
+        # print(self._map)
 
     def add_nodes(self):
         xyz = []
@@ -98,15 +104,15 @@ class Earth():
             self._nodes[i] = center + np.matmul(matrix, node - center)
 
     def draw(self, image):
-        
         temp_nodes = self.add_tilt()
 
-        for node in temp_nodes:
-            if node[2] > 1:
+        for i, node in enumerate(temp_nodes):
+            if node[2] > 1 and self._map[i]:
                 image.putpixel((self.X + int(node[0]), self.Y + int(node[1])), (255, 255, 255, 255))
 
     def add_tilt(self):
-        angle = 0.4101524
+        # angle = 0.4101524
+        angle = 0
 
         c = np.cos(angle)
         s = np.sin(angle)
@@ -126,3 +132,17 @@ class Earth():
             temp_nodes[i] = center + np.matmul(matrix_x, node - center)
 
         return temp_nodes
+
+    def convert_map(self):
+        path = os.path.join(SRC_BASE, "assets", "issview", "world-map.png")
+        img = Image.open(path).convert("1")
+
+        resized = img.resize((self.MAP_WIDTH + 1, self.MAP_HEIGHT + 1), Image.BOX)
+
+        for y in range(resized.height):
+            for x in range(resized.width):
+                pixel = resized.getpixel((x, y))
+                if pixel == 255:
+                    self._map.append(1)
+                else:
+                    self._map.append(0)
