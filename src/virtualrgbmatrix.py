@@ -2,6 +2,7 @@ import tkinter as tk
 import PIL
 from PIL import ImageTk, ImageDraw
 import sys
+import time
 
 class RGBMatrix:
     def __init__(self, options):
@@ -35,6 +36,9 @@ class MatrixWindow():
     HEIGHT = WIDTH // 2
 
     def __init__(self):
+        self.__start_time = time.time()
+        self.__frames = 0
+
         self.__root = tk.Tk()
         self.__root.title("Virtual RGB Matrix")
         self.__root.geometry(f"{self.WIDTH}x{self.HEIGHT}")
@@ -78,10 +82,16 @@ class MatrixWindow():
 
     def update_window(self):
         try:
+            self.__root.title(f"Virtual RGB Matrix ({str(self.get_fps())} FPS)")
             self.__root.update()
             self.__root.update_idletasks()
+
+            self.__frames += 1
         except tk.TclError:
             sys.exit(0)
+
+    def get_fps(self):
+        return round(self.__frames / (time.time() - self.__start_time), 2)
 
     def handle_close(self):
         self.__root.destroy()
