@@ -1,10 +1,14 @@
-from PIL import Image, ImageChops, ImageOps
+from PIL import Image, ImageChops, ImageOps, ImageFont, ImageDraw
 import time
 import numpy as np
 from math import pi, sin, cos, radians
 from cfg import SRC_BASE
 import os
 import requests
+import threading
+
+e = threading.Event()
+iss_coords = (0, 0)
 
 class ISSView():
     REFRESH_INTERVAL = 50 # ms.
@@ -13,8 +17,13 @@ class ISSView():
 
     def __init__(self, matrix):
         self._matrix = matrix
+
+        self._request_t = threading.Thread(name="requests", target=request_thread, args=(e,))
+        self._request_t.start()
+
+        e.set()
+
         self._earth = Earth()
-        self._api = APIConnection()
         self._iss_nodes = self.update_iss_coords()
         self._earth.update_iss()
 
@@ -29,27 +38,57 @@ class ISSView():
 
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOUR)
 
+            self.draw_coords(image)
+
             self._earth.draw(image)
             self._earth.update_spin(0.05)
+            
             self._matrix.set_image(image)
 
             self.msleep(self.REFRESH_INTERVAL)
 
+    def draw_coords(self, image):
+        font_path = os.path.join(SRC_BASE, "assets", "fonts", "cg-pixel-4x5.ttf")
+        f = ImageFont.truetype(font_path, 5)
+        d = ImageDraw.Draw(image)
+
+        color = (184, 184, 184)
+
+        x_offset = 1
+        y_offset = 8
+
+        # Latitude.
+        d.text(
+            (x_offset, y_offset),
+            str(round(iss_coords[0], 3)),
+            font=f,
+            fill=color
+        )
+
+        # Longitude.
+        d.text(
+            (x_offset, y_offset + 10),
+            str(round(iss_coords[1], 3)),
+            font=f,
+            fill=color
+        )
+
     def update_iss_coords(self):
-        self._iss_nodes = self._api.get_coords()
-        self._earth.update_coords(self._iss_nodes)
+        e.set()
 
     def msleep(self, ms):
         time.sleep(ms / 1000)
 
 class Earth():
+    HOME_COORDS = (51.030436, -114.065720)
+
     MAP_CALIBRATION = 1
     RADIUS = 13
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
     # MAP_WIDTH = 25
     # MAP_HEIGHT = 25
-    X = 46
+    X = 49
     Y = 15
 
     def __init__(self):
@@ -61,6 +100,10 @@ class Earth():
         # Used for drawing the ISS.
         self._iss_coords = None
         self._iss_nodes = None
+
+        # Used for drawing my coords.
+        self._home_nodes = None
+        self._home_nodes_backup = None
 
         self._current_spin = 0
         
@@ -90,13 +133,22 @@ class Earth():
         ones_added = np.hstack((node_array, ones_column))
         self._earth_nodes = np.vstack((self._earth_nodes, ones_added))
 
+        # Build home array of nodes.
+        home_coords = self.convert_coords(radians(90 - self.HOME_COORDS[0]), radians(180 - self.HOME_COORDS[1]))
+        ones_column = np.ones((1, 1))
+        ones_added = np.hstack(([home_coords], ones_column))
+        self._home_nodes = np.vstack((np.zeros((0, 4)), ones_added))
+
         # Backup the nodes to allow them to be restored after full rotation.
         self._earth_nodes_backup = np.copy(self._earth_nodes)
+        self._home_nodes_backup = np.copy(self._home_nodes)
 
     def find_center(self):
         return self._earth_nodes.mean(axis=0)
 
     def update_iss(self):
+        self.update_coords()
+
         ones_column = np.ones((1, 1))
         ones_added = np.hstack(([self._iss_coords], ones_column))
         self._iss_nodes = np.vstack((np.zeros((0, 4)), ones_added))
@@ -106,9 +158,9 @@ class Earth():
 
         # Earth has done a full rotation. Reset the nodes for alignment.
         if self._current_spin >= 2 * pi:
-            print("Full rotation - reset")
             self._current_spin = 0
             self._earth_nodes = np.copy(self._earth_nodes_backup)
+            self._home_nodes = np.copy(self._home_nodes_backup)
             self.update_iss()
 
         # Rotate counter-clockwise as normal.
@@ -132,6 +184,7 @@ class Earth():
             self._earth_nodes[i] = center + np.matmul(matrix, node - center)
 
         self._iss_nodes[0] = center + np.matmul(matrix, self._iss_nodes[0] - center)
+        self._home_nodes[0] = center + np.matmul(matrix, self._home_nodes[0] - center)
 
     def draw(self, image):
         # Draw the Earth.
@@ -146,6 +199,14 @@ class Earth():
 
         if iss_z > 1:
             image.putpixel((self.X + iss_x, self.Y + iss_y * -1), (255, 0, 0, 255))
+
+        # Draw home.
+        home_x = int(self._home_nodes[0][0])
+        home_y = int(self._home_nodes[0][1])
+        home_z = self._home_nodes[0][2]
+
+        if home_z > 1:
+            image.putpixel((self.X + home_x, self.Y + home_y * -1), (0, 255, 0, 255))
 
     def add_tilt(self):
         angle = 0.4101524
@@ -185,11 +246,22 @@ class Earth():
                 pixel = shifted.getpixel((x, y))
                 self._map.append(int(pixel == 255))
                     
-    def update_coords(self, coords):
-        self._iss_coords = self.convert_coords(radians(90 - coords[0]), radians(180 - coords[1]))
+    def update_coords(self):
+        global iss_coords
+        self._iss_coords = self.convert_coords(radians(90 - iss_coords[0]), radians(180 - iss_coords[1]))
 
-# def request_thread
+def request_thread(e):
+    global iss_coords
+    api_connection = APIConnection()
 
+    while True:
+        e.wait()
+        
+        iss_coords = api_connection.get_coords()
+
+        # Reset the event.
+        e.clear()
+        
 class APIConnection():
     ENDPOINT = "http://api.open-notify.org/iss-now.json"
 
@@ -197,6 +269,5 @@ class APIConnection():
         pass
 
     def get_coords(self):
-        print("update")
         loc = requests.get(self.ENDPOINT).json()
         return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
