@@ -88,7 +88,7 @@ class Earth():
     MAP_HEIGHT = 40
     # MAP_WIDTH = 25
     # MAP_HEIGHT = 25
-    X = 49
+    X = 46
     Y = 15
 
     def __init__(self):
@@ -190,7 +190,7 @@ class Earth():
         # Draw the Earth.
         for i, node in enumerate(self._earth_nodes):
             if i > self.MAP_WIDTH - 1 and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and node[2] > 1 and self._map[i]:
-                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), (255, 255, 255, 255))
+                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), (130, 130, 130, 255))
 
         # Draw the ISS.
         iss_x = int(self._iss_nodes[0][0])
