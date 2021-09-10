@@ -57,18 +57,28 @@ class ISSView():
         x_offset = 1
         y_offset = 8
 
+        truncate_len = 7
+
+        lat = str(round(iss_coords[0], 3))
+        if len(lat) > truncate_len:
+            lat = lat[:truncate_len]
+
         # Latitude.
         d.text(
             (x_offset, y_offset),
-            str(round(iss_coords[0], 3)),
+            lat,
             font=f,
             fill=color
         )
 
+        lon = str(round(iss_coords[1], 3))
+        if len(lon) > truncate_len:
+            lon = lon[:truncate_len]
+
         # Longitude.
         d.text(
             (x_offset, y_offset + 10),
-            str(round(iss_coords[1], 3)),
+            lon,
             font=f,
             fill=color
         )
