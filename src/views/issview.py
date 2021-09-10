@@ -1,7 +1,7 @@
 from PIL import Image
 import time
 import numpy as np
-from math import pi, sin, cos
+from math import pi, sin, cos, radians
 from cfg import SRC_BASE
 import os
 import requests
@@ -99,39 +99,26 @@ class Earth():
     def find_center(self):
         return self._nodes.mean(axis=0)
 
-    def update_coord_index(self):
-        x, y, z  = convert_coords(self._coords[0], self._coords[1])
-        print(x, y, z)
-
     def update_spin(self, theta):
-        self._current_spin += theta
+        c = np.cos(theta)
+        s = np.sin(theta)
 
-        if self._current_spin >= 2 * pi:
-            self._current_spin = 0
-            self._nodes = np.copy(self._nodes_backup)
-            self.update_coord_index()
-            print("reset")
+        matrix_y = np.array([
+            [c, 0, s, 0],
+            [0, 1, 0, 0],
+            [-s, 0, c, 0],
+            [0, 0, 0, 1]
+        ])    
 
-        else:
-            c = np.cos(theta)
-            s = np.sin(theta)
+        # matrix_z = np.array([
+        #     [1, 0, 0, 0],
+        #     [0, c, -s, 0],
+        #     [0, s, c, 0],
+        #     [0, 0, 0, 1]
+        # ])
 
-            matrix_y = np.array([
-                [c, 0, s, 0],
-                [0, 1, 0, 0],
-                [-s, 0, c, 0],
-                [0, 0, 0, 1]
-            ])    
-
-            # matrix_z = np.array([
-            #     [1, 0, 0, 0],
-            #     [0, c, -s, 0],
-            #     [0, s, c, 0],
-            #     [0, 0, 0, 1]
-            # ])
-
-            self.rotate(matrix_y)
-            # self.rotate(matrix_z)
+        self.rotate(matrix_y)
+        # self.rotate(matrix_z)
 
     def rotate(self, matrix):
         center = self.find_center()
@@ -139,17 +126,19 @@ class Earth():
         for i, node in enumerate(self._nodes):
             self._nodes[i] = center + np.matmul(matrix, node - center)
 
+        self._coords[0] = center + np.matmul(matrix, self._coords[0] - center)
+
     def draw(self, image):
         for i, node in enumerate(self._nodes):
             if i > self.MAP_WIDTH - 1 and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and node[2] > 1 and self._map[i]:
                 image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), (255, 255, 255, 255))
 
-        # iss_x = int(self._nodes[self._coord_index][0])
-        # iss_y = int(self._nodes[self._coord_index][1])
-        # iss_z = self._nodes[self._coord_index][2]
+        iss_x = int(self._coords[0][0])
+        iss_y = int(self._coords[0][1])
+        iss_z = self._coords[0][2]
 
-        # if iss_z > 1:
-        #     image.putpixel((self.X + iss_x, self.Y + iss_y), (255, 0, 0, 255))
+        if iss_z > 1:
+            image.putpixel((self.X + iss_x, self.Y + iss_y), (255, 0, 0, 255))
 
     def add_tilt(self):
         # angle = 0.4101524
@@ -190,7 +179,12 @@ class Earth():
                     self._map.append(0)
 
     def update_coords(self, coords):
-        self._coords = self.convert_coords(coords[0], coords[1])
+        coords = [self.convert_coords(radians(coords[0]), radians(coords[1]))]
+
+        ones_column = np.ones((len(coords), 1))
+        ones_added = np.hstack((coords, ones_column))
+        self._coords = np.vstack((np.zeros((0, 4)), ones_added))
+
         print(self._coords)
 
 class APIConnection():
