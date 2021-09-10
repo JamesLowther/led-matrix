@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageChops
 import time
 import numpy as np
 from math import pi, sin, cos, radians
@@ -37,11 +37,13 @@ class ISSView():
     def update_iss_coords(self):
         self._coords = self._api.get_coords()
         self._earth.update_coords(self._coords)
+        self._earth.update_iss()
 
     def msleep(self, ms):
         time.sleep(ms / 1000)
 
 class Earth():
+    MAP_CALIBRATION = 7
     RADIUS = 13
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
@@ -99,26 +101,40 @@ class Earth():
     def find_center(self):
         return self._nodes.mean(axis=0)
 
+    def update_iss(self):
+        ones_column = np.ones((len(self._converted_coords), 1))
+        ones_added = np.hstack((self._converted_coords, ones_column))
+        self._coords = np.vstack((np.zeros((0, 4)), ones_added))
+
     def update_spin(self, theta):
-        c = np.cos(theta)
-        s = np.sin(theta)
+        self._current_spin += theta
 
-        matrix_y = np.array([
-            [c, 0, s, 0],
-            [0, 1, 0, 0],
-            [-s, 0, c, 0],
-            [0, 0, 0, 1]
-        ])    
+        if self._current_spin >= 2 * pi:
+            self._current_spin = 0
+            self._nodes = np.copy(self._nodes_backup)
+            self.update_iss()
+            print("rotation")
 
-        # matrix_z = np.array([
-        #     [1, 0, 0, 0],
-        #     [0, c, -s, 0],
-        #     [0, s, c, 0],
-        #     [0, 0, 0, 1]
-        # ])
+        else:
+            c = np.cos(theta)
+            s = np.sin(theta)
 
-        self.rotate(matrix_y)
-        # self.rotate(matrix_z)
+            matrix_y = np.array([
+                [c, 0, s, 0],
+                [0, 1, 0, 0],
+                [-s, 0, c, 0],
+                [0, 0, 0, 1]
+            ])    
+
+            # matrix_z = np.array([
+            #     [1, 0, 0, 0],
+            #     [0, c, -s, 0],
+            #     [0, s, c, 0],
+            #     [0, 0, 0, 1]
+            # ])
+
+            self.rotate(matrix_y)
+            # self.rotate(matrix_z)
 
     def rotate(self, matrix):
         center = self.find_center()
@@ -166,32 +182,26 @@ class Earth():
     def convert_map(self):
         path = os.path.join(SRC_BASE, "assets", "issview", "world-map.png")
         img = Image.open(path).convert("1")
-        img.save("output.png", "PNG")
 
         resized = img.resize((self.MAP_WIDTH + 1, self.MAP_HEIGHT + 1), Image.BOX)
+        shifted = ImageChops.offset(resized, self.MAP_CALIBRATION, 0)
 
-        for y in range(resized.height):
-            for x in range(resized.width):
-                pixel = resized.getpixel((x, y))
+        for y in range(shifted.height):
+            for x in range(shifted.width):
+                pixel = shifted.getpixel((x, y))
                 if pixel == 255:
                     self._map.append(1)
                 else:
                     self._map.append(0)
-
+                    
     def update_coords(self, coords):
-        coords = [self.convert_coords(radians(coords[0]), radians(coords[1]))]
-
-        ones_column = np.ones((len(coords), 1))
-        ones_added = np.hstack((coords, ones_column))
-        self._coords = np.vstack((np.zeros((0, 4)), ones_added))
-
-        print(self._coords)
+        self._converted_coords = [self.convert_coords(radians(coords[0]), radians(coords[1]))]
 
 class APIConnection():
     def __init__(self):
         pass
 
     def get_coords(self):
+        print("update")
         loc = requests.get("http://api.open-notify.org/iss-now.json").json()
-
         return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
