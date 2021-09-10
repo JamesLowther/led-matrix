@@ -98,7 +98,7 @@ class Earth():
     MAP_HEIGHT = 40
     # MAP_WIDTH = 25
     # MAP_HEIGHT = 25
-    X = 46
+    X = 47
     Y = 15
 
     def __init__(self):
