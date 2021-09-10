@@ -1,4 +1,4 @@
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageOps
 import time
 import numpy as np
 from math import pi, sin, cos, radians
@@ -43,7 +43,7 @@ class ISSView():
         time.sleep(ms / 1000)
 
 class Earth():
-    MAP_CALIBRATION = 7
+    MAP_CALIBRATION = 1
     RADIUS = 13
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
@@ -154,7 +154,7 @@ class Earth():
         iss_z = self._coords[0][2]
 
         if iss_z > 1:
-            image.putpixel((self.X + iss_x, self.Y + iss_y), (255, 0, 0, 255))
+            image.putpixel((self.X + iss_x, self.Y + iss_y * -1), (255, 0, 0, 255))
 
     def add_tilt(self):
         # angle = 0.4101524
@@ -184,7 +184,8 @@ class Earth():
         img = Image.open(path).convert("1")
 
         resized = img.resize((self.MAP_WIDTH + 1, self.MAP_HEIGHT + 1), Image.BOX)
-        shifted = ImageChops.offset(resized, self.MAP_CALIBRATION, 0)
+        flipped = ImageOps.mirror(resized)
+        shifted = ImageChops.offset(flipped, self.MAP_CALIBRATION, 0)
 
         for y in range(shifted.height):
             for x in range(shifted.width):
@@ -195,7 +196,7 @@ class Earth():
                     self._map.append(0)
                     
     def update_coords(self, coords):
-        self._converted_coords = [self.convert_coords(radians(coords[0]), radians(coords[1]))]
+        self._converted_coords = [self.convert_coords(radians(90 - coords[0]), radians(180 - coords[1]))]
 
 class APIConnection():
     def __init__(self):
