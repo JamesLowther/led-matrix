@@ -4,44 +4,68 @@ import numpy as np
 from math import pi, sin, cos
 from cfg import SRC_BASE
 import os
+import requests
 
 class ISSView():
-    REFRESH_INTERVAL = 50
-    BG_COLOUR = "#1c1c1c"
+    REFRESH_INTERVAL = 50 # ms.
+    API_INTERVAL= 30 # s.
+    BG_COLOUR = "black"
 
     def __init__(self, matrix):
         self._matrix = matrix
         self._earth = Earth()
+        self._api = APIConnection()
+        self._coords = self.update_iss_coords()
 
     def run(self):
+        start_time = time.time()
+
         while True:
+            current_time = time.time()
+            if current_time - start_time >= self.API_INTERVAL:
+                start_time = current_time
+                self.update_iss_coords()
+
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOUR)
 
             self._earth.draw(image)
-
             self._earth.update_spin(0.05)
-            
             self._matrix.set_image(image)
 
             self.msleep(self.REFRESH_INTERVAL)
+
+    def update_iss_coords(self):
+        self._coords = self._api.get_coords()
+        self._earth.update_coords(self._coords)
 
     def msleep(self, ms):
         time.sleep(ms / 1000)
 
 class Earth():
-    RADIUS = 15
-    MAP_WIDTH = 100
-    MAP_HEIGHT = 100
+    RADIUS = 13
+    MAP_WIDTH = 80
+    MAP_HEIGHT = 40
+    # MAP_WIDTH = 25
+    # MAP_HEIGHT = 25
     X = 46
     Y = 15
 
     def __init__(self):
         self._nodes = np.zeros((0, 4))
         self._map = []
+        self._coords = None
+        self._coord_index = 2000
+        self._current_spin = 0
         
         self.add_nodes()
         self.convert_map()
-        # print(self._map)
+    
+    def convert_coords(self, lat, lon):
+        x = round(self.RADIUS * sin(lat) * cos(lon), 2)
+        y = round(self.RADIUS * cos(lat), 2)
+        z = round(self.RADIUS * sin(lat) * sin(lon), 2)
+        
+        return (x, y, z)
 
     def add_nodes(self):
         xyz = []
@@ -51,10 +75,7 @@ class Earth():
             lat = (pi / self.MAP_HEIGHT) * i
             for j in range(self.MAP_WIDTH + 1):
                 lon = (2 * pi / self.MAP_WIDTH) * j
-                x = round(self.RADIUS * sin(lat) * cos(lon), 2)
-                y = round(self.RADIUS * sin(lat) * sin(lon), 2)
-                z = round(self.RADIUS * cos(lat), 2)
-                xyz.append((x, y, z))
+                xyz.append(self.convert_coords(lat, lon))
 
         node_array = np.array(xyz)
 
@@ -72,30 +93,45 @@ class Earth():
             [0, 0, 0, 1]
         ])
 
-        self.rotate(matrix_fix)
+        # self.rotate(matrix_fix)    
+        self._nodes_backup = np.copy(self._nodes)
 
     def find_center(self):
         return self._nodes.mean(axis=0)
 
+    def update_coord_index(self):
+        x, y, z  = convert_coords(self._coords[0], self._coords[1])
+        print(x, y, z)
+
     def update_spin(self, theta):
-        c = np.cos(theta)
-        s = np.sin(theta)
+        self._current_spin += theta
 
-        matrix_y = np.array([
-            [c, 0, s, 0],
-            [0, 1, 0, 0],
-            [-s, 0, c, 0],
-            [0, 0, 0, 1]
-        ])    
+        if self._current_spin >= 2 * pi:
+            self._current_spin = 0
+            self._nodes = np.copy(self._nodes_backup)
+            self.update_coord_index()
+            print("reset")
 
-        # matrix_z = np.array([
-        #     [1, 0, 0, 0],
-        #     [0, c, -s, 0],
-        #     [0, s, c, 0],
-        #     [0, 0, 0, 1]
-        # ])
+        else:
+            c = np.cos(theta)
+            s = np.sin(theta)
 
-        self.rotate(matrix_y)
+            matrix_y = np.array([
+                [c, 0, s, 0],
+                [0, 1, 0, 0],
+                [-s, 0, c, 0],
+                [0, 0, 0, 1]
+            ])    
+
+            # matrix_z = np.array([
+            #     [1, 0, 0, 0],
+            #     [0, c, -s, 0],
+            #     [0, s, c, 0],
+            #     [0, 0, 0, 1]
+            # ])
+
+            self.rotate(matrix_y)
+            # self.rotate(matrix_z)
 
     def rotate(self, matrix):
         center = self.find_center()
@@ -104,11 +140,16 @@ class Earth():
             self._nodes[i] = center + np.matmul(matrix, node - center)
 
     def draw(self, image):
-        temp_nodes = self.add_tilt()
+        for i, node in enumerate(self._nodes):
+            if i > self.MAP_WIDTH - 1 and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and node[2] > 1 and self._map[i]:
+                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), (255, 255, 255, 255))
 
-        for i, node in enumerate(temp_nodes):
-            if node[2] > 1 and self._map[i]:
-                image.putpixel((self.X + int(node[0]), self.Y + int(node[1])), (255, 255, 255, 255))
+        # iss_x = int(self._nodes[self._coord_index][0])
+        # iss_y = int(self._nodes[self._coord_index][1])
+        # iss_z = self._nodes[self._coord_index][2]
+
+        # if iss_z > 1:
+        #     image.putpixel((self.X + iss_x, self.Y + iss_y), (255, 0, 0, 255))
 
     def add_tilt(self):
         # angle = 0.4101524
@@ -136,6 +177,7 @@ class Earth():
     def convert_map(self):
         path = os.path.join(SRC_BASE, "assets", "issview", "world-map.png")
         img = Image.open(path).convert("1")
+        img.save("output.png", "PNG")
 
         resized = img.resize((self.MAP_WIDTH + 1, self.MAP_HEIGHT + 1), Image.BOX)
 
@@ -146,3 +188,16 @@ class Earth():
                     self._map.append(1)
                 else:
                     self._map.append(0)
+
+    def update_coords(self, coords):
+        self._coords = self.convert_coords(coords[0], coords[1])
+        print(self._coords)
+
+class APIConnection():
+    def __init__(self):
+        pass
+
+    def get_coords(self):
+        loc = requests.get("http://api.open-notify.org/iss-now.json").json()
+
+        return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
