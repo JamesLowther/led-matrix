@@ -19,7 +19,8 @@ def main():
     # testview.run()
 
     issview = ISSView(matrix)
-    issview.run()
+    issview.start()
+    # issview.run()
 
     input()
 
