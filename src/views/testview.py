@@ -6,8 +6,9 @@ import numpy as np
 from math import pi, sin, cos
 
 class TestView():
-    def __init__(self, matrix):
+    def __init__(self, matrix, press_event):
         self.matrix = matrix
+        self._press_event = press_event
 
     def run(self):
         base = time.time()
@@ -46,8 +47,8 @@ class TestView():
         sphere.rotate(sphere.find_center(), matrix_fix)
 
         theta = 0.05
-        bgcolor = "#1c1c1c"
-        while True:
+        bgcolor = "black"
+        while not self._press_event.is_set():
             image = Image.new("RGB", self.matrix.dimensions, color=bgcolor)
 
             for node in sphere.nodes:

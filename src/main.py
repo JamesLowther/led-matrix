@@ -1,4 +1,3 @@
-from PIL import Image, ImageDraw
 import urllib3
 import signal
 import threading
@@ -16,29 +15,33 @@ urllib3.disable_warnings()
 stop_event = threading.Event()
 
 def main():
-
     press_event = threading.Event()
-    # button_thread = threading.Thread(target=button_handler, args=(press_event, stop_event))
     button_thread = ButtonHandler(press_event, stop_event)
     button_thread.start()
 
-    press_event.wait()
-
     matrix = Matrix()
 
-    # networkmanager = NetworkMonitor(matrix)
-    # networkmanager.run()
+    networkmanager = NetworkMonitor(matrix, press_event)
+    testview = TestView(matrix, press_event)
+    issview = ISSView(matrix, press_event)
 
-    # testview = TestView(matrix)
-    # testview.run()
+    views = [
+        networkmanager,
+        testview,
+        issview
+    ]
 
-    issview = ISSView(matrix)
-    issview.run()
+    current_view = 0
+
+    while True:
+        views[current_view].run()
+        current_view = (current_view + 1) % len(views)
+        press_event.clear()
 
 def signal_handler(sig, frame):
-    print("Stopping...")
+    print("Main - Sending stop event...")
     stop_event.set()
-
+    print("Main - Stopped.")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)

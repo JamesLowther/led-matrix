@@ -4,16 +4,19 @@ try:
 except ModuleNotFoundError:
     VIRTUAL_BUTTON = True
 
-import time
 import threading
+import time
 
 class ButtonHandler(threading.Thread):
-    PRESS_TIMEOUT = 1500
+    BOUNCE_TIME = 300
+    HOLD_TIME = 3000
 
     def __init__(self, press_event, stop_event):
         threading.Thread.__init__(self)
-        self.press_event = press_event
-        self.stop_event = stop_event
+        self._press_event = press_event
+        self._stop_event = stop_event
+
+        self._last_press = 0
 
     def run(self):
         if VIRTUAL_BUTTON:
@@ -23,16 +26,36 @@ class ButtonHandler(threading.Thread):
                 self.press(3)
 
         else:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(3, GPIO.FALLING, callback=self.press)
+            try:
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                GPIO.add_event_detect(3, GPIO.BOTH, callback=self.press, bouncetime=self.BOUNCE_TIME)
 
-            self.stop_event.wait()
+            except RuntimeError as e:
+                self.log(e)
+                GPIO.cleanup()
+                return
 
+            self._stop_event.wait()
+
+            self.log("Stopping...")
             GPIO.cleanup()
-            print("Stopped button handler.")
+            self.log("Stopped.")
 
     def press(self, channel):
-        print("\npress\n")
-        self.press_event.set()
-        time.sleep(self.PRESS_TIMEOUT / 1000)
+        time.sleep(0.05)
+        pressed = not GPIO.input(channel)
+
+        if pressed:
+            self._last_press = time.time()
+            self._press_event.set()
+
+        else:
+            if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
+                print("LONG PRESS")
+
+            else:
+                self._press_event.set()
+
+    def log(self, text):
+        print(f"Button Handler - {text}")

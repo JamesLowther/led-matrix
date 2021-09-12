@@ -15,8 +15,9 @@ class ISSView():
     API_INTERVAL= 5 # s.
     BG_COLOUR = "black"
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, press_event):
         self._matrix = matrix
+        self._press_event = press_event
 
         # Start the request thread.
         self._request_t = threading.Thread(name="requests", target=request_thread)
@@ -34,7 +35,7 @@ class ISSView():
         """
         start_time = time.time()
 
-        while True:
+        while not self._press_event.is_set():
             current_time = time.time()
             if current_time - start_time >= self.API_INTERVAL:
                 start_time = current_time

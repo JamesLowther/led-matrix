@@ -8,13 +8,14 @@ from time import sleep
 class NetworkMonitor():
     REFRESH_INTERVAL = 1
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, press_event):
         self.matrix = matrix
+        self._press_event = press_event
 
     def run(self):
         unifi = UnifiConnection()
 
-        while True:
+        while not self._press_event.is_set():
             _, data = unifi.update()
 
             # print(data)
