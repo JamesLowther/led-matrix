@@ -32,7 +32,6 @@ class ISSView():
         """
         Starts the ISSView.
         """
-
         start_time = time.time()
 
         while True:
