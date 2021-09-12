@@ -10,13 +10,12 @@ import threading
 request_e = threading.Event()
 iss_coords = (0, 0)
 
-class ISSView(threading.Thread):
+class ISSView():
     REFRESH_INTERVAL = 50 # ms.
     API_INTERVAL= 5 # s.
     BG_COLOUR = "black"
 
     def __init__(self, matrix):
-        super(ISSView, self).__init__()
         self._matrix = matrix
 
         # Start the request thread.
