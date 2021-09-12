@@ -6,15 +6,20 @@ except ModuleNotFoundError:
 
 import time
 
-def button_handler(press_event):
+def button_handler(press_event, stop_event):
     if VIRTUAL_BUTTON:
         while True:
-            input("enter")
+            press(3)
 
     else:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(3, GPIO.FALLING, callback=press)
 
-        while True:
-            GPIO.wait_for_edge(3, GPIO.FALLING)
-            print("press")
+        stop_event.wait()
+
+        GPIO.cleanup()
+        print("Stopped button handler.")
+
+def press(channel):
+    print(channel)
