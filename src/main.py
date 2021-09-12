@@ -1,6 +1,10 @@
 from PIL import Image, ImageDraw
 import urllib3
 
+from buttonhandler import button_handler
+
+import threading
+
 from matrix import Matrix
 from views.networkmonitor import NetworkMonitor
 from views.testview import TestView
@@ -10,6 +14,12 @@ import os
 urllib3.disable_warnings()
 
 def main():
+
+    press_event = threading.Event()
+    button_thread = threading.Thread(target=button_handler, args=(press_event,))
+    button_thread.start()
+
+
     matrix = Matrix()
 
     # networkmanager = NetworkMonitor(matrix)
@@ -20,8 +30,6 @@ def main():
 
     issview = ISSView(matrix)
     issview.run()
-
-    input()
 
 if __name__ == "__main__":
     main()
