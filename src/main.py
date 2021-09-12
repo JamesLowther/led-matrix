@@ -4,7 +4,7 @@ import signal
 import threading
 import sys
 
-from buttonhandler import button_handler
+from buttonhandler import ButtonHandler
 
 from matrix import Matrix
 from views.networkmonitor import NetworkMonitor
@@ -18,9 +18,11 @@ stop_event = threading.Event()
 def main():
 
     press_event = threading.Event()
-    button_thread = threading.Thread(target=button_handler, args=(press_event, stop_event))
+    # button_thread = threading.Thread(target=button_handler, args=(press_event, stop_event))
+    button_thread = ButtonHandler(press_event, stop_event)
     button_thread.start()
 
+    press_event.wait()
 
     matrix = Matrix()
 
@@ -36,7 +38,7 @@ def main():
 def signal_handler(sig, frame):
     print("Stopping...")
     stop_event.set()
-    
+
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
