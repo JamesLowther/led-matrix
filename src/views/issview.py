@@ -44,6 +44,7 @@ class ISSView():
 
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOUR)
 
+            self.draw_time(image)
             self.draw_coords(image)
             self.draw_ast(image)
 
@@ -54,6 +55,30 @@ class ISSView():
 
             self.msleep(self.REFRESH_INTERVAL)
 
+    def draw_time(self, image):
+        """
+        Draws the current time.
+        """
+        
+        x_offset = 2
+        y_offset = 1
+
+        color = (184, 184, 184)
+
+        font_path = os.path.join(SRC_BASE, "assets", "fonts", "resolution-3x4.ttf")
+        f = ImageFont.truetype(font_path, 4)
+        d = ImageDraw.Draw(image)
+
+        time_str = time.strftime("%I:%M %p")
+
+        d.text(
+            (x_offset, y_offset),
+            time_str,
+            font=f,
+            fill=color
+        )
+
+        
     def draw_coords(self, image):
         """
         Draws the latitude and longitude on the the screen.
@@ -65,7 +90,9 @@ class ISSView():
         color = (184, 184, 184)
 
         x_offset = 2
-        y_offset = 6
+        y_offset = 10
+
+        spacing = 8
 
         truncate_len = 7
 
@@ -87,7 +114,7 @@ class ISSView():
             lon = lon[:truncate_len]
 
         d.text(
-            (x_offset, y_offset + 10),
+            (x_offset, y_offset + spacing),
             lon,
             font=f,
             fill=color
@@ -103,7 +130,7 @@ class ISSView():
         size = 2
         spacing = 2
 
-        colours = [
+        colors = [
             "darkred",
             "green",
             "purple",
@@ -123,7 +150,7 @@ class ISSView():
                     x_offset + ((size + spacing) * i) + size - 1,
                     y_offset + size - 1
                 ],
-                fill=colours[i % len(colours)]
+                fill=colors[i % len(colors)]
             )
 
     def msleep(self, ms):
