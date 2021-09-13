@@ -26,9 +26,9 @@ def main():
     issview = ISSView(matrix, press_event)
 
     views = [
+        issview,
         networkmanager,
-        testview,
-        issview
+        testview
     ]
 
     current_view = 0

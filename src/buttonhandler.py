@@ -58,7 +58,7 @@ class ButtonHandler(threading.Thread):
         else:
             if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
                 self.log("Shutting down...")
-                os.system("sudo shutdown -h now")
+                os.system("systemctl poweroff -i")
 
             else:
                 self._press_event.set()
