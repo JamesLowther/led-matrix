@@ -43,6 +43,10 @@ class ButtonHandler(threading.Thread):
             self.log("Stopped.")
 
     def press(self, channel):
+        if VIRTUAL_BUTTON:
+            self._press_event.set()
+            return
+
         time.sleep(0.05)
         pressed = not GPIO.input(channel)
 
