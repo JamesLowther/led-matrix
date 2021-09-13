@@ -9,6 +9,7 @@ import threading
 
 request_e = threading.Event()
 iss_coords = (0, 0)
+number_ast = 0
 
 class ISSView():
     REFRESH_INTERVAL = 50 # ms.
@@ -44,6 +45,7 @@ class ISSView():
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOUR)
 
             self.draw_coords(image)
+            self.draw_ast(image)
 
             self._earth.draw(image)
             self._earth.update_spin()
@@ -63,7 +65,7 @@ class ISSView():
         color = (184, 184, 184)
 
         x_offset = 1
-        y_offset = 8
+        y_offset = 6
 
         truncate_len = 7
 
@@ -90,6 +92,33 @@ class ISSView():
             font=f,
             fill=color
         )
+
+    def draw_ast(self, image):
+        x_offset = 5
+        y_offset = 28
+
+        size = 2
+
+        colours = [
+            "red",
+            "green",
+            "purple",
+            "yellow",
+            "brown"
+        ]
+
+        d = ImageDraw.Draw(image)
+
+        for i in range(number_ast):
+            d.rectangle(
+                [
+                    x_offset + ((size + 1) * i),
+                    y_offset,
+                    x_offset + ((size + 1) * i) + size - 1,
+                    y_offset + size - 1
+                ],
+                fill=colours[i % len(colours)]
+            )
 
     def msleep(self, ms):
         """
@@ -308,19 +337,35 @@ class Earth():
 
 def request_thread():
     global iss_coords
+    global number_ast
     api_connection = APIConnection()
 
     while True:
         request_e.wait(timeout=10)
-        iss_coords = api_connection.get_coords()
+        iss_coords = api_connection.get_iss_coords()
+        number_ast = api_connection.get_ast_number()
         request_e.clear()
         
 class APIConnection():
-    ENDPOINT = "http://api.open-notify.org/iss-now.json"
+    ISS_ENDPOINT = "http://api.open-notify.org/iss-now.json"
+    AST_ENDPOINT = "http://api.open-notify.org/astros.json"
 
-    def get_coords(self):
+    def get_iss_coords(self):
         """
         Sends a request to the ISS API to get its location.
         """
-        loc = requests.get(self.ENDPOINT).json()
+        loc = requests.get(self.ISS_ENDPOINT).json()
         return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
+
+    def get_ast_number(self):
+        """
+        Sends a request to get the number of astronauts on the ISS.
+        """
+        results = requests.get(self.AST_ENDPOINT).json()
+
+        count = 0
+        for person in results["people"]:
+            if person["craft"] == "ISS":
+                count += 1
+        
+        return count
