@@ -22,7 +22,7 @@ class ButtonHandler(threading.Thread):
 
     def run(self):
         if VIRTUAL_BUTTON:
-            print("Using virtual button.")
+            self.log("Virtual button enabled.")
             while True:
                 input()
                 self.press(3)
