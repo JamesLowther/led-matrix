@@ -63,7 +63,7 @@ class ISSView():
         x_offset = 2
         y_offset = 1
 
-        color = (184, 184, 184)
+        color = (170, 170, 170)
 
         font_path = os.path.join(SRC_BASE, "assets", "fonts", "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -87,12 +87,12 @@ class ISSView():
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
-        color = (184, 184, 184)
+        color = (170, 170, 170)
 
         x_offset = 2
-        y_offset = 10
+        y_offset = 11
 
-        spacing = 8
+        spacing = 7
 
         truncate_len = 7
 
@@ -137,7 +137,10 @@ class ISSView():
             "darkgoldenrod",
             "teal",
             "indigo",
-            "darkslategrey"
+            "darkslategrey",
+            "olivedrab",
+            "sienna",
+            "violet"
         ]
 
         d = ImageDraw.Draw(image)
@@ -161,6 +164,10 @@ class ISSView():
 
 class Earth():
     HOME_COORDS = (51.030436, -114.065720)
+
+    EARTH_COLOR = (130, 130, 130, 255)
+    ISS_COLOR = (255, 0, 0, 255)
+    HOME_COLOR = (184, 134, 11, 255)
 
     MAP_CALIBRATION = 1
     
@@ -297,7 +304,7 @@ class Earth():
         # Draw the Earth.
         for i, node in enumerate(self._earth_nodes):
             if i > self.MAP_WIDTH - 1 and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and node[2] > 1 and self._map[i]:
-                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), (130, 130, 130, 255))
+                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), self.EARTH_COLOR)
 
         # Draw the ISS.
         iss_x = int(self._iss_nodes[0][0])
@@ -305,7 +312,7 @@ class Earth():
         iss_z = self._iss_nodes[0][2]
 
         if iss_z > 1:
-            image.putpixel((self.X + iss_x, self.Y + iss_y * -1), (255, 0, 0, 255))
+            image.putpixel((self.X + iss_x, self.Y + iss_y * -1), self.ISS_COLOR)
 
         # Draw home.
         home_x = int(self._home_nodes[0][0])
@@ -313,7 +320,7 @@ class Earth():
         home_z = self._home_nodes[0][2]
 
         if home_z > 1:
-            image.putpixel((self.X + home_x, self.Y + home_y * -1), (0, 127, 255, 255))
+            image.putpixel((self.X + home_x, self.Y + home_y * -1), self.HOME_COLOR)
 
     def add_tilt(self):
         """

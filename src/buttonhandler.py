@@ -1,5 +1,6 @@
 try:
     import RPi.GPIO as GPIO
+    GPIO.setwarnings(False)
     VIRTUAL_BUTTON = False
 except ModuleNotFoundError:
     VIRTUAL_BUTTON = True
@@ -58,7 +59,7 @@ class ButtonHandler(threading.Thread):
         else:
             if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
                 self.log("Shutting down...")
-                os.system("systemctl poweroff -i")
+                # os.system("shutdown -h now")
 
             else:
                 self._press_event.set()
