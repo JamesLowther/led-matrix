@@ -64,7 +64,7 @@ class ISSView():
 
         color = (184, 184, 184)
 
-        x_offset = 1
+        x_offset = 2
         y_offset = 6
 
         truncate_len = 7
@@ -94,17 +94,23 @@ class ISSView():
         )
 
     def draw_ast(self, image):
-        x_offset = 5
+        """
+        Draw icons for each astronaut on the ISS.
+        """
+        x_offset = 2
         y_offset = 28
 
         size = 2
+        spacing = 2
 
         colours = [
-            "red",
+            "darkred",
             "green",
             "purple",
-            "yellow",
-            "brown"
+            "darkgoldenrod",
+            "teal",
+            "indigo",
+            "darkslategrey"
         ]
 
         d = ImageDraw.Draw(image)
@@ -112,9 +118,9 @@ class ISSView():
         for i in range(number_ast):
             d.rectangle(
                 [
-                    x_offset + ((size + 1) * i),
+                    x_offset + ((size + spacing) * i),
                     y_offset,
-                    x_offset + ((size + 1) * i) + size - 1,
+                    x_offset + ((size + spacing) * i) + size - 1,
                     y_offset + size - 1
                 ],
                 fill=colours[i % len(colours)]
@@ -135,7 +141,7 @@ class Earth():
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
 
-    X = 47
+    X = 48
     Y = 15
 
     SPIN_THETA = 0.05
@@ -280,7 +286,7 @@ class Earth():
         home_z = self._home_nodes[0][2]
 
         if home_z > 1:
-            image.putpixel((self.X + home_x, self.Y + home_y * -1), (0, 255, 0, 255))
+            image.putpixel((self.X + home_x, self.Y + home_y * -1), (0, 127, 255, 255))
 
     def add_tilt(self):
         """
