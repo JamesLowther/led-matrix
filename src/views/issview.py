@@ -311,7 +311,7 @@ def request_thread():
     api_connection = APIConnection()
 
     while True:
-        request_e.wait()        
+        request_e.wait(timeout=10)
         iss_coords = api_connection.get_coords()
         request_e.clear()
         

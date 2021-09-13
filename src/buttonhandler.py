@@ -6,6 +6,7 @@ except ModuleNotFoundError:
 
 import threading
 import time
+import os
 
 class ButtonHandler(threading.Thread):
     BOUNCE_TIME = 300
@@ -56,7 +57,8 @@ class ButtonHandler(threading.Thread):
 
         else:
             if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
-                print("LONG PRESS")
+                self.log("Shutting down...")
+                os.system("sudo shutdown -h now")
 
             else:
                 self._press_event.set()
