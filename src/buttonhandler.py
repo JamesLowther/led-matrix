@@ -7,16 +7,16 @@ except ModuleNotFoundError:
 
 import threading
 import time
-import os
 
 class ButtonHandler(threading.Thread):
     BOUNCE_TIME = 300
     HOLD_TIME = 3000
 
-    def __init__(self, press_event, stop_event):
+    def __init__(self, press_event, stop_event, sigint_stop_event):
         threading.Thread.__init__(self)
         self._press_event = press_event
         self._stop_event = stop_event
+        self._sigint_stop_event = sigint_stop_event
 
         self._last_press = 0
 
@@ -38,7 +38,7 @@ class ButtonHandler(threading.Thread):
                 GPIO.cleanup()
                 return
 
-            self._stop_event.wait()
+            self._sigint_stop_event.wait()
 
             self.log("Stopping...")
             GPIO.cleanup()
@@ -58,8 +58,8 @@ class ButtonHandler(threading.Thread):
 
         else:
             if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
-                self.log("Shutting down...")
-                # os.system("shutdown -h now")
+                self._stop_event.set()
+                self._press_event.set()
 
             else:
                 self._press_event.set()

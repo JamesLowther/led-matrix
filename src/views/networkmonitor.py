@@ -25,7 +25,7 @@ class NetworkMonitor():
             d = ImageDraw.Draw(image)
             d.text(
                 (0, 0),
-                f"{str(data['data'][0]['num_user'])} clients",
+                f"{data['data'][0]['num_user']} clients",
                 font=f,
                 fill=(255, 255, 255)
             )
