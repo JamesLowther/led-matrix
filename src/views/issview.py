@@ -167,7 +167,7 @@ class Earth():
 
     EARTH_COLOR = (130, 130, 130, 255)
     ISS_COLOR = (255, 0, 0, 255)
-    HOME_COLOR = (184, 134, 11, 255)
+    HOME_COLOR = (0, 255, 0, 255)
 
     MAP_CALIBRATION = 1
     
