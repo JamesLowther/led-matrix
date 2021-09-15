@@ -94,7 +94,7 @@ class ISSView():
 
         spacing = 7
 
-        truncate_len = 7
+        truncate_len = 6
 
         # Draw latitude.
         lat = str(round(iss_coords[0], 3))
@@ -128,7 +128,10 @@ class ISSView():
         y_offset = 28
 
         size = 2
-        spacing = 2
+        x_spacing = 2
+        y_spacing = 1
+        
+        line_length = 7
 
         colors = [
             "darkred",
@@ -143,18 +146,33 @@ class ISSView():
             "violet"
         ]
 
+        if number_ast > line_length:
+            y_offset -= 2
+
         d = ImageDraw.Draw(image)
 
-        for i in range(number_ast):
+        for i in range(min(line_length, number_ast)):
             d.rectangle(
                 [
-                    x_offset + ((size + spacing) * i),
+                    x_offset + ((size + x_spacing) * i),
                     y_offset,
-                    x_offset + ((size + spacing) * i) + size - 1,
+                    x_offset + ((size + x_spacing) * i) + size - 1,
                     y_offset + size - 1
                 ],
                 fill=colors[i % len(colors)]
             )
+
+        if number_ast > 7:
+            for i in range(number_ast - 7):
+                d.rectangle(
+                    [
+                        x_offset + ((size + x_spacing) * i),
+                        y_offset + (size + y_spacing),
+                        x_offset + ((size + x_spacing) * i) + size - 1,
+                        y_offset + size - 1 + (size + y_spacing)
+                    ],
+                    fill=colors[(line_length + i) % len(colors)]
+                )
 
     def msleep(self, ms):
         """
@@ -175,7 +193,7 @@ class Earth():
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
 
-    X = 48
+    X = 46
     Y = 15
 
     SPIN_THETA = 0.05
