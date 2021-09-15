@@ -12,7 +12,7 @@ iss_coords = (0, 0)
 number_ast = 0
 
 class ISSView():
-    REFRESH_INTERVAL = 50 # ms.
+    REFRESH_INTERVAL = 150 # ms.
     API_INTERVAL= 5 # s.
     BG_COLOUR = "black"
 
