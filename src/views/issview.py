@@ -162,8 +162,8 @@ class ISSView():
                 fill=colors[i % len(colors)]
             )
 
-        if number_ast > 7:
-            for i in range(number_ast - 7):
+        if number_ast > line_length:
+            for i in range(number_ast - line_length):
                 d.rectangle(
                     [
                         x_offset + ((size + x_spacing) * i),
@@ -305,7 +305,7 @@ class Earth():
 
     def rotate(self, matrix):
         """
-        Applys the rotation matrix to the Earth array, ISS array, and home array.
+        Applies the rotation matrix to the Earth array, ISS array, and home array.
         """
         center = self.find_center()
 
@@ -321,8 +321,14 @@ class Earth():
         """
         # Draw the Earth.
         for i, node in enumerate(self._earth_nodes):
-            if i > self.MAP_WIDTH - 1 and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and node[2] > 1 and self._map[i]:
-                image.putpixel((self.X + int(node[0]), self.Y + int(node[1]) * -1), self.EARTH_COLOR)
+            if (i > self.MAP_WIDTH - 1 and
+                i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and
+                node[2] > 1 and self._map[i]):
+                image.putpixel(
+                    (self.X + int(node[0]), 
+                    self.Y + int(node[1]) * -1), 
+                    self.EARTH_COLOR
+                )
 
         # Draw the ISS.
         iss_x = int(self._iss_nodes[0][0])
