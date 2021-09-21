@@ -2,6 +2,8 @@ from PIL import Image, ImageChops, ImageOps, ImageFont, ImageDraw
 import time
 import numpy as np
 from math import pi, sin, cos, radians
+
+from requests import api
 from cfg import SRC_BASE
 import os
 import requests
@@ -10,6 +12,7 @@ import threading
 request_e = threading.Event()
 iss_coords = (0, 0)
 number_ast = 0
+api_error = False
 
 class ISSView():
     REFRESH_INTERVAL = 150 # ms.
@@ -47,6 +50,9 @@ class ISSView():
             self.draw_time(image)
             self.draw_coords(image)
             self.draw_ast(image)
+            
+            if api_error:
+                self.draw_error(image)
 
             self._earth.draw(image)
             self._earth.update_spin()
@@ -173,6 +179,40 @@ class ISSView():
                     ],
                     fill=colors[(line_length + i) % len(colors)]
                 )
+
+    def draw_error(self, image):
+        """
+        Draws the error indicator if there are connection problems with the API.
+        """
+        
+        x_offset = 59
+        y_offset = 27
+
+        circle_d = 3
+
+        color = "darkred"
+
+        d = ImageDraw.Draw(image)
+
+        d.ellipse(
+            [
+                x_offset,
+                y_offset,
+                x_offset + circle_d,
+                y_offset + circle_d
+            ],
+            outline=color
+        )
+
+        d.line(
+            [
+                x_offset + 1,
+                y_offset + 1,
+                x_offset + circle_d - 1,
+                y_offset + circle_d - 1
+            ],
+            fill=color
+        )
 
     def msleep(self, ms):
         """
@@ -402,12 +442,23 @@ class Earth():
 def request_thread():
     global iss_coords
     global number_ast
+    global api_error
     api_connection = APIConnection()
 
     while True:
         request_e.wait(timeout=10)
-        iss_coords = api_connection.get_iss_coords()
-        number_ast = api_connection.get_ast_number()
+        iss_return = api_connection.get_iss_coords()
+        ast_return = api_connection.get_ast_number()
+
+        if iss_return == None or ast_return == None:
+            api_error = True
+
+        if iss_return != None:
+            iss_coords = iss_return
+
+        if ast_return != None:
+            number_ast = ast_return
+
         request_e.clear()
         
 class APIConnection():
@@ -418,14 +469,23 @@ class APIConnection():
         """
         Sends a request to the ISS API to get its location.
         """
-        loc = requests.get(self.ISS_ENDPOINT).json()
+        try:
+            r = requests.get(self.ISS_ENDPOINT)
+            loc = r.json()
+        except requests.exceptions.ConnectionError:
+            return None
+
         return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
 
     def get_ast_number(self):
         """
         Sends a request to get the number of astronauts on the ISS.
         """
-        results = requests.get(self.AST_ENDPOINT).json()
+        try:
+            r = requests.get(self.AST_ENDPOINT)
+            results = r.json()
+        except requests.exceptions.ConnectionError:
+            return None
 
         count = 0
         for person in results["people"]:
