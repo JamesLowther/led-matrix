@@ -450,8 +450,7 @@ def request_thread():
         iss_return = api_connection.get_iss_coords()
         ast_return = api_connection.get_ast_number()
 
-        if iss_return == None or ast_return == None:
-            api_error = True
+        api_error = iss_return == None or ast_return == None
 
         if iss_return != None:
             iss_coords = iss_return
