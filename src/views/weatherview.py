@@ -14,7 +14,9 @@ api_error = False
 
 class WeatherView():
     FRAME_INTERVAL = 1100 #  ms.
-    API_INTERVAL = 5 # s.
+    API_INTERVAL = 60 # s.
+
+    LOCATION_COLOR = "lightsteelblue"
 
     def __init__(self, matrix, press_event):
         self._matrix = matrix
@@ -49,7 +51,7 @@ class WeatherView():
 
             current_image = self._frames[i]
             self.draw_location(current_image)
-            self._matrix.set_image(self._frames[i])
+            self._matrix.set_image(self._frames[i], unsafe=False)
 
             i = (i + 1) % len(self._frames)
 
@@ -68,8 +70,6 @@ class WeatherView():
         w = 2
         h = 2
 
-        color = "lightblue"
-
         d = ImageDraw.Draw(image)
 
         d.rectangle(
@@ -79,7 +79,7 @@ class WeatherView():
                 x_offset + w - 1,
                 y_offset + h - 1
             ],
-            fill=color
+            fill=self.LOCATION_COLOR
         )
 
     def msleep(self, ms):
@@ -104,14 +104,14 @@ def request_thread():
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
     
-    NUMBER_PAST = 4
-    NUMBER_NOWCAST = 3
+    NUMBER_PAST = 4     # Max 12.
+    NUMBER_NOWCAST = 3  # Max 3.
 
     LATITUDE = 51.030436
     LONGITUDE = -114.065720
 
     ZOOM = 5
-    COLOR = 1
+    COLOR = 2
     SMOOTH = 0
     SNOW = 1
 
