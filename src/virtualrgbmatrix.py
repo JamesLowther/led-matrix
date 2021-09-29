@@ -11,7 +11,10 @@ class RGBMatrix:
 
         self._window = MatrixWindow()
 
-    def SetImage(self, image):
+    def SetImage(self, image, unsafe=True):
+        if (image.mode != "RGB"):
+            raise Exception("Currently, only RGB mode is supported for SetImage(). Please create images with mode 'RGB' or convert first with image = image.convert('RGB'). Pull requests to support more modes natively are also welcome :)")
+
         self._window.update_image(image)
 
 class RGBMatrixOptions:

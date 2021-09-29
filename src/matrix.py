@@ -63,5 +63,5 @@ class Matrix():
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
 
-    def set_image(self, image):
-        self.matrix.SetImage(image)
+    def set_image(self, image, unsafe=True):
+        self.matrix.SetImage(image, unsafe=unsafe)
