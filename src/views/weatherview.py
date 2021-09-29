@@ -173,6 +173,7 @@ class RadarData():
             new_frames.append(converted_image)
 
     def convert_image(self, image):
+        image = image.convert("RGB")
         resized = image.resize((64, 64), Image.BOX)
         cropped = resized.crop((0, 15, 64, 47))
         return cropped
