@@ -11,6 +11,7 @@ from views.poweroffview import PoweroffView
 from views.networkmonitor import NetworkMonitor
 from views.testview import TestView
 from views.issview import ISSView
+from views.weatherview import WeatherView
 
 urllib3.disable_warnings()
 
@@ -26,11 +27,13 @@ def main():
 
     poweroffview = PoweroffView(matrix, press_event)
 
+    weatherview = WeatherView(matrix, press_event)
     networkmanager = NetworkMonitor(matrix, press_event)
     testview = TestView(matrix, press_event)
     issview = ISSView(matrix, press_event)
 
     views = [
+        weatherview,
         issview,
         networkmanager,
         testview

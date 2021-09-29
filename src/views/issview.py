@@ -446,7 +446,7 @@ def request_thread():
     api_connection = APIConnection()
 
     while True:
-        request_e.wait(timeout=10)
+        request_e.wait()
         iss_return = api_connection.get_iss_coords()
         ast_return = api_connection.get_ast_number()
 
