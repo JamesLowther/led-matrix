@@ -51,12 +51,12 @@ LOCATIONS = [
 ]
 
 class WeatherView():
-    FRAME_INTERVAL = 1100 # ms.
-    HOLD_TIME = 2000 # ms.
+    FRAME_INTERVAL = 1300 # ms.
+    HOLD_TIME = 2200 # ms.
     
-    FORECAST_INTERVAL = 10000 # ms.
+    FORECAST_INTERVAL = 16000 # ms.
 
-    RADAR_LOOPS = 4
+    RADAR_LOOPS = 5
 
     API_INTERVAL = 300 # s.
 
