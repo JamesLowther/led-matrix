@@ -2,8 +2,8 @@ from PIL import Image, ImageChops
 import time
 
 class Transitions:
-    def vertical_transition(matrix, prev_image, new_image, unsafe=True):
-        TRANSITION_INTERVAL = 10
+    def vertical_transition(matrix, prev_image, new_image, unsafe=True, speed_mult=1):
+        TRANSITION_INTERVAL = 40 * speed_mult
         SHIFT_AMOUNT = 1
 
         image = Image.new("RGB", (matrix.dimensions[0], matrix.dimensions[1] * 2), color="black")

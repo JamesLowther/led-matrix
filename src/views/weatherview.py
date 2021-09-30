@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from cfg import FONTS
-from datetime import date, datetime
+from cfg import FONTS, ENV_VALUES
+from datetime import datetime
 
 from transitions import Transitions
 
@@ -13,7 +13,10 @@ import os
 request_e = threading.Event()
 
 new_frames = []
-api_updated = False
+radar_api_updated = False
+
+weather_data = {}
+weather_api_updated = False
 
 api_error = False
 
@@ -21,7 +24,7 @@ class WeatherView():
     FRAME_INTERVAL = 900 # ms.
     HOLD_TIME = 2000 # ms.
     
-    RADAR_LOOPS = 2
+    RADAR_LOOPS = 1
 
     API_INTERVAL = 60 # s.
 
@@ -43,7 +46,7 @@ class WeatherView():
 
     def run(self):
         # Wait for initial frame data to be generated.
-        while(not api_updated):
+        while(not radar_api_updated):
             time.sleep(0.1)
 
         self.update_frames()
@@ -58,7 +61,8 @@ class WeatherView():
                 start_time = current_time
                 request_e.set()
 
-            if i == 0 and api_updated:
+            # Check if api has updated radar images.
+            if i == 0 and radar_api_updated:
                 self.update_frames()
 
             current_image = self._frames[i]["frame"]
@@ -81,15 +85,15 @@ class WeatherView():
 
                 temperature_image = self._temperature_data.start_temperature(current_image)
 
-                if api_updated:
+                if radar_api_updated:
                     self.update_frames()
 
                 Transitions.vertical_transition(self._matrix, temperature_image, self._frames[0]["frame"])
 
     def update_frames(self):
-        global api_updated
+        global radar_api_updated
         self._frames = new_frames.copy()
-        api_updated = False
+        radar_api_updated = False
 
     def draw_location(self, image):
         x_offset = 31 
@@ -136,16 +140,6 @@ class WeatherView():
             fill=color
         )
 
-def request_thread():
-    global frames
-
-    radar_data = RadarData()
-
-    while True:
-        request_e.wait()
-        radar_data.update()
-        request_e.clear()
-
 class TemperatureData():
     BG_COLOR = "red"
 
@@ -155,7 +149,7 @@ class TemperatureData():
 
     def start_temperature(self, last_frame):
         
-        self.generate_temp_image()
+        self.generate_temperature_image()
 
         Transitions.vertical_transition(self._matrix, last_frame, self._temperature_image)
 
@@ -163,8 +157,44 @@ class TemperatureData():
 
         return self._temperature_image
 
-    def generate_temp_image(self):
+    def generate_temperature_image(self):
         self._temperature_image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
+
+def request_thread():
+    global frames
+
+    weather_data = WeatherData()
+    radar_data = RadarData()
+
+    while True:
+        request_e.wait()
+        radar_data.update()
+        weather_data.update()
+        request_e.clear()
+
+class WeatherData():
+    EXCLUDE = "minutely,hourly"
+
+    def __init__(self):
+        self._locations = [
+            {
+                "name": "Calgary",
+                "lat": 51.030436,
+                "lon": -114.065720
+            }
+        ]
+
+    def update(self):
+        global weather_data
+        global weather_api_updated
+
+        for location in self._locations:
+            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={ENV_VALUES['OPENWEATHER_API_KEY']}"
+            data = requests.get(url).json()
+
+            weather_data[location["name"]] = data
+
+        weather_api_updated = True
 
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
@@ -185,7 +215,7 @@ class RadarData():
         self._last_updated = 0
     
     def update(self):
-        global api_updated
+        global radar_api_updated
 
         self.get_api_file()
 
@@ -200,7 +230,7 @@ class RadarData():
         self.get_past_radar()
         self.get_nowcast_radar()
 
-        api_updated = True
+        radar_api_updated = True
 
     def get_api_file(self):
         self._api_file = requests.get(self.API_FILE_URL).json()

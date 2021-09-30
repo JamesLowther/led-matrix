@@ -1,9 +1,10 @@
 from urllib import request
 from PIL import Image, ImageDraw, ImageFont
 from requests import Session
-from dotenv import dotenv_values
 import json
 from time import sleep
+
+from cfg import ENV_VALUES
 
 class NetworkMonitor():
     REFRESH_INTERVAL = 1
@@ -39,7 +40,6 @@ class UnifiConnection():
     SITE = "default"
 
     def __init__(self):
-        self._config = dotenv_values()
         self._session = Session()
 
         self.login()
@@ -52,8 +52,8 @@ class UnifiConnection():
         self._session.post(
             f"{self.ENDPOINT}/api/login",
             json={
-                "username": self._config["UNIFI_USERNAME"],
-                "password": self._config["UNIFI_PASSWORD"]
+                "username": ENV_VALUES["UNIFI_USERNAME"],
+                "password": ENV_VALUES["UNIFI_PASSWORD"]
             },
             verify=False
         )
