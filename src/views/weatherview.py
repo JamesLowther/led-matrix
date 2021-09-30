@@ -54,7 +54,7 @@ class WeatherView():
     FRAME_INTERVAL = 1100 # ms.
     HOLD_TIME = 2000 # ms.
     
-    FORECAST_INTERVAL = 7000 # ms.
+    FORECAST_INTERVAL = 10000 # ms.
 
     RADAR_LOOPS = 4
 
@@ -71,6 +71,8 @@ class WeatherView():
         self._request_t = threading.Thread(name="requests", target=request_thread)
         self._request_t.daemon = True
         self._request_t.start()
+
+        self._time_display = TimeDisplay(self._matrix)
 
         self._location_tempurature_data = []
         for location in LOCATIONS:
@@ -136,7 +138,13 @@ class WeatherView():
                 if radar_api_updated:
                     self.update_frames()
 
-                Transitions.vertical_transition(self._matrix, prev_image, self._frames[0]["frame"])
+                time_frame = self._time_display.create_time_frame()
+
+                Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
+
+                final_time_frame = self._time_display.show_time()
+
+                Transitions.vertical_transition(self._matrix, final_time_frame, self._frames[0]["frame"])
 
     def update_frames(self):
         global radar_api_updated
@@ -217,9 +225,52 @@ class WeatherView():
             fill=color
         )
 
+class TimeDisplay():
+    INTERVAL = 10 # s.
+
+    UPDATE_INTERVAL = 500
+    BG_COLOR = "black"
+    FONT_COLOR = (170, 170, 170)
+
+    def __init__(self, matrix):
+        self._matrix = matrix
+
+    def show_time(self):
+        start_time = time.time()
+        
+        while time.time() - start_time <= self.INTERVAL:
+            image = self.create_time_frame()
+
+            self._matrix.set_image(image)
+
+            msleep(self.UPDATE_INTERVAL)
+
+        return image
+
+    def create_time_frame(self):
+        image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
+
+        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        f = ImageFont.truetype(font_path, 5)
+        d = ImageDraw.Draw(image)
+
+        time_str = time.strftime("%I:%M %p")
+        time_size = d.textsize(time_str, f)
+
+        d.text(
+            (
+                (self._matrix.dimensions[0] // 2) - (time_size[0] // 2),
+                (self._matrix.dimensions[1] // 2) - (time_size[1] // 2),
+            ),
+            time_str,
+            font=f,
+            fill=self.FONT_COLOR
+        )
+
+        return image
+
 class TemperatureData():
     BG_COLOR = "black"
-    INTERVAL = 10000
 
     def __init__(self, matrix, location):
         self._matrix = matrix
@@ -452,7 +503,7 @@ class WeatherData():
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
     
-    NUMBER_PAST = 6     # Max 12.
+    NUMBER_PAST = 5     # Max 12.
     NUMBER_NOWCAST = 3  # Max 3.
 
     LATITUDE = 51.030436
