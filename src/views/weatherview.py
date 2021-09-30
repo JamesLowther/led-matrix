@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+
+from PIL.ImageChops import offset
 from cfg import FONTS, ENV_VALUES
 from datetime import datetime
 
@@ -141,7 +143,7 @@ class WeatherView():
         )
 
 class TemperatureData():
-    BG_COLOR = "red"
+    BG_COLOR = "black"
 
     def __init__(self, matrix, location):
         self._matrix = matrix
@@ -153,12 +155,91 @@ class TemperatureData():
 
         Transitions.vertical_transition(self._matrix, last_frame, self._temperature_image)
 
-        msleep(1000)
+        msleep(6000)
 
         return self._temperature_image
 
     def generate_temperature_image(self):
         self._temperature_image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
+
+        self.add_location_text()
+        self.add_current_temp()
+
+    def add_location_text(self):
+        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        f = ImageFont.truetype(font_path, 5)
+        d = ImageDraw.Draw(self._temperature_image)
+
+        x_offset = 1
+        y_offset = 1
+
+        color = (170, 170, 170)
+
+        d.text(
+            (x_offset, y_offset),
+            self._location,
+            font=f,
+            fill=color
+        )
+
+    def add_current_temp(self):
+        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        f = ImageFont.truetype(font_path, 5)
+        d = ImageDraw.Draw(self._temperature_image)
+
+        x_offset = 4
+        y_offset = 2
+
+        radius = 1
+
+        color = (170, 170, 170)
+
+        data = weather_data[self._location]["current"]
+
+        current_temp = str(int(data["feels_like"] - 273.15))
+
+        size = d.textsize(current_temp, f)
+
+        d.text(
+            (
+                self._matrix.dimensions[0] - size[0] - x_offset - radius - 1,
+                y_offset
+            ),
+            current_temp,
+            font=f,
+            fill=color
+        )
+
+        d.rectangle(
+            [
+                self._matrix.dimensions[0] - radius - x_offset,
+                y_offset - 1,
+                self._matrix.dimensions[0] - x_offset,
+                y_offset + radius - 1
+            ],
+            fill=color
+        )
+
+        icon = self.get_icon(data["weather"][0]["icon"])
+
+        self._temperature_image.paste(
+            icon, 
+            (
+                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 1, 
+                y_offset - 4
+            )
+        )
+        
+
+    def get_icon(self, code):
+        url = f"https://openweathermap.org/img/wn/{code}@2x.png"
+        print(url)
+        icon = requests.get(url)
+        image = Image.open(BytesIO(icon.content))
+
+        resized = image.resize((12, 12), Image.BOX)
+
+        return resized
 
 def request_thread():
     global frames
