@@ -1,7 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-from PIL.ImageChops import offset
 from cfg import FONTS, ENV_VALUES, SRC_BASE
 from datetime import datetime
 
@@ -29,35 +28,35 @@ LOCATIONS = [
         "lat": 51.030436,
         "lon": -114.065720
     },
-    # {
-    #     "name": "Seattle",
-    #     "lat": 47.6062,
-    #     "lon": -122.3321
-    # },
-    # {
-    #     "name": "Tokyo",
-    #     "lat": 35.6762,
-    #     "lon": 139.6503
-    # },
-    # {
-    #     "name": "Berlin",
-    #     "lat": 52.5200,
-    #     "lon": 13.4050
-    # },
-    # {
-    #     "name": "London",
-    #     "lat": 51.5074,
-    #     "lon": -0.1278
-    # }
+    {
+        "name": "Seattle",
+        "lat": 47.6062,
+        "lon": -122.3321
+    },
+    {
+        "name": "Tokyo",
+        "lat": 35.6762,
+        "lon": 139.6503
+    },
+    {
+        "name": "Berlin",
+        "lat": 52.5200,
+        "lon": 13.4050
+    },
+    {
+        "name": "London",
+        "lat": 51.5074,
+        "lon": -0.1278
+    }
 ]
 
 class WeatherView():
     FRAME_INTERVAL = 1100 # ms.
     HOLD_TIME = 2000 # ms.
     
-    FORECAST_INTERVAL = 2000 # ms.
+    FORECAST_INTERVAL = 10000 # ms.
 
-    RADAR_LOOPS = 0
+    RADAR_LOOPS = 4
 
     API_INTERVAL = 300 # s.
 
