@@ -159,6 +159,8 @@ class WeatherView():
 
                 Transitions.vertical_transition(self._matrix, final_time_frame, self._frames[0]["frame"])
 
+                msleep(self.HOLD_TIME)
+
     def update_frames(self):
         global radar_api_updated
         self._frames = new_frames.copy()
