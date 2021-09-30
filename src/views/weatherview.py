@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
 from PIL.ImageChops import offset
-from cfg import FONTS, ENV_VALUES
+from cfg import FONTS, ENV_VALUES, SRC_BASE
 from datetime import datetime
 
 from transitions import Transitions
@@ -26,7 +26,7 @@ class WeatherView():
     FRAME_INTERVAL = 900 # ms.
     HOLD_TIME = 2000 # ms.
     
-    RADAR_LOOPS = 1
+    RADAR_LOOPS = 3
 
     API_INTERVAL = 60 # s.
 
@@ -144,6 +144,7 @@ class WeatherView():
 
 class TemperatureData():
     BG_COLOR = "black"
+    INTERVAL = 10000
 
     def __init__(self, matrix, location):
         self._matrix = matrix
@@ -155,17 +156,18 @@ class TemperatureData():
 
         Transitions.vertical_transition(self._matrix, last_frame, self._temperature_image)
 
-        msleep(6000)
+        msleep(self.INTERVAL)
 
         return self._temperature_image
 
     def generate_temperature_image(self):
         self._temperature_image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
 
-        self.add_location_text()
-        self.add_current_temp()
+        self.draw_location_text()
+        self.draw_current_temp()
+        self.draw_forecast()
 
-    def add_location_text(self):
+    def draw_location_text(self):
         font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
@@ -182,7 +184,7 @@ class TemperatureData():
             fill=color
         )
 
-    def add_current_temp(self):
+    def draw_current_temp(self):
         font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
@@ -220,7 +222,7 @@ class TemperatureData():
             fill=color
         )
 
-        icon = self.get_icon(data["weather"][0]["icon"])
+        icon = self.get_icon(data["weather"][0]["icon"], 12)
 
         self._temperature_image.paste(
             icon, 
@@ -230,13 +232,128 @@ class TemperatureData():
             )
         )
         
+    def draw_forecast(self):
+        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        f = ImageFont.truetype(font_path, 4)
+        d = ImageDraw.Draw(self._temperature_image)
+        
+        data = weather_data[self._location]["daily"]
 
-    def get_icon(self, code):
-        url = f"https://openweathermap.org/img/wn/{code}@2x.png"
-        icon = requests.get(url)
-        image = Image.open(BytesIO(icon.content))
+        x_offset = 1
+        y_offset = 10
 
-        resized = image.resize((12, 12), Image.BOX)
+        neutral_color = (170, 170, 170)
+
+        hot_color = "red"
+        warm_color = "orange"
+        cold_color = "lightblue"
+        freezing_color = "blue"
+
+        hot = 17
+        freezing = -17
+
+        block_width = 9
+        icon_size= 5
+
+        x = x_offset
+
+        for i, forecast in enumerate(data):
+            
+            day = datetime.fromtimestamp(forecast["dt"]).strftime("%A")[0]
+            day_size = d.textsize(day, f)
+
+            day_x = x + (block_width // 2) - (day_size[0] // 2)
+            day_y = y_offset
+
+            d.text(
+                (
+                    day_x,
+                    day_y
+                ),
+                day,
+                font=f,
+                fill=neutral_color
+            )
+
+            min_temp_int = int(forecast["temp"]["min"] - 273.15)
+            max_temp_int = int(forecast["temp"]["max"] - 273.15)
+
+            min_color = neutral_color
+            if min_temp_int > 0:
+                if min_temp_int >= hot:
+                    min_color = hot_color
+                else:
+                    min_color = warm_color
+            elif min_temp_int < 0:
+                if min_temp_int <= freezing:
+                    min_color = freezing_color
+                else:
+                    min_color = cold_color
+                min_temp_int = abs(min_temp_int)
+
+            max_color = neutral_color
+            if max_temp_int > 0:
+                if max_temp_int >= hot:
+                    max_color = hot_color
+                else:
+                    max_color = warm_color
+            elif max_temp_int < 0:
+                if max_temp_int <= freezing:
+                    max_color = freezing_color
+                else:
+                    max_color = cold_color
+                max_temp_int = abs(max_temp_int)
+
+            min_temp = str(min_temp_int)
+            max_temp = str(max_temp_int)
+
+            min_temp_size = d.textsize(min_temp, f)
+            max_temp_size = d.textsize(max_temp, f)
+
+            max_x = x + (block_width // 2) - (max_temp_size[0] // 2)
+            max_y = y_offset + day_size[1]
+
+            d.text(
+                (
+                    max_x,
+                    max_y
+                ),
+                max_temp,
+                font=f,
+                fill=max_color
+            )
+
+            min_x = x + (block_width // 2) - (min_temp_size[0] // 2)
+            min_y = y_offset + day_size[1] + max_temp_size[1]
+
+            d.text(
+                (
+                    min_x,
+                    min_y
+                ),
+                min_temp,
+                font=f,
+                fill=min_color
+            )
+
+
+
+            icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
+            self._temperature_image.paste(
+                icon, 
+                (
+                    x + (block_width // 2) - (icon_size // 2), 
+                    y_offset + day_size[1] + max_temp_size[1] + min_temp_size[1]
+                )
+            )
+
+            x += block_width
+
+    def get_icon(self, code, size):
+        path = os.path.join(SRC_BASE, "assets", "weatherview", "icons", f"{code}.png")
+        image = Image.open(path)
+
+        resized = image.resize((size, size), Image.BOX)
 
         return resized
 
