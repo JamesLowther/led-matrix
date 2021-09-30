@@ -51,14 +51,14 @@ LOCATIONS = [
 ]
 
 class WeatherView():
-    FRAME_INTERVAL = 900 # ms.
+    FRAME_INTERVAL = 1100 # ms.
     HOLD_TIME = 2000 # ms.
     
-    FORECAST_INTERVAL = 1000 # ms.
+    FORECAST_INTERVAL = 7000 # ms.
 
-    RADAR_LOOPS = 0
+    RADAR_LOOPS = 3
 
-    API_INTERVAL = 60 # s.
+    API_INTERVAL = 300 # s.
 
     LOCATION_COLOR = "lightsteelblue"
 
@@ -105,7 +105,9 @@ class WeatherView():
             current_time = self._frames[i]["time"]
 
             self.draw_location(current_image)
+            self.draw_borders(current_image)
             self.draw_time(current_image, current_time)
+            
             self._matrix.set_image(current_image, unsafe=False)
 
             i = (i + 1) % len(self._frames)
@@ -158,6 +160,35 @@ class WeatherView():
                 y_offset + h - 1
             ],
             fill=self.LOCATION_COLOR
+        )
+
+    def draw_borders(self, image):
+        d = ImageDraw.Draw(image)
+
+        color = (20, 20, 20)
+
+
+        left_x_offset = 15
+        right_x_offset = 54
+
+        d.line(
+            [
+                right_x_offset,
+                0,
+                right_x_offset,
+                self._matrix.dimensions[1]
+            ],
+            fill=color
+        )
+
+        d.line(
+            [
+                left_x_offset,
+                0,
+                left_x_offset + 13,
+                self._matrix.dimensions[1]
+            ],
+            fill=color
         )
 
     def draw_time(self, image, time):
@@ -258,13 +289,13 @@ class TemperatureData():
             fill=color
         )
 
-        icon = self.get_icon(data["weather"][0]["icon"], 10)
+        icon = self.get_icon(data["weather"][0]["icon"], 7)
 
         self._temperature_image.paste(
             icon, 
             (
-                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 2, 
-                y_offset - 4
+                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 3, 
+                y_offset - 2
             )
         )
         
@@ -280,13 +311,13 @@ class TemperatureData():
 
         neutral_color = (170, 170, 170)
 
-        hot_color = "red"
+        hot_color = "firebrick"
         warm_color = "orange"
         cold_color = "lightblue"
-        freezing_color = "blue"
+        freezing_color = "cadetblue"
 
-        hot = 17
-        freezing = -17
+        hot = 20
+        freezing = -20
 
         block_width = 9
         icon_size= 4
