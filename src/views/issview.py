@@ -3,8 +3,7 @@ import time
 import numpy as np
 from math import pi, sin, cos, radians
 
-from requests import api
-from cfg import SRC_BASE
+from cfg import SRC_BASE, FONTS
 import os
 import requests
 import threading
@@ -71,7 +70,7 @@ class ISSView():
 
         color = (170, 170, 170)
 
-        font_path = os.path.join(SRC_BASE, "assets", "fonts", "resolution-3x4.ttf")
+        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 
@@ -89,7 +88,7 @@ class ISSView():
         """
         Draws the latitude and longitude on the the screen.
         """
-        font_path = os.path.join(SRC_BASE, "assets", "fonts", "cg-pixel-4x5.ttf")
+        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
