@@ -15,6 +15,7 @@ import os
 request_e = threading.Event()
 
 new_frames = []
+last_updated = 0
 radar_api_updated = False
 
 weather_data = {}
@@ -28,35 +29,35 @@ LOCATIONS = [
         "lat": 51.030436,
         "lon": -114.065720
     },
-    {
-        "name": "Seattle",
-        "lat": 47.6062,
-        "lon": -122.3321
-    },
-    {
-        "name": "Tokyo",
-        "lat": 35.6762,
-        "lon": 139.6503
-    },
-    {
-        "name": "Berlin",
-        "lat": 52.5200,
-        "lon": 13.4050
-    },
-    {
-        "name": "London",
-        "lat": 51.5074,
-        "lon": -0.1278
-    }
+    # {
+    #     "name": "Seattle",
+    #     "lat": 47.6062,
+    #     "lon": -122.3321
+    # },
+    # {
+    #     "name": "Tokyo",
+    #     "lat": 35.6762,
+    #     "lon": 139.6503
+    # },
+    # {
+    #     "name": "Berlin",
+    #     "lat": 52.5200,
+    #     "lon": 13.4050
+    # },
+    # {
+    #     "name": "London",
+    #     "lat": 51.5074,
+    #     "lon": -0.1278
+    # }
 ]
 
 class WeatherView():
     FRAME_INTERVAL = 1100 # ms.
     HOLD_TIME = 2000 # ms.
     
-    FORECAST_INTERVAL = 10000 # ms.
+    FORECAST_INTERVAL = 2000 # ms.
 
-    RADAR_LOOPS = 4
+    RADAR_LOOPS = 0
 
     API_INTERVAL = 300 # s.
 
@@ -72,7 +73,7 @@ class WeatherView():
         self._request_t.daemon = True
         self._request_t.start()
 
-        self._time_display = TimeDisplay(self._matrix)
+        self._time_display = TimeDisplay(self._matrix, press_event)
 
         self._location_tempurature_data = []
         for location in LOCATIONS:
@@ -80,12 +81,13 @@ class WeatherView():
                 TemperatureData(self._matrix, location["name"])
             )
 
+    def run(self):
+        last_updated = 0
         request_e.set()
 
-    def run(self):
         # Wait for initial frame data to be generated.
         while(not radar_api_updated):
-            time.sleep(0.1)
+            msleep(500)
 
         self.update_frames()
 
@@ -132,8 +134,18 @@ class WeatherView():
                     else:
                         Transitions.horizontal_transition(self._matrix, prev_image, next_image)
 
-                    msleep(self.FORECAST_INTERVAL)
+                    start_time = time.time()
+
+                    while time.time() - start_time <= (self.FORECAST_INTERVAL / 1000):
+                        msleep(500)
+
+                        if self._press_event.is_set():
+                            return
+
                     prev_image = next_image
+
+                    if self._press_event.is_set():
+                        return
 
                 if radar_api_updated:
                     self.update_frames()
@@ -143,6 +155,8 @@ class WeatherView():
                 Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
 
                 final_time_frame = self._time_display.show_time()
+                if self._press_event.is_set():
+                    return
 
                 Transitions.vertical_transition(self._matrix, final_time_frame, self._frames[0]["frame"])
 
@@ -232,13 +246,16 @@ class TimeDisplay():
     BG_COLOR = "black"
     FONT_COLOR = (170, 170, 170)
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, press_event):
         self._matrix = matrix
+        self._press_event = press_event
 
     def show_time(self):
         start_time = time.time()
         
-        while time.time() - start_time <= self.INTERVAL:
+        image = self.create_time_frame()
+
+        while not self._press_event.is_set() and time.time() - start_time <= self.INTERVAL:
             image = self.create_time_frame()
 
             self._matrix.set_image(image)
@@ -520,17 +537,17 @@ class RadarData():
     
     def update(self):
         global radar_api_updated
+        global last_updated
 
         self.get_api_file()
 
         # Check if the API data changed.
-        if self._api_file["generated"] == self._last_updated:
+        if self._api_file["generated"] == last_updated:
             return
 
         self._last_updated = self._api_file["generated"]
 
         new_frames.clear()
-
         self.get_past_radar()
         self.get_nowcast_radar()
 
