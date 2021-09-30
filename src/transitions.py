@@ -32,6 +32,36 @@ class Transitions:
             matrix.set_image(cropped, unsafe=unsafe)
             msleep(TRANSITION_INTERVAL)
 
+    def horizontal_transition(matrix, prev_image, new_image, unsafe=True, speed_mult=1):
+        TRANSITION_INTERVAL = 40 * speed_mult
+        SHIFT_AMOUNT = -1
+
+        image = Image.new("RGB", (matrix.dimensions[0] * 2, matrix.dimensions[1]), color="black")
+        image.paste(prev_image, (0,0))
+        image.paste(new_image, (matrix.dimensions[0], 0))
+
+        current_offset = 0
+
+        # Handle the transition
+        while True:
+            image = ImageChops.offset(image, SHIFT_AMOUNT, 0)
+            cropped = image.crop(
+                (
+                    0,
+                    0,
+                    matrix.dimensions[0],
+                    matrix.dimensions[1]
+                )
+            )
+
+            current_offset += SHIFT_AMOUNT
+
+            if abs(current_offset) > matrix.dimensions[0]:
+                break
+
+            matrix.set_image(cropped, unsafe=unsafe)
+            msleep(TRANSITION_INTERVAL)
+
 def msleep(ms):
     """
     Sleep in milliseconds.

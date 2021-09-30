@@ -22,11 +22,31 @@ weather_api_updated = False
 
 api_error = False
 
+LOCATIONS = [
+    {
+        "name": "Calgary",
+        "lat": 51.030436,
+        "lon": -114.065720
+    },
+    {
+        "name": "Seattle",
+        "lat": 47.6062,
+        "lon": -122.3321
+    },
+    {
+        "name": "Tokyo",
+        "lat": 35.6762,
+        "lon": 139.6503
+    }
+]
+
 class WeatherView():
     FRAME_INTERVAL = 900 # ms.
     HOLD_TIME = 2000 # ms.
     
-    RADAR_LOOPS = 3
+    FORECAST_INTERVAL = 6000 # ms.
+
+    RADAR_LOOPS = 2
 
     API_INTERVAL = 60 # s.
 
@@ -42,7 +62,11 @@ class WeatherView():
         self._request_t.daemon = True
         self._request_t.start()
 
-        self._temperature_data = TemperatureData(self._matrix, "Calgary")
+        self._location_tempurature_data = []
+        for location in LOCATIONS:
+            self._location_tempurature_data.append(
+                TemperatureData(self._matrix, location["name"])
+            )
 
         request_e.set()
 
@@ -85,12 +109,22 @@ class WeatherView():
             if loop == self.RADAR_LOOPS:
                 loop = 0
 
-                temperature_image = self._temperature_data.start_temperature(current_image)
+                prev_image = current_image
+                for i, location in enumerate(self._location_tempurature_data):
+                    next_image = location.generate_temperature_image()
+                    if i == 0:
+                        Transitions.vertical_transition(self._matrix, prev_image, next_image)
+
+                    else:
+                        Transitions.horizontal_transition(self._matrix, prev_image, next_image)
+
+                    msleep(self.FORECAST_INTERVAL)
+                    prev_image = next_image
 
                 if radar_api_updated:
                     self.update_frames()
 
-                Transitions.vertical_transition(self._matrix, temperature_image, self._frames[0]["frame"])
+                Transitions.vertical_transition(self._matrix, prev_image, self._frames[0]["frame"])
 
     def update_frames(self):
         global radar_api_updated
@@ -150,22 +184,14 @@ class TemperatureData():
         self._matrix = matrix
         self._location = location
 
-    def start_temperature(self, last_frame):
-        
-        self.generate_temperature_image()
-
-        Transitions.vertical_transition(self._matrix, last_frame, self._temperature_image)
-
-        msleep(self.INTERVAL)
-
-        return self._temperature_image
-
     def generate_temperature_image(self):
         self._temperature_image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
 
         self.draw_location_text()
         self.draw_current_temp()
         self.draw_forecast()
+
+        return self._temperature_image
 
     def draw_location_text(self):
         font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
@@ -222,12 +248,12 @@ class TemperatureData():
             fill=color
         )
 
-        icon = self.get_icon(data["weather"][0]["icon"], 12)
+        icon = self.get_icon(data["weather"][0]["icon"], 10)
 
         self._temperature_image.paste(
             icon, 
             (
-                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 1, 
+                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 2, 
                 y_offset - 4
             )
         )
@@ -253,7 +279,7 @@ class TemperatureData():
         freezing = -17
 
         block_width = 9
-        icon_size= 5
+        icon_size= 4
 
         x = x_offset
 
@@ -336,14 +362,15 @@ class TemperatureData():
                 fill=min_color
             )
 
-
+            icon_x = x + (block_width // 2) - (icon_size // 2)
+            icon_y = y_offset + day_size[1] + max_temp_size[1] + min_temp_size[1] + 2
 
             icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
             self._temperature_image.paste(
                 icon, 
                 (
-                    x + (block_width // 2) - (icon_size // 2), 
-                    y_offset + day_size[1] + max_temp_size[1] + min_temp_size[1]
+                    icon_x, 
+                    icon_y
                 )
             )
 
@@ -372,26 +399,14 @@ def request_thread():
 class WeatherData():
     EXCLUDE = "minutely,hourly"
 
-    def __init__(self):
-        self._locations = [
-            {
-                "name": "Calgary",
-                "lat": 51.030436,
-                "lon": -114.065720
-            }
-        ]
-
     def update(self):
         global weather_data
-        global weather_api_updated
 
-        for location in self._locations:
+        for location in LOCATIONS:
             url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={ENV_VALUES['OPENWEATHER_API_KEY']}"
             data = requests.get(url).json()
 
             weather_data[location["name"]] = data
-
-        weather_api_updated = True
 
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
