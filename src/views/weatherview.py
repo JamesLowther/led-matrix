@@ -37,6 +37,16 @@ LOCATIONS = [
         "name": "Tokyo",
         "lat": 35.6762,
         "lon": 139.6503
+    },
+    {
+        "name": "Berlin",
+        "lat": 52.5200,
+        "lon": 13.4050
+    },
+    {
+        "name": "London",
+        "lat": 51.5074,
+        "lon": -0.1278
     }
 ]
 
@@ -44,9 +54,9 @@ class WeatherView():
     FRAME_INTERVAL = 900 # ms.
     HOLD_TIME = 2000 # ms.
     
-    FORECAST_INTERVAL = 6000 # ms.
+    FORECAST_INTERVAL = 1000 # ms.
 
-    RADAR_LOOPS = 2
+    RADAR_LOOPS = 0
 
     API_INTERVAL = 60 # s.
 
