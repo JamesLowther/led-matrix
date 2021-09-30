@@ -170,8 +170,8 @@ class TemperatureData():
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
 
-        x_offset = 1
-        y_offset = 1
+        x_offset = 2
+        y_offset = 2
 
         color = (170, 170, 170)
 
@@ -187,8 +187,8 @@ class TemperatureData():
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
 
-        x_offset = 4
-        y_offset = 2
+        x_offset = 2
+        y_offset = 3
 
         radius = 1
 
@@ -212,9 +212,9 @@ class TemperatureData():
 
         d.rectangle(
             [
-                self._matrix.dimensions[0] - radius - x_offset,
+                self._matrix.dimensions[0] - radius - x_offset - 1,
                 y_offset - 1,
-                self._matrix.dimensions[0] - x_offset,
+                self._matrix.dimensions[0] - x_offset - 1,
                 y_offset + radius - 1
             ],
             fill=color
@@ -233,7 +233,6 @@ class TemperatureData():
 
     def get_icon(self, code):
         url = f"https://openweathermap.org/img/wn/{code}@2x.png"
-        print(url)
         icon = requests.get(url)
         image = Image.open(BytesIO(icon.content))
 
