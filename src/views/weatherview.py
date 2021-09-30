@@ -56,7 +56,7 @@ class WeatherView():
     
     FORECAST_INTERVAL = 7000 # ms.
 
-    RADAR_LOOPS = 3
+    RADAR_LOOPS = 4
 
     API_INTERVAL = 300 # s.
 
@@ -452,7 +452,7 @@ class WeatherData():
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
     
-    NUMBER_PAST = 4     # Max 12.
+    NUMBER_PAST = 6     # Max 12.
     NUMBER_NOWCAST = 3  # Max 3.
 
     LATITUDE = 51.030436
