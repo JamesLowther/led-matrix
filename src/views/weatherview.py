@@ -56,7 +56,7 @@ class WeatherView():
     
     FORECAST_INTERVAL = 14000 # ms.
 
-    RADAR_LOOPS = 1
+    RADAR_LOOPS = 4
 
     API_INTERVAL = 300 # s.
 
@@ -202,7 +202,7 @@ class WeatherView():
     def draw_borders(self, image):
         d = ImageDraw.Draw(image)
 
-        color = (20, 20, 20)
+        color = (35, 35, 35)
 
 
         left_x_offset = 15
@@ -396,7 +396,7 @@ class TemperatureData():
         neutral_color = (170, 170, 170)
 
         hot_color = "firebrick"
-        warm_color = "orange"
+        warm_color = "peru"
         cold_color = "lightblue"
         freezing_color = "cadetblue"
 
