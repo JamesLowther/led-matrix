@@ -56,7 +56,7 @@ class WeatherView():
     
     FORECAST_INTERVAL = 14000 # ms.
 
-    RADAR_LOOPS = 4
+    RADAR_LOOPS = 1
 
     API_INTERVAL = 300 # s.
 
@@ -76,9 +76,9 @@ class WeatherView():
 
         self._time_display = TimeDisplay(self._matrix, press_event)
 
-        self._location_tempurature_data = []
+        self._location_temperature_data = []
         for location in LOCATIONS:
-            self._location_tempurature_data.append(
+            self._location_temperature_data.append(
                 TemperatureData(self._matrix, location["name"])
             )
 
@@ -98,12 +98,6 @@ class WeatherView():
 
         radar_i = 0
         while not self._press_event.is_set():
-            self.check_api_interval()
-
-            # Check if api has updated radar images.
-            if radar_i == 0 and radar_api_updated:
-                self.update_frames()
-
             current_image = self._frames[radar_i]["frame"]
             current_time = self._frames[radar_i]["time"]
 
@@ -117,6 +111,7 @@ class WeatherView():
 
             if radar_i == 0:
                 loop += 1
+                self.check_api_interval()
                 msleep(self.HOLD_TIME)
             else:
                 msleep(self.FRAME_INTERVAL)
@@ -126,8 +121,9 @@ class WeatherView():
                 radar_i = 0
 
                 prev_image = current_image
-                for i, location in enumerate(self._location_tempurature_data):
+                for i, location in enumerate(self._location_temperature_data):
                     next_image = location.generate_temperature_image()
+                    self.check_api_interval()
                     if i == 0:
                         Transitions.vertical_transition(self._matrix, prev_image, next_image)
 
@@ -146,6 +142,8 @@ class WeatherView():
 
                     if self._press_event.is_set():
                         return
+
+                self.check_api_interval()
 
                 time_frame = self._time_display.create_time_frame()
 
