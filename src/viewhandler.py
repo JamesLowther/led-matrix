@@ -14,7 +14,7 @@ class ViewHandler():
         self._stop_event = stop_event
 
         self._timed_mode = timed_mode
-        self._view_time = 10
+        self._view_time = 300 # s.
 
     def start(self):
         poweroffview = PoweroffView(self._matrix, self._press_event)
@@ -27,8 +27,8 @@ class ViewHandler():
         views = [
             weatherview,
             issview,
-            networkmanager,
-            testview
+            # networkmanager,
+            # testview
         ]
 
 
