@@ -90,7 +90,7 @@ class WeatherView():
         request_e.set()
 
         # Wait for initial frame data to be generated.
-        while(not radar_api_updated):
+        while(not radar_api_updated and len(self._frames) == 0):
             msleep(500)
 
         self.update_frames()
@@ -112,6 +112,7 @@ class WeatherView():
             if radar_i == 0:
                 loop += 1
                 self.check_api_interval()
+                self.check_update()
                 msleep(self.HOLD_TIME)
             else:
                 msleep(self.FRAME_INTERVAL)
@@ -153,8 +154,7 @@ class WeatherView():
                 if self._press_event.is_set():
                     return
 
-                if radar_api_updated:
-                    self.update_frames()
+                self.check_update()
 
                 next_radar_image = self._frames[radar_i]["frame"]
                 next_radar_time = self._frames[radar_i]["time"]
@@ -172,6 +172,11 @@ class WeatherView():
         if current_time - self._start_time >= self.API_INTERVAL:
             self._start_time = current_time
             request_e.set()
+
+    def check_update(self):
+        global radar_api_updated
+        if radar_api_updated:
+            self.update_frames()
 
     def update_frames(self):
         global radar_api_updated
