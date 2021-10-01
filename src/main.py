@@ -6,7 +6,7 @@ import sys
 from buttonhandler import ButtonHandler
 
 from matrix import Matrix
-from viewhander import ViewHandler
+from viewhandler import ViewHandler
 
 urllib3.disable_warnings()
 
