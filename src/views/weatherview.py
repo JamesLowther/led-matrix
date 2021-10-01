@@ -52,11 +52,11 @@ LOCATIONS = [
 
 class WeatherView():
     FRAME_INTERVAL = 1300 # ms.
-    HOLD_TIME = 2200 # ms.
+    HOLD_TIME = 2600 # ms.
     
-    FORECAST_INTERVAL = 16000 # ms.
+    FORECAST_INTERVAL = 14000 # ms.
 
-    RADAR_LOOPS = 5
+    RADAR_LOOPS = 4
 
     API_INTERVAL = 300 # s.
 
@@ -65,6 +65,8 @@ class WeatherView():
     def __init__(self, matrix, press_event):
         self._matrix = matrix
         self._press_event = press_event
+
+        self._start_time = time.time()
 
         self._frames = []
 
@@ -81,6 +83,9 @@ class WeatherView():
             )
 
     def run(self):
+        global last_updated
+        global radar_api_updated
+
         last_updated = 0
         request_e.set()
 
@@ -89,23 +94,18 @@ class WeatherView():
             msleep(500)
 
         self.update_frames()
-
-        start_time = time.time()
         loop = 0
 
-        i = 0
+        radar_i = 0
         while not self._press_event.is_set():
-            current_time = time.time()
-            if current_time - start_time >= self.API_INTERVAL:
-                start_time = current_time
-                request_e.set()
+            self.check_api_interval()
 
             # Check if api has updated radar images.
-            if i == 0 and radar_api_updated:
+            if radar_i == 0 and radar_api_updated:
                 self.update_frames()
 
-            current_image = self._frames[i]["frame"]
-            current_time = self._frames[i]["time"]
+            current_image = self._frames[radar_i]["frame"]
+            current_time = self._frames[radar_i]["time"]
 
             self.draw_location(current_image)
             self.draw_borders(current_image)
@@ -113,9 +113,9 @@ class WeatherView():
             
             self._matrix.set_image(current_image, unsafe=False)
 
-            i = (i + 1) % len(self._frames)
+            radar_i = (radar_i + 1) % len(self._frames)
 
-            if i == 0:
+            if radar_i == 0:
                 loop += 1
                 msleep(self.HOLD_TIME)
             else:
@@ -123,6 +123,7 @@ class WeatherView():
 
             if loop == self.RADAR_LOOPS:
                 loop = 0
+                radar_i = 0
 
                 prev_image = current_image
                 for i, location in enumerate(self._location_tempurature_data):
@@ -146,9 +147,6 @@ class WeatherView():
                     if self._press_event.is_set():
                         return
 
-                if radar_api_updated:
-                    self.update_frames()
-
                 time_frame = self._time_display.create_time_frame()
 
                 Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
@@ -157,12 +155,30 @@ class WeatherView():
                 if self._press_event.is_set():
                     return
 
-                Transitions.vertical_transition(self._matrix, final_time_frame, self._frames[0]["frame"])
+                if radar_api_updated:
+                    self.update_frames()
 
-                msleep(self.HOLD_TIME)
+                next_radar_image = self._frames[radar_i]["frame"]
+                next_radar_time = self._frames[radar_i]["time"]
+
+                self.draw_location(next_radar_image)
+                self.draw_borders(next_radar_image)
+                self.draw_time(next_radar_image, next_radar_time)
+
+                Transitions.vertical_transition(self._matrix, final_time_frame, next_radar_image)
+
+                msleep(self.HOLD_TIME - self.FRAME_INTERVAL)
+
+    def check_api_interval(self):
+        current_time = time.time()
+        if current_time - self._start_time >= self.API_INTERVAL:
+            self._start_time = current_time
+            request_e.set()
 
     def update_frames(self):
         global radar_api_updated
+        global new_frames
+
         self._frames = new_frames.copy()
         radar_api_updated = False
 
@@ -241,7 +257,7 @@ class WeatherView():
         )
 
 class TimeDisplay():
-    INTERVAL = 10 # s.
+    INTERVAL = 16 # s.
 
     UPDATE_INTERVAL = 500
     BG_COLOR = "black"
@@ -273,6 +289,7 @@ class TimeDisplay():
         d = ImageDraw.Draw(image)
 
         time_str = time.strftime("%I:%M %p")
+        time_str = time_str.lstrip("0")
         time_size = d.textsize(time_str, f)
 
         d.text(
@@ -534,11 +551,11 @@ class RadarData():
 
     def __init__(self):
         self._api_file = None
-        self._last_updated = 0
     
     def update(self):
         global radar_api_updated
         global last_updated
+        global new_frames
 
         self.get_api_file()
 
@@ -546,7 +563,7 @@ class RadarData():
         if self._api_file["generated"] == last_updated:
             return
 
-        self._last_updated = self._api_file["generated"]
+        last_updated = self._api_file["generated"]
 
         new_frames.clear()
         self.get_past_radar()
@@ -558,6 +575,8 @@ class RadarData():
         self._api_file = requests.get(self.API_FILE_URL).json()
 
     def get_past_radar(self):
+        global new_frames
+
         size = 512
 
         number_data = len(self._api_file["radar"]["past"])
@@ -579,6 +598,8 @@ class RadarData():
             )
 
     def get_nowcast_radar(self):
+        global new_frames
+
         size = 512
 
         number_data = len(self._api_file["radar"]["nowcast"])
