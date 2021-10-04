@@ -4,7 +4,7 @@ from requests import Session
 import json
 from time import sleep
 
-from cfg import ENV_VALUES
+from config import ENV_VALUES
 
 class NetworkMonitor():
     REFRESH_INTERVAL = 1

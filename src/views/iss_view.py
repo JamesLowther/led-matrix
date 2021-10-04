@@ -3,7 +3,7 @@ import time
 import numpy as np
 from math import pi, sin, cos, radians
 
-from cfg import SRC_BASE, FONTS
+from config import SRC_BASE, FONTS
 from common import msleep
 import os
 import requests

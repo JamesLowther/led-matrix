@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-from cfg import FONTS, ENV_VALUES, SRC_BASE
+from config import FONTS, ENV_VALUES, SRC_BASE
 from datetime import datetime
 
 from common import msleep

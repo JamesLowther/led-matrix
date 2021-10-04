@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import time
 import os
-from cfg import SRC_BASE
+from config import SRC_BASE
 import numpy as np
 from math import pi, sin, cos
 
