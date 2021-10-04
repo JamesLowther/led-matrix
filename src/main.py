@@ -3,10 +3,10 @@ import signal
 import threading
 import sys
 
-from buttonhandler import ButtonHandler
+from button_handler import ButtonHandler
 
 from matrix import Matrix
-from viewhandler import ViewHandler
+from view_handler import ViewHandler
 
 urllib3.disable_warnings()
 

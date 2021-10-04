@@ -1,11 +1,11 @@
 import os
 import threading
 
-from views.poweroffview import PoweroffView
-from views.networkmonitor import NetworkMonitor
-from views.testview import TestView
-from views.issview import ISSView
-from views.weatherview import WeatherView
+from views.poweroff_view import PoweroffView
+from views.network_view import NetworkMonitor
+from views.test_view import TestView
+from views.iss_view import ISSView
+from views.weather_view import WeatherView
 
 class ViewHandler():
     def __init__(self, matrix, press_event, stop_event, timed_mode=False):
