@@ -4,6 +4,7 @@ import numpy as np
 from math import pi, sin, cos, radians
 
 from cfg import SRC_BASE, FONTS
+from common import msleep
 import os
 import requests
 import threading
@@ -58,7 +59,7 @@ class ISSView():
             
             self._matrix.set_image(image)
 
-            self.msleep(self.REFRESH_INTERVAL)
+            msleep(self.REFRESH_INTERVAL)
 
     def draw_time(self, image):
         """
@@ -212,12 +213,6 @@ class ISSView():
             ],
             fill=color
         )
-
-    def msleep(self, ms):
-        """
-        Sleep in milliseconds.
-        """
-        time.sleep(ms / 1000)
 
 class Earth():
     HOME_COORDS = (51.030436, -114.065720)

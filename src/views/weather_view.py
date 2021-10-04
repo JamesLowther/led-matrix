@@ -4,6 +4,7 @@ from io import BytesIO
 from cfg import FONTS, ENV_VALUES, SRC_BASE
 from datetime import datetime
 
+from common import msleep
 from transitions import Transitions
 
 import time
@@ -628,9 +629,3 @@ class RadarData():
         resized = image.resize((64, 64), Image.BOX)
         cropped = resized.crop((0, 15, 64, 47))
         return cropped
-
-def msleep(ms):
-    """
-    Sleep in milliseconds.
-    """
-    time.sleep(ms / 1000)

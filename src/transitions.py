@@ -1,6 +1,8 @@
 from PIL import Image, ImageChops
 import time
 
+from common import msleep
+
 class Transitions:
     def vertical_transition(matrix, prev_image, new_image, unsafe=True, speed_mult=1):
         TRANSITION_INTERVAL = 40 * speed_mult
@@ -61,9 +63,4 @@ class Transitions:
 
             matrix.set_image(cropped, unsafe=unsafe)
             msleep(TRANSITION_INTERVAL)
-
-def msleep(ms):
-    """
-    Sleep in milliseconds.
-    """
-    time.sleep(ms / 1000)
+            
