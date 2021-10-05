@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-from config import FONTS, ENV_VALUES
+from config import ENV_VALUES
 from datetime import datetime
 
 from common import msleep
@@ -13,7 +13,6 @@ from views.weather_view.wind_view import WindView
 import time
 import requests
 import threading
-import os
 
 request_e = threading.Event()
 
@@ -111,7 +110,7 @@ class WeatherView():
             if prev_image == -1:
                 return
 
-            # # Ensure that weather api data gets set.
+            # # # Ensure that weather api data gets set.
             while len(weather_data) != len(LOCATIONS):
                 msleep(200)
 
@@ -211,54 +210,6 @@ class WeatherView():
 
         self._frames = new_frames.copy()
         radar_api_updated = False
-
-class TimeDisplay():
-    INTERVAL = 16 # s.
-
-    UPDATE_INTERVAL = 500
-    BG_COLOR = "black"
-    FONT_COLOR = (170, 170, 170)
-
-    def __init__(self, matrix, press_event):
-        self._matrix = matrix
-        self._press_event = press_event
-
-    def show_time(self):
-        start_time = time.time()
-        
-        image = self.create_time_frame()
-
-        while not self._press_event.is_set() and time.time() - start_time <= self.INTERVAL:
-            image = self.create_time_frame()
-
-            self._matrix.set_image(image)
-
-            msleep(self.UPDATE_INTERVAL)
-
-        return image
-
-    def create_time_frame(self):
-        image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
-
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
-        d = ImageDraw.Draw(image)
-
-        time_str = time.strftime("%I:%M %p")
-        time_str = time_str.lstrip("0")
-        time_size = d.textsize(time_str, f)
-
-        d.text(
-            (
-                (self._matrix.dimensions[0] // 2) - (time_size[0] // 2),
-                (self._matrix.dimensions[1] // 2) - (time_size[1] // 2),
-            ),
-            time_str,
-            font=f,
-            fill=self.FONT_COLOR
-        )
-
-        return image
 
 def request_thread():
     global frames

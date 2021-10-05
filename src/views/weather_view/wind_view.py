@@ -8,6 +8,7 @@ from config import SRC_BASE, FONTS
 
 class WindView():
     BG_COLOR = "black"
+    WIND_COLOR = (200, 200, 200)
 
     MIN_LENGTH = 4
     MAX_LENGTH = 8
@@ -24,8 +25,6 @@ class WindView():
     def initialize_particles(self, windspeed):
         self.update_windspeed(windspeed)
 
-        print(windspeed)
-
         self._particles.clear()
 
         for i in range(int(0.3 * 100 * self._windspeed / self.MAX_WINDSPEED)):
@@ -33,7 +32,7 @@ class WindView():
             self._particles.append(p)
 
     def update_windspeed(self, windspeed):
-        self._display_windspeed = windspeed
+        self._display_windspeed = windspeed * 3.6
         windspeed = windspeed * 3.6
         self._windspeed = max(windspeed, self.MIN_WINDSPEED)
         self._windspeed = min(self._windspeed, self.MAX_WINDSPEED)
@@ -106,7 +105,7 @@ class WindView():
                     p.x1,
                     p.y1,
                 ],
-                fill=(140, 140, 140)
+                fill=self.WIND_COLOR
             )
 
     def draw_time(self, image):
@@ -149,7 +148,7 @@ class WindView():
 
         y_offset = 1
 
-        speed_str = f"{round(self._display_windspeed, 1)} m/s"
+        speed_str = f"{round(self._display_windspeed, 1)} km/h"
         speed_size = d.textsize(speed_str, f)
 
         x = (self._matrix.dimensions[0] // 2) - (speed_size[0] // 2)
