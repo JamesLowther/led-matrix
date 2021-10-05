@@ -139,7 +139,7 @@ class TemperatureView():
                     min_color = hot_color
                 else:
                     min_color = warm_color
-            elif min_temp_int < 0:
+            elif min_temp_int <= 0:
                 if min_temp_int <= freezing:
                     min_color = freezing_color
                 else:

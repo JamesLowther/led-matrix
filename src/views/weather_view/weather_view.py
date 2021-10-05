@@ -59,11 +59,11 @@ class WeatherView():
     FRAME_INTERVAL = 1300 # ms.
     HOLD_TIME = 2600 # ms.
     
-    FORECAST_INTERVAL = 14000 # ms.
+    FORECAST_INTERVAL = 16000 # ms.
 
-    WIND_INTERVAL = 14000 # ms.
+    WIND_INTERVAL = 30000 # ms.
 
-    RADAR_LOOPS = 4
+    RADAR_LOOPS = 5
 
     API_INTERVAL = 300 # s.
 
@@ -110,7 +110,7 @@ class WeatherView():
             if prev_image == -1:
                 return
 
-            # # # Ensure that weather api data gets set.
+            # Ensure that weather api data gets set.
             while len(weather_data) != len(LOCATIONS):
                 msleep(200)
 

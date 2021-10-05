@@ -14,6 +14,7 @@ class ViewHandler():
         self._stop_event = stop_event
 
         self._timed_mode = timed_mode
+        self._auto_switch = True
 
     def start(self):
         poweroffview = PoweroffView(self._matrix, self._press_event)
@@ -26,29 +27,48 @@ class ViewHandler():
         views = [
             {
                 "view": weatherview,
-                "time": 300
+                "time": 358
             },
             {
                 "view": issview,
-                "time": 200
+                # "time": 300
+                "time": 5
             },
             {
                 "view": networkmanager,
-                "time": 30
+                # "time": 60
+                "time": 5
             },
             {
                 "view": testview,
-                "time": 30
+                "time": 60
             }
         ]
 
 
-        current_view = 0
+        current_view = 1
+        
+        auto_timer = None
+        manual_timer = None
 
         while True:
             if self._timed_mode:
-                timer = threading.Timer(views[current_view]["time"], lambda: self._press_event.set())
-                timer.start()
+                if self._auto_switch:
+                    self._auto_switch = False
+                    auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
+                    auto_timer.start()
+                
+                else:
+                    try:
+                        auto_timer.cancel()
+                        manual_timer.cancel()
+                    except AttributeError:
+                        pass
+
+                    print("manual timer")
+
+                    manual_timer = threading.Timer(10, self.handle_timer)
+                    manual_timer.start()
             
             views[current_view]["view"].run()
 
@@ -58,6 +78,10 @@ class ViewHandler():
 
             current_view = (current_view + 1) % len(views)
             self._press_event.clear()
+
+    def handle_timer(self):
+        self._auto_switch = True
+        self._press_event.set()
 
     def handle_shutdown(self, poweroffview):
         self._stop_event.clear()

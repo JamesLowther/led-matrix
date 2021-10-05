@@ -149,7 +149,7 @@ class ISSView():
             "darkslategrey",
             "olivedrab",
             "sienna",
-            "violet"
+            "mediumorchid"
         ]
 
         if number_ast > line_length:
