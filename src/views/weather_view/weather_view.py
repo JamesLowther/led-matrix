@@ -8,7 +8,7 @@ from common import msleep
 from transitions import Transitions
 from views.weather_view.radar_view import RadarView
 from views.weather_view.temperature_view import TemperatureView
-from views.weather_view.wind_chicken import WindChicken
+from views.weather_view.wind_view import WindView
 
 import time
 import requests
@@ -32,27 +32,29 @@ LOCATIONS = [
         "lat": 51.030436,
         "lon": -114.065720
     },
-    # {
-    #     "name": "Seattle",
-    #     "lat": 47.6062,
-    #     "lon": -122.3321
-    # },
-    # {
-    #     "name": "Tokyo",
-    #     "lat": 35.6762,
-    #     "lon": 139.6503
-    # },
-    # {
-    #     "name": "Berlin",
-    #     "lat": 52.5200,
-    #     "lon": 13.4050
-    # },
-    # {
-    #     "name": "London",
-    #     "lat": 51.5074,
-    #     "lon": -0.1278
-    # }
+    {
+        "name": "Seattle",
+        "lat": 47.6062,
+        "lon": -122.3321
+    },
+    {
+        "name": "Tokyo",
+        "lat": 35.6762,
+        "lon": 139.6503
+    },
+    {
+        "name": "Berlin",
+        "lat": 52.5200,
+        "lon": 13.4050
+    },
+    {
+        "name": "London",
+        "lat": 51.5074,
+        "lon": -0.1278
+    }
 ]
+
+WIND_LOCATION = "Calgary"
 
 class WeatherView():
     FRAME_INTERVAL = 1300 # ms.
@@ -60,9 +62,9 @@ class WeatherView():
     
     FORECAST_INTERVAL = 14000 # ms.
 
-    WIND_CHICKEN_INTERVAL = 10000 # ms.
+    WIND_INTERVAL = 14000 # ms.
 
-    RADAR_LOOPS = 1
+    RADAR_LOOPS = 4
 
     API_INTERVAL = 300 # s.
 
@@ -78,8 +80,6 @@ class WeatherView():
         self._request_t.daemon = True
         self._request_t.start()
 
-        # self._time_display = TimeDisplay(self._matrix, press_event)
-
         self._radar_view = RadarView(self._matrix)
 
         self._location_temperature_views = []
@@ -88,7 +88,7 @@ class WeatherView():
                 TemperatureView(self._matrix, location["name"])
             )
 
-        self._wind_chicken = WindChicken(self._matrix)
+        self._wind_view = WindView(self._matrix)
 
     def run(self):
         global last_updated
@@ -99,7 +99,6 @@ class WeatherView():
 
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and len(self._frames) == 0):
-            break
             msleep(200)
 
         self.update_frames()
@@ -107,22 +106,22 @@ class WeatherView():
         prev_image = None
         while not self._press_event.is_set():
 
-            # self.check_update()
-            # prev_image = self.start_radar_loop(prev_image)
-            # if prev_image == -1:
-            #     return
+            self.check_update()
+            prev_image = self.start_radar_loop(prev_image)
+            if prev_image == -1:
+                return
 
-            # # Ensure that weather api data gets set
-            # while len(weather_data) != len(LOCATIONS):
-            #     msleep(200)
+            # # Ensure that weather api data gets set.
+            while len(weather_data) != len(LOCATIONS):
+                msleep(200)
 
-            # self.check_update()
-            # prev_image = self.start_temperature_loop(prev_image)
-            # if prev_image == -1:
-            #     return
+            self.check_update()
+            prev_image = self.start_temperature_loop(prev_image)
+            if prev_image == -1:
+                return
             
             self.check_update()
-            prev_image = self.start_wind_chicken_loop(prev_image)
+            prev_image = self.start_wind_loop(prev_image)
             if prev_image == -1:
                 return
             
@@ -173,20 +172,25 @@ class WeatherView():
 
         return prev_image
 
-    def start_wind_chicken_loop(self, prev_image):
+    def start_wind_loop(self, prev_image):
         sleep = 50
 
         self.check_api_interval()
 
-        # Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
+        self._wind_view.initialize_particles(weather_data[WIND_LOCATION]["current"]["wind_speed"])
 
-        next_image = None
+        next_image = self._wind_view.generate_wind_image()
+
+        Transitions.horizontal_transition(self._matrix, prev_image, next_image)
 
         start_time = time.time()
-        while time.time() - start_time <= (self.WIND_CHICKEN_INTERVAL / 1000):
-            next_image = self._wind_chicken.generate_chicken_image()
+        while time.time() - start_time <= (self.WIND_INTERVAL / 1000):
+            next_image = self._wind_view.generate_wind_image()
             self._matrix.set_image(next_image)
             msleep(sleep)
+
+            if self._press_event.is_set():
+                    return -1
 
         return next_image
 
