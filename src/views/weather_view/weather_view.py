@@ -304,11 +304,12 @@ class RadarData():
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
             
             radar_image = None
-            try:
-                radar_image = requests.get(url)
-                break
-            except requests.exceptions.ConnectionError:
-                msleep(self.RETRY_TIME)
+            while True:
+                try:
+                    radar_image = requests.get(url)
+                    break
+                except requests.exceptions.ConnectionError:
+                    msleep(self.RETRY_TIME)
 
             img = Image.open(BytesIO(radar_image.content))
             converted_image = self.convert_image(img)
