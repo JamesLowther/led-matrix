@@ -60,6 +60,8 @@ class WeatherView():
     
     FORECAST_INTERVAL = 14000 # ms.
 
+    WIND_CHICKEN_INTERVAL = 10000 # ms.
+
     RADAR_LOOPS = 1
 
     API_INTERVAL = 300 # s.
@@ -76,7 +78,7 @@ class WeatherView():
         self._request_t.daemon = True
         self._request_t.start()
 
-        self._time_display = TimeDisplay(self._matrix, press_event)
+        # self._time_display = TimeDisplay(self._matrix, press_event)
 
         self._radar_view = RadarView(self._matrix)
 
@@ -97,22 +99,26 @@ class WeatherView():
 
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and len(self._frames) == 0):
-            msleep(500)
+            msleep(200)
 
         self.update_frames()
 
         prev_image = None
         while not self._press_event.is_set():
 
-            self.check_update()
-            prev_image = self.start_radar_loop(prev_image)
-            if prev_image == -1:
-                return
+            # self.check_update()
+            # prev_image = self.start_radar_loop(prev_image)
+            # if prev_image == -1:
+            #     return
 
-            self.check_update()
-            prev_image = self.start_temperature_loop(prev_image)
-            if prev_image == -1:
-                return
+            # # Ensure that weather api data gets set
+            # while len(weather_data) != len(LOCATIONS):
+            #     msleep(200)
+
+            # self.check_update()
+            # prev_image = self.start_temperature_loop(prev_image)
+            # if prev_image == -1:
+            #     return
             
             self.check_update()
             prev_image = self.start_wind_chicken_loop(prev_image)
@@ -167,16 +173,21 @@ class WeatherView():
         return prev_image
 
     def start_wind_chicken_loop(self, prev_image):
+        sleep = 50
+
         self.check_api_interval()
-        time_frame = self._time_display.create_time_frame()
 
-        Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
+        # Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
 
-        final_time_frame = self._time_display.show_time()
-        if self._press_event.is_set():
-            return -1
+        next_image = None
 
-        return final_time_frame
+        start_time = time.time()
+        while time.time() - start_time <= (self.WIND_CHICKEN_INTERVAL / 1000):
+            next_image = self._wind_chicken.generate_chicken_image()
+            self._matrix.set_image(next_image)
+            msleep(sleep)
+
+        return next_image
 
     def check_api_interval(self):
         current_time = time.time()
@@ -267,6 +278,8 @@ class WeatherData():
             data = requests.get(url).json()
 
             weather_data[location["name"]] = data
+
+        weather_api_updated = True
 
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
