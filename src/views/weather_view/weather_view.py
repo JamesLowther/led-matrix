@@ -226,12 +226,20 @@ def request_thread():
 class WeatherData():
     EXCLUDE = "minutely,hourly"
 
+    RETRY_TIME = 2000
+
     def update(self):
         global weather_data
 
         for location in LOCATIONS:
             url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={ENV_VALUES['OPENWEATHER_API_KEY']}"
-            data = requests.get(url).json()
+            
+            while True:
+                try:
+                    data = requests.get(url).json()
+                    break
+                except requests.exceptions.ConnectionError:
+                    msleep(self.RETRY_TIME)
 
             weather_data[location["name"]] = data
 
@@ -240,6 +248,8 @@ class WeatherData():
 class RadarData():
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
     
+    RETRY_TIME = 2000
+
     NUMBER_PAST = 5     # Max 12.
     NUMBER_NOWCAST = 3  # Max 3.
 
@@ -274,7 +284,12 @@ class RadarData():
         radar_api_updated = True
 
     def get_api_file(self):
-        self._api_file = requests.get(self.API_FILE_URL).json()
+        while True:
+            try:
+                self._api_file = requests.get(self.API_FILE_URL).json()
+                break
+            except requests.exceptions.ConnectionError:
+                msleep(self.RETRY_TIME)
 
     def get_past_radar(self):
         global new_frames
@@ -287,7 +302,13 @@ class RadarData():
         
         for data in past_api_data:
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
-            radar_image = requests.get(url)
+            
+            radar_image = None
+            try:
+                radar_image = requests.get(url)
+                break
+            except requests.exceptions.ConnectionError:
+                msleep(self.RETRY_TIME)
 
             img = Image.open(BytesIO(radar_image.content))
             converted_image = self.convert_image(img)
@@ -310,7 +331,14 @@ class RadarData():
         
         for data in nowcast_api_data:
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
-            radar_image = requests.get(url)
+            
+            radar_image = None
+            while True:
+                try:
+                    radar_image = requests.get(url)
+                    break
+                except requests.exceptions.ConnectionError:
+                    msleep(1000)
 
             img = Image.open(BytesIO(radar_image.content))
             converted_image = self.convert_image(img)
