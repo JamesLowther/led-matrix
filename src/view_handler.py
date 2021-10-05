@@ -31,20 +31,17 @@ class ViewHandler():
             },
             {
                 "view": issview,
-                # "time": 300
-                "time": 5
+                "time": 300
             },
             {
                 "view": networkmanager,
-                # "time": 60
-                "time": 5
+                "time": 60
             },
             {
                 "view": testview,
                 "time": 60
             }
         ]
-
 
         current_view = 1
         
@@ -65,9 +62,9 @@ class ViewHandler():
                     except AttributeError:
                         pass
 
-                    print("manual timer")
+                    manual_time = 300 # s.
 
-                    manual_timer = threading.Timer(10, self.handle_timer)
+                    manual_timer = threading.Timer(manual_time, self.handle_timer)
                     manual_timer.start()
             
             views[current_view]["view"].run()
