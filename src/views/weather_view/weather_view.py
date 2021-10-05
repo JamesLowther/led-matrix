@@ -1,11 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-from config import FONTS, ENV_VALUES, SRC_BASE
+from config import FONTS, ENV_VALUES
 from datetime import datetime
 
 from common import msleep
 from transitions import Transitions
+from views.weather_view.temperature_view import TemperatureView
+from views.weather_view.radar_view import RadarView
 
 import time
 import requests
@@ -61,8 +63,6 @@ class WeatherView():
 
     API_INTERVAL = 300 # s.
 
-    LOCATION_COLOR = "lightsteelblue"
-
     def __init__(self, matrix, press_event):
         self._matrix = matrix
         self._press_event = press_event
@@ -77,10 +77,12 @@ class WeatherView():
 
         self._time_display = TimeDisplay(self._matrix, press_event)
 
-        self._location_temperature_data = []
+        self._radar_view = RadarView(self._matrix)
+
+        self._location_temperature_views = []
         for location in LOCATIONS:
-            self._location_temperature_data.append(
-                TemperatureData(self._matrix, location["name"])
+            self._location_temperature_views.append(
+                TemperatureView(self._matrix, location["name"])
             )
 
     def run(self):
@@ -102,9 +104,7 @@ class WeatherView():
             current_image = self._frames[radar_i]["frame"]
             current_time = self._frames[radar_i]["time"]
 
-            self.draw_location(current_image)
-            self.draw_borders(current_image)
-            self.draw_time(current_image, current_time)
+            self._radar_view.generate_radar_image(current_image, current_time)
             
             self._matrix.set_image(current_image, unsafe=False)
 
@@ -123,8 +123,8 @@ class WeatherView():
                 radar_i = 0
 
                 prev_image = current_image
-                for i, location in enumerate(self._location_temperature_data):
-                    next_image = location.generate_temperature_image()
+                for i, location in enumerate(self._location_temperature_views):
+                    next_image = location.generate_temperature_image(weather_data)
                     self.check_api_interval()
                     if i == 0:
                         Transitions.vertical_transition(self._matrix, prev_image, next_image)
@@ -160,9 +160,7 @@ class WeatherView():
                 next_radar_image = self._frames[radar_i]["frame"]
                 next_radar_time = self._frames[radar_i]["time"]
 
-                self.draw_location(next_radar_image)
-                self.draw_borders(next_radar_image)
-                self.draw_time(next_radar_image, next_radar_time)
+                self._radar_view.generate_radar_image(next_radar_image, next_radar_time)
 
                 Transitions.vertical_transition(self._matrix, final_time_frame, next_radar_image)
 
@@ -185,80 +183,6 @@ class WeatherView():
 
         self._frames = new_frames.copy()
         radar_api_updated = False
-
-    def draw_location(self, image):
-        x_offset = 31 
-        y_offset = 15
-
-        w = 2
-        h = 2
-
-        d = ImageDraw.Draw(image)
-
-        d.rectangle(
-            [
-                x_offset,
-                y_offset,
-                x_offset + w - 1,
-                y_offset + h - 1
-            ],
-            fill=self.LOCATION_COLOR
-        )
-
-    def draw_borders(self, image):
-        d = ImageDraw.Draw(image)
-
-        color = (35, 35, 35)
-
-
-        left_x_offset = 15
-        right_x_offset = 54
-
-        d.line(
-            [
-                right_x_offset,
-                0,
-                right_x_offset,
-                self._matrix.dimensions[1]
-            ],
-            fill=color
-        )
-
-        d.line(
-            [
-                left_x_offset,
-                0,
-                left_x_offset + 13,
-                self._matrix.dimensions[1]
-            ],
-            fill=color
-        )
-
-    def draw_time(self, image, time):
-        x_offset = 1
-        y_offset = 1
-
-        color = (170, 170, 170)
-
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
-
-        f = ImageFont.truetype(font_path, 4)
-        d = ImageDraw.Draw(image)
-
-        time_str = datetime.fromtimestamp(time).strftime("%I:%M %p")
-        time_str = time_str.lstrip("0")
-
-        text_size = d.textsize(time_str, f)
-
-        d.text(
-            (
-                64 - text_size[0] - x_offset, 
-                32 - text_size[1] - y_offset
-            ),
-            time_str,
-            font=f,
-            fill=color
-        )
 
 class TimeDisplay():
     INTERVAL = 16 # s.
@@ -307,213 +231,6 @@ class TimeDisplay():
         )
 
         return image
-
-class TemperatureData():
-    BG_COLOR = "black"
-
-    def __init__(self, matrix, location):
-        self._matrix = matrix
-        self._location = location
-
-    def generate_temperature_image(self):
-        self._temperature_image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
-
-        self.draw_location_text()
-        self.draw_current_temp()
-        self.draw_forecast()
-
-        return self._temperature_image
-
-    def draw_location_text(self):
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
-        d = ImageDraw.Draw(self._temperature_image)
-
-        x_offset = 2
-        y_offset = 2
-
-        color = (170, 170, 170)
-
-        d.text(
-            (x_offset, y_offset),
-            self._location,
-            font=f,
-            fill=color
-        )
-
-    def draw_current_temp(self):
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
-        d = ImageDraw.Draw(self._temperature_image)
-
-        x_offset = 2
-        y_offset = 3
-
-        radius = 1
-
-        color = (170, 170, 170)
-
-        data = weather_data[self._location]["current"]
-
-        current_temp = str(int(data["feels_like"] - 273.15))
-
-        size = d.textsize(current_temp, f)
-
-        d.text(
-            (
-                self._matrix.dimensions[0] - size[0] - x_offset - radius - 1,
-                y_offset
-            ),
-            current_temp,
-            font=f,
-            fill=color
-        )
-
-        d.rectangle(
-            [
-                self._matrix.dimensions[0] - radius - x_offset - 1,
-                y_offset - 1,
-                self._matrix.dimensions[0] - x_offset - 1,
-                y_offset + radius - 1
-            ],
-            fill=color
-        )
-
-        icon = self.get_icon(data["weather"][0]["icon"], 7)
-
-        self._temperature_image.paste(
-            icon, 
-            (
-                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 3, 
-                y_offset - 2
-            )
-        )
-        
-    def draw_forecast(self):
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
-        d = ImageDraw.Draw(self._temperature_image)
-        
-        data = weather_data[self._location]["daily"]
-
-        x_offset = 1
-        y_offset = 10
-
-        neutral_color = (170, 170, 170)
-
-        hot_color = "firebrick"
-        warm_color = "peru"
-        cold_color = "lightblue"
-        freezing_color = "cadetblue"
-
-        hot = 20
-        freezing = -20
-
-        block_width = 9
-        icon_size= 4
-
-        x = x_offset
-
-        for i, forecast in enumerate(data):
-            
-            day = datetime.fromtimestamp(forecast["dt"]).strftime("%A")[0]
-            day_size = d.textsize(day, f)
-
-            day_x = x + (block_width // 2) - (day_size[0] // 2)
-            day_y = y_offset
-
-            d.text(
-                (
-                    day_x,
-                    day_y
-                ),
-                day,
-                font=f,
-                fill=neutral_color
-            )
-
-            min_temp_int = int(forecast["temp"]["min"] - 273.15)
-            max_temp_int = int(forecast["temp"]["max"] - 273.15)
-
-            min_color = neutral_color
-            if min_temp_int > 0:
-                if min_temp_int >= hot:
-                    min_color = hot_color
-                else:
-                    min_color = warm_color
-            elif min_temp_int < 0:
-                if min_temp_int <= freezing:
-                    min_color = freezing_color
-                else:
-                    min_color = cold_color
-                min_temp_int = abs(min_temp_int)
-
-            max_color = neutral_color
-            if max_temp_int > 0:
-                if max_temp_int >= hot:
-                    max_color = hot_color
-                else:
-                    max_color = warm_color
-            elif max_temp_int < 0:
-                if max_temp_int <= freezing:
-                    max_color = freezing_color
-                else:
-                    max_color = cold_color
-                max_temp_int = abs(max_temp_int)
-
-            min_temp = str(min_temp_int)
-            max_temp = str(max_temp_int)
-
-            min_temp_size = d.textsize(min_temp, f)
-            max_temp_size = d.textsize(max_temp, f)
-
-            max_x = x + (block_width // 2) - (max_temp_size[0] // 2)
-            max_y = y_offset + day_size[1]
-
-            d.text(
-                (
-                    max_x,
-                    max_y
-                ),
-                max_temp,
-                font=f,
-                fill=max_color
-            )
-
-            min_x = x + (block_width // 2) - (min_temp_size[0] // 2)
-            min_y = y_offset + day_size[1] + max_temp_size[1]
-
-            d.text(
-                (
-                    min_x,
-                    min_y
-                ),
-                min_temp,
-                font=f,
-                fill=min_color
-            )
-
-            icon_x = x + (block_width // 2) - (icon_size // 2)
-            icon_y = y_offset + day_size[1] + max_temp_size[1] + min_temp_size[1] + 2
-
-            icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
-            self._temperature_image.paste(
-                icon, 
-                (
-                    icon_x, 
-                    icon_y
-                )
-            )
-
-            x += block_width
-
-    def get_icon(self, code, size):
-        path = os.path.join(SRC_BASE, "assets", "weatherview", "icons", f"{code}.png")
-        image = Image.open(path)
-
-        resized = image.resize((size, size), Image.BOX)
-
-        return resized
 
 def request_thread():
     global frames
