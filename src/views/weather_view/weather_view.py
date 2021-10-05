@@ -6,8 +6,9 @@ from datetime import datetime
 
 from common import msleep
 from transitions import Transitions
-from views.weather_view.temperature_view import TemperatureView
 from views.weather_view.radar_view import RadarView
+from views.weather_view.temperature_view import TemperatureView
+from views.weather_view.wind_chicken import WindChicken
 
 import time
 import requests
@@ -31,26 +32,26 @@ LOCATIONS = [
         "lat": 51.030436,
         "lon": -114.065720
     },
-    {
-        "name": "Seattle",
-        "lat": 47.6062,
-        "lon": -122.3321
-    },
-    {
-        "name": "Tokyo",
-        "lat": 35.6762,
-        "lon": 139.6503
-    },
-    {
-        "name": "Berlin",
-        "lat": 52.5200,
-        "lon": 13.4050
-    },
-    {
-        "name": "London",
-        "lat": 51.5074,
-        "lon": -0.1278
-    }
+    # {
+    #     "name": "Seattle",
+    #     "lat": 47.6062,
+    #     "lon": -122.3321
+    # },
+    # {
+    #     "name": "Tokyo",
+    #     "lat": 35.6762,
+    #     "lon": 139.6503
+    # },
+    # {
+    #     "name": "Berlin",
+    #     "lat": 52.5200,
+    #     "lon": 13.4050
+    # },
+    # {
+    #     "name": "London",
+    #     "lat": 51.5074,
+    #     "lon": -0.1278
+    # }
 ]
 
 class WeatherView():
@@ -59,7 +60,7 @@ class WeatherView():
     
     FORECAST_INTERVAL = 14000 # ms.
 
-    RADAR_LOOPS = 4
+    RADAR_LOOPS = 1
 
     API_INTERVAL = 300 # s.
 
@@ -85,6 +86,8 @@ class WeatherView():
                 TemperatureView(self._matrix, location["name"])
             )
 
+        self._wind_chicken = WindChicken(self._matrix)
+
     def run(self):
         global last_updated
         global radar_api_updated
@@ -97,74 +100,83 @@ class WeatherView():
             msleep(500)
 
         self.update_frames()
-        loop = 0
 
-        radar_i = 0
+        prev_image = None
         while not self._press_event.is_set():
-            current_image = self._frames[radar_i]["frame"]
-            current_time = self._frames[radar_i]["time"]
 
-            self._radar_view.generate_radar_image(current_image, current_time)
+            self.check_update()
+            prev_image = self.start_radar_loop(prev_image)
+            if prev_image == -1:
+                return
+
+            self.check_update()
+            prev_image = self.start_temperature_loop(prev_image)
+            if prev_image == -1:
+                return
             
-            self._matrix.set_image(current_image, unsafe=False)
+            self.check_update()
+            prev_image = self.start_wind_chicken_loop(prev_image)
+            if prev_image == -1:
+                return
+            
+    def start_radar_loop(self, prev_image):
+        current_image = None
+        for _ in range(self.RADAR_LOOPS):
+            for radar_i in range(len(self._frames)):
+                current_image = self._frames[radar_i]["frame"]
+                current_time = self._frames[radar_i]["time"]
 
-            radar_i = (radar_i + 1) % len(self._frames)
+                self._radar_view.generate_radar_image(current_image, current_time)
 
-            if radar_i == 0:
-                loop += 1
-                self.check_api_interval()
-                self.check_update()
-                msleep(self.HOLD_TIME)
-            else:
-                msleep(self.FRAME_INTERVAL)
+                if prev_image == None:
+                    self._matrix.set_image(current_image, unsafe=False)
+                    msleep(self.FRAME_INTERVAL)
 
-            if loop == self.RADAR_LOOPS:
-                loop = 0
-                radar_i = 0
+                else:
+                    Transitions.vertical_transition(self._matrix, prev_image, current_image)
+                    prev_image = None
+                    msleep(self.HOLD_TIME)
 
-                prev_image = current_image
-                for i, location in enumerate(self._location_temperature_views):
-                    next_image = location.generate_temperature_image(weather_data)
-                    self.check_api_interval()
-                    if i == 0:
-                        Transitions.vertical_transition(self._matrix, prev_image, next_image)
-
-                    else:
-                        Transitions.horizontal_transition(self._matrix, prev_image, next_image)
-
-                    start_time = time.time()
-
-                    while time.time() - start_time <= (self.FORECAST_INTERVAL / 1000):
-                        msleep(500)
-
-                        if self._press_event.is_set():
-                            return
-
-                    prev_image = next_image
-
-                    if self._press_event.is_set():
-                        return
-
-                self.check_api_interval()
-
-                time_frame = self._time_display.create_time_frame()
-
-                Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
-
-                final_time_frame = self._time_display.show_time()
                 if self._press_event.is_set():
-                    return
+                    return -1
 
-                self.check_update()
+            msleep(self.HOLD_TIME - self.FRAME_INTERVAL)
 
-                next_radar_image = self._frames[radar_i]["frame"]
-                next_radar_time = self._frames[radar_i]["time"]
+        return current_image
 
-                self._radar_view.generate_radar_image(next_radar_image, next_radar_time)
+    def start_temperature_loop(self, prev_image):
+        for i, location in enumerate(self._location_temperature_views):
+            next_image = location.generate_temperature_image(weather_data)
+            self.check_api_interval()
+            if i == 0:
+                Transitions.vertical_transition(self._matrix, prev_image, next_image)
 
-                Transitions.vertical_transition(self._matrix, final_time_frame, next_radar_image)
+            else:
+                Transitions.horizontal_transition(self._matrix, prev_image, next_image)
 
-                msleep(self.HOLD_TIME - self.FRAME_INTERVAL)
+            start_time = time.time()
+
+            while time.time() - start_time <= (self.FORECAST_INTERVAL / 1000):
+                msleep(500)
+
+                if self._press_event.is_set():
+                    return -1
+
+            prev_image = next_image
+
+        return prev_image
+
+    def start_wind_chicken_loop(self, prev_image):
+        self.check_api_interval()
+        time_frame = self._time_display.create_time_frame()
+
+        Transitions.horizontal_transition(self._matrix, prev_image, time_frame)
+
+        final_time_frame = self._time_display.show_time()
+        if self._press_event.is_set():
+            return -1
+
+        return final_time_frame
 
     def check_api_interval(self):
         current_time = time.time()
