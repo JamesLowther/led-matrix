@@ -99,6 +99,7 @@ class WeatherView():
 
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and len(self._frames) == 0):
+            break
             msleep(200)
 
         self.update_frames()
