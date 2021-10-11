@@ -31,7 +31,7 @@ class ViewHandler():
             },
             {
                 "view": issview,
-                "time": 600
+                "time": 900
             },
             {
                 "view": networkmanager,
