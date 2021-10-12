@@ -26,10 +26,6 @@ class ViewHandler():
 
         views = [
             {
-                "view": weatherview,
-                "time": 358
-            },
-            {
                 "view": issview,
                 "time": 900
             },
@@ -40,6 +36,10 @@ class ViewHandler():
             {
                 "view": testview,
                 "time": 60
+            },
+            {
+                "view": weatherview,
+                "time": 358
             }
         ]
 
@@ -53,6 +53,7 @@ class ViewHandler():
                 if self._auto_switch:
                     self._auto_switch = False
                     auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
+                    auto_timer.daemon = True
                     auto_timer.start()
                 
                 else:
@@ -65,6 +66,7 @@ class ViewHandler():
                     manual_time = 300 # s.
 
                     manual_timer = threading.Timer(manual_time, self.handle_timer)
+                    manual_timer.daemon = True
                     manual_timer.start()
             
             views[current_view]["view"].run()
