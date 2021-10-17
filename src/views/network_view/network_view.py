@@ -155,7 +155,6 @@ class NetworkMonitor():
 
         percent = round(pihole_data["ads_percentage_today"], 1)
         percent_str = f"{percent}%"
-        percent_str = "60.2%"
         percent_size = d.textsize(percent_str, f)
 
         image.paste(
