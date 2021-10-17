@@ -50,13 +50,12 @@ class TrafficGraph:
         )
 
     def draw_graph(image, traffic_data):
-        x_offset = 1
+        x_offset = 2
         y_offset = 20
         
         width = 40
         height = 10
 
-        border_color = (100, 100, 100)
         tx_color = "red"
         rx_color = "green"
 
@@ -74,19 +73,6 @@ class TrafficGraph:
 
         d = ImageDraw.Draw(image)
 
-        d.rectangle(
-            [
-                x_offset,
-                y_offset,
-                x_offset + width,
-                y_offset + height
-            ],
-            outline=border_color
-        )
-
-        width = width - 2
-        height = height - 4
-
         tx_prev = None
         rx_prev = None
 
@@ -97,11 +83,11 @@ class TrafficGraph:
 
         # Draw graph lines.
         for i in range(len(traffic_data)):
-            tx_x = x_offset + (step * i) + 1
-            tx_y = y_offset + height - (((traffic_data[i]["wan-tx_bytes"] - min_tx) / max_tx_normal) * height) + 2
+            tx_x = x_offset + (step * i)
+            tx_y = y_offset + height - (((traffic_data[i]["wan-tx_bytes"] - min_tx) / max_tx_normal) * height)
 
-            rx_x = x_offset + (step * i) + 1
-            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max_rx_normal) * height) + 2
+            rx_x = x_offset + (step * i)
+            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max_rx_normal) * height)
 
             if i != 0:
                 d.line(

@@ -5,10 +5,11 @@ import json
 import threading
 import time
 from common import msleep
+import os
 
 from views.network_view.traffic_graph import TrafficGraph
 
-from config import ENV_VALUES
+from config import ENV_VALUES, FONTS
 
 health_data = None
 traffic_interval_data = None
@@ -41,6 +42,9 @@ class NetworkMonitor():
 
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)     
             
+            self.draw_time(image)
+            self.draw_clients(image)
+
             TrafficGraph.draw_graph(image, traffic_interval_data)
             TrafficGraph.draw_tx_rx(image, health_data)
 
@@ -55,6 +59,50 @@ class NetworkMonitor():
         if current_time - self._start_time >= self.API_INTERVAL:
             self._start_time = current_time
             request_e.set()
+
+    def draw_time(self, image):
+        """
+        Draws the current time.
+        """
+        
+        x_offset = 2
+        y_offset = 1
+
+        color = (170, 170, 170)
+
+        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        f = ImageFont.truetype(font_path, 4)
+        d = ImageDraw.Draw(image)
+
+        time_str = time.strftime("%I:%M %p")
+
+        d.text(
+            (x_offset, y_offset),
+            time_str,
+            font=f,
+            fill=color
+        )
+
+    def draw_clients(self, image):
+        x_offset = 2
+        y_offset = 10
+
+        color = (170, 170, 170)
+
+        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        f = ImageFont.truetype(font_path, 4)
+        d = ImageDraw.Draw(image)
+
+        num_clients = health_data[1]["num_sta"]
+
+        client_str = f"{num_clients} clients"
+
+        d.text(
+            (x_offset, y_offset),
+            client_str,
+            font=f,
+            fill=color
+        )
 
 def request_thread():
     global health_data
