@@ -4,18 +4,28 @@ from requests import Session
 import json
 import threading
 import time
-from time import sleep
+from common import msleep
+
+from views.network_view.traffic_graph import TrafficGraph
 
 from config import ENV_VALUES
+
+health_data = None
+traffic_interval_data = None
 
 request_e = threading.Event()
 
 class NetworkMonitor():
-    REFRESH_INTERVAL = 1
+    API_INTERVAL = 5
+
+    REFRESH_INTERVAL = 1000
+    BG_COLOR = "black"
 
     def __init__(self, matrix, press_event):
         self._matrix = matrix
         self._press_event = press_event
+
+        self._start_time = time.time()
 
         self._request_t = threading.Thread(name="requests", target=request_thread)
         self._request_t.daemon = True
@@ -23,19 +33,40 @@ class NetworkMonitor():
 
     def run(self):
         request_e.set()
+        
+        while health_data == None or traffic_interval_data == None:
+            msleep(200)
 
-        while not self._press_event.is_set():            
+        while not self._press_event.is_set():
+
+            image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)     
             
+            TrafficGraph.draw_graph(image, traffic_interval_data)
+            TrafficGraph.draw_tx_rx(image, health_data)
 
-            sleep(self.REFRESH_INTERVAL)
+            self._matrix.set_image(image)
+
+            self.check_api_interval()
+
+            msleep(self.REFRESH_INTERVAL)
+
+    def check_api_interval(self):
+        current_time = time.time()
+        if current_time - self._start_time >= self.API_INTERVAL:
+            self._start_time = current_time
+            request_e.set()
 
 def request_thread():
+    global health_data
+    global traffic_interval_data
+
     unifi = UnifiConnection()
 
     while True:
         request_e.wait()
-        data = unifi.update_5min_interval()
-        print(data)
+        print("update")
+        traffic_interval_data = unifi.update_5min_interval()[1]["data"]
+        health_data = unifi.update_health()[1]["data"]
         request_e.clear()
 
 class UnifiConnection():
@@ -106,7 +137,7 @@ class UnifiConnection():
 
         return (success, data)
 
-    def update(self, retry_attempts=3):
+    def update_health(self, retry_attempts=3):
         """
         Queries the Unifi controller for network information.
         Returns the success status and the JSON data.
