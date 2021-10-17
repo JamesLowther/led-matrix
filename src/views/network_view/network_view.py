@@ -46,8 +46,10 @@ class NetworkMonitor():
             
             self.draw_time(image)
             self.draw_clients(image)
-
             self.draw_pihole(image)
+            self.draw_wifi(image)
+
+            print(health_data)
 
             TrafficGraph.draw_graph(image, traffic_interval_data)
             TrafficGraph.draw_tx_rx(image, health_data)
@@ -106,6 +108,22 @@ class NetworkMonitor():
             client_str,
             font=f,
             fill=color
+        )
+
+    def draw_wifi(self, image):
+        x_offset = 1
+        y_offset = 1
+
+        icon_size = 15
+
+        icon = self.get_icon("wifi", icon_size)
+
+        image.paste(
+            icon,
+            (
+                x_offset,
+                y_offset
+            )
         )
 
     def draw_pihole(self, image):
