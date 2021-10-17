@@ -7,6 +7,7 @@ import threading
 import time
 from common import msleep
 import os
+import subprocess
 
 from views.network_view.traffic_graph import TrafficGraph
 
@@ -14,6 +15,7 @@ from config import ENV_VALUES, FONTS, SRC_BASE
 
 pihole_data = None
 health_data = None
+ping_data = None
 traffic_interval_data = None
 
 request_e = threading.Event()
@@ -37,7 +39,7 @@ class NetworkMonitor():
     def run(self):
         request_e.set()
         
-        while pihole_data == None or health_data == None or traffic_interval_data == None:
+        while pihole_data == None or health_data == None or traffic_interval_data == None or ping_data == None:
             msleep(200)
 
         while not self._press_event.is_set():
@@ -47,9 +49,7 @@ class NetworkMonitor():
             self.draw_time(image)
             self.draw_clients(image)
             self.draw_pihole(image)
-            self.draw_wifi(image)
-
-            print(health_data)
+            self.draw_ping(image)
 
             TrafficGraph.draw_graph(image, traffic_interval_data)
             TrafficGraph.draw_tx_rx(image, health_data)
@@ -74,7 +74,7 @@ class NetworkMonitor():
         x_offset = 2
         y_offset = 1
 
-        color = (170, 170, 170)
+        color = (160, 160, 160)
 
         font_path = os.path.join(FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -93,7 +93,7 @@ class NetworkMonitor():
         x_offset = 2
         y_offset = 10
 
-        color = (170, 170, 170)
+        color = "rosybrown"
 
         font_path = os.path.join(FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -101,7 +101,7 @@ class NetworkMonitor():
 
         num_clients = health_data[1]["num_sta"]
 
-        client_str = f"{num_clients} clients"
+        client_str = f"{num_clients} users"
 
         d.text(
             (x_offset, y_offset),
@@ -110,27 +110,34 @@ class NetworkMonitor():
             fill=color
         )
 
-    def draw_wifi(self, image):
-        x_offset = 1
-        y_offset = 1
+    def draw_ping(self, image):
+        x_offset = 2
+        y_offset = 10
 
-        icon_size = 15
+        color = "rosybrown"
 
-        icon = self.get_icon("wifi", icon_size)
+        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        f = ImageFont.truetype(font_path, 4)
+        d = ImageDraw.Draw(image)
 
-        image.paste(
-            icon,
+        ms_str = str(round(ping_data, 1)) + " ms"
+        ms_size = d.textsize(ms_str, f)
+
+        d.text(
             (
-                x_offset,
+                64 - ms_size[0] - x_offset,
                 y_offset
-            )
+            ),
+            ms_str,
+            font=f,
+            fill=color
         )
 
     def draw_pihole(self, image):
-        x_offset = 1
+        x_offset = 2
         y_offset = 1
 
-        x_spacing = 1
+        x_spacing = 2
 
         icon_size = 7
 
@@ -140,7 +147,7 @@ class NetworkMonitor():
         else:
             icon = self.get_icon("pihole-off", icon_size)
 
-        color = (170, 170, 170)
+        color = "lightcoral"
 
         font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
@@ -181,17 +188,29 @@ def request_thread():
     global pihole_data
     global health_data
     global traffic_interval_data
+    global ping_data
 
     unifi = UnifiConnection()
     pihole = PiHoleConnection()
+    ping = PingConnection()
 
     while True:
         request_e.wait()
-        print("update")
+        ping_data = ping.update()
         pihole_data = pihole.update()
         traffic_interval_data = unifi.update_5min_interval()[1]["data"]
         health_data = unifi.update_health()[1]["data"]
         request_e.clear()
+
+class PingConnection():
+    ENDPOINT = "8.8.8.8"
+
+    def update(self):
+        resp = str(subprocess.check_output("ping -c 1 " + self.ENDPOINT, shell=True))
+        last = resp.rindex("/")
+        s_last = resp.rindex("/", 0, last)
+
+        return float(resp[s_last + 1:last])
 
 class PiHoleConnection():
     ENDPOINT = "http://192.168.1.5/admin/api.php"

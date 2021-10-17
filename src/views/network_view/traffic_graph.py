@@ -6,11 +6,11 @@ import os
 class TrafficGraph:
 
     def draw_tx_rx(image, health_data):
-        tx_color = "red"
-        rx_color = "green"
+        tx_color = "goldenrod"
+        rx_color = "crimson"
         
         x_offset = 1
-        y_offset = 20
+        y_offset = 18
 
         y_spacing = 0
 
@@ -54,10 +54,10 @@ class TrafficGraph:
         y_offset = 20
         
         width = 40
-        height = 10
+        height = 8
 
-        tx_color = "red"
-        rx_color = "green"
+        tx_color = "goldenrod"
+        rx_color = "crimson"
 
         max_tx = float("-inf")
         max_rx = float("-inf")
