@@ -109,20 +109,18 @@ class NetworkMonitor():
         )
 
     def draw_pihole(self, image):
-        x_offset = 40
-        y_offset = 10
+        x_offset = 1
+        y_offset = 1
+
+        x_spacing = 1
 
         icon_size = 7
 
-        icon = self.get_icon("pihole", icon_size)
-
-        image.paste(
-            icon,
-            (
-                x_offset,
-                y_offset
-            )
-        )
+        icon = None
+        if pihole_data["status"] == "enabled":
+            icon = self.get_icon("pihole", icon_size)
+        else:
+            icon = self.get_icon("pihole-off", icon_size)
 
         color = (170, 170, 170)
 
@@ -132,11 +130,20 @@ class NetworkMonitor():
 
         percent = round(pihole_data["ads_percentage_today"], 1)
         percent_str = f"{percent}%"
+        percent_str = "60.2%"
         percent_size = d.textsize(percent_str, f)
+
+        image.paste(
+            icon,
+            (
+                64 - percent_size[0] - icon_size - x_offset - x_spacing,
+                y_offset
+            )
+        )
 
         d.text(
             (
-                x_offset + icon_size, 
+                64 - percent_size[0] - x_offset, 
                 y_offset + ((icon_size / 2) - (percent_size[1] / 2))
             ),
             percent_str,
