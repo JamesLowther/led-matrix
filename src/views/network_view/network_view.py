@@ -21,9 +21,9 @@ traffic_interval_data = None
 request_e = threading.Event()
 
 class NetworkMonitor():
-    API_INTERVAL = 5
+    API_INTERVAL = 5 # s.
 
-    REFRESH_INTERVAL = 1000
+    REFRESH_INTERVAL = 300 # ms.
     BG_COLOR = "black"
 
     def __init__(self, matrix, press_event):
@@ -74,7 +74,7 @@ class NetworkMonitor():
         x_offset = 2
         y_offset = 1
 
-        color = (160, 160, 160)
+        color = "thistle"
 
         font_path = os.path.join(FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -111,7 +111,7 @@ class NetworkMonitor():
         )
 
     def draw_ping(self, image):
-        x_offset = 2
+        x_offset = 1
         y_offset = 10
 
         color = "rosybrown"
@@ -134,7 +134,7 @@ class NetworkMonitor():
         )
 
     def draw_pihole(self, image):
-        x_offset = 2
+        x_offset = 1
         y_offset = 1
 
         x_spacing = 2

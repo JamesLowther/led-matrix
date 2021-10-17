@@ -23,8 +23,11 @@ class TrafficGraph:
         tx = round(wan_data["tx_bytes-r"] / 125000, 1)
         rx = round(wan_data["rx_bytes-r"] / 125000, 1)
 
-        tx_str = str(tx) + " M"
-        rx_str = str(rx) + " M"
+        tx_str = str(tx) + " TX"
+        rx_str = str(rx) + " RX"
+
+        if len(tx_str) <= 6 and len(rx_str) <= 6:
+            x_offset = 2
 
         tx_size = d.textsize(tx_str, f)
         rx_size = d.textsize(rx_str, f)
@@ -53,7 +56,7 @@ class TrafficGraph:
         x_offset = 2
         y_offset = 20
         
-        width = 40
+        width = 35
         height = 8
 
         tx_color = "goldenrod"
