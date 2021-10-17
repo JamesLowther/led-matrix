@@ -10,7 +10,7 @@ import os
 
 from views.network_view.traffic_graph import TrafficGraph
 
-from config import ENV_VALUES, FONTS
+from config import ENV_VALUES, FONTS, SRC_BASE
 
 pihole_data = None
 health_data = None
@@ -112,6 +112,18 @@ class NetworkMonitor():
         x_offset = 40
         y_offset = 10
 
+        icon_size = 7
+
+        icon = self.get_icon("pihole", icon_size)
+
+        image.paste(
+            icon,
+            (
+                x_offset,
+                y_offset
+            )
+        )
+
         color = (170, 170, 170)
 
         font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
@@ -120,13 +132,25 @@ class NetworkMonitor():
 
         percent = round(pihole_data["ads_percentage_today"], 1)
         percent_str = f"{percent}%"
+        percent_size = d.textsize(percent_str, f)
 
         d.text(
-            (x_offset, y_offset),
+            (
+                x_offset + icon_size, 
+                y_offset + ((icon_size / 2) - (percent_size[1] / 2))
+            ),
             percent_str,
             font=f,
             fill=color
         )
+
+    def get_icon(self, code, size):
+        path = os.path.join(SRC_BASE, "assets", "networkview", f"{code}.png")
+        image = Image.open(path)
+
+        resized = image.resize((size, size), Image.BOX)
+
+        return resized
 
 def request_thread():
     global pihole_data
