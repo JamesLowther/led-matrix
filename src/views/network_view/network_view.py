@@ -1,6 +1,7 @@
 from urllib import request
 from PIL import Image, ImageDraw, ImageFont
 from requests import Session
+import requests
 import json
 import threading
 import time
@@ -11,6 +12,7 @@ from views.network_view.traffic_graph import TrafficGraph
 
 from config import ENV_VALUES, FONTS
 
+pihole_data = None
 health_data = None
 traffic_interval_data = None
 
@@ -35,7 +37,7 @@ class NetworkMonitor():
     def run(self):
         request_e.set()
         
-        while health_data == None or traffic_interval_data == None:
+        while pihole_data == None or health_data == None or traffic_interval_data == None:
             msleep(200)
 
         while not self._press_event.is_set():
@@ -44,6 +46,8 @@ class NetworkMonitor():
             
             self.draw_time(image)
             self.draw_clients(image)
+
+            self.draw_pihole(image)
 
             TrafficGraph.draw_graph(image, traffic_interval_data)
             TrafficGraph.draw_tx_rx(image, health_data)
@@ -104,18 +108,52 @@ class NetworkMonitor():
             fill=color
         )
 
+    def draw_pihole(self, image):
+        x_offset = 40
+        y_offset = 10
+
+        color = (170, 170, 170)
+
+        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        f = ImageFont.truetype(font_path, 5)
+        d = ImageDraw.Draw(image)
+
+        percent = round(pihole_data["ads_percentage_today"], 1)
+        percent_str = f"{percent}%"
+
+        d.text(
+            (x_offset, y_offset),
+            percent_str,
+            font=f,
+            fill=color
+        )
+
 def request_thread():
+    global pihole_data
     global health_data
     global traffic_interval_data
 
     unifi = UnifiConnection()
+    pihole = PiHoleConnection()
 
     while True:
         request_e.wait()
         print("update")
+        pihole_data = pihole.update()
         traffic_interval_data = unifi.update_5min_interval()[1]["data"]
         health_data = unifi.update_health()[1]["data"]
         request_e.clear()
+
+class PiHoleConnection():
+    ENDPOINT = "http://192.168.1.5/admin/api.php"
+
+    def update(self):
+
+        data = requests.get(
+            self.ENDPOINT
+        ).json()
+
+        return data
 
 class UnifiConnection():
     ENDPOINT = "https://192.168.1.5:8443"
