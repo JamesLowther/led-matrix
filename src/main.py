@@ -21,7 +21,7 @@ def main():
 
     matrix = Matrix()
 
-    viewhandler = ViewHandler(matrix, press_event, stop_event, timed_mode=True)
+    viewhandler = ViewHandler(matrix, press_event, stop_event, timed_mode=False)
     viewhandler.start()
 
 def signal_handler(sig, frame):

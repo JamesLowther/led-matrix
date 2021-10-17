@@ -2,9 +2,13 @@ from urllib import request
 from PIL import Image, ImageDraw, ImageFont
 from requests import Session
 import json
+import threading
+import time
 from time import sleep
 
 from config import ENV_VALUES
+
+request_e = threading.Event()
 
 class NetworkMonitor():
     REFRESH_INTERVAL = 1
@@ -13,35 +17,26 @@ class NetworkMonitor():
         self._matrix = matrix
         self._press_event = press_event
 
+        self._request_t = threading.Thread(name="requests", target=request_thread)
+        self._request_t.daemon = True
+        self._request_t.start()
+
     def run(self):
-        unifi = UnifiConnection()
+        request_e.set()
 
-        while not self._press_event.is_set():
-            _, data = unifi.update()
-
-            # print(data)
+        while not self._press_event.is_set():            
             
-            image = Image.new("RGB", self._matrix.dimensions, color="black")
-            f = ImageFont.truetype("./src/assets/fonts/6px-Normal.ttf", 8)
-            d = ImageDraw.Draw(image)
-
-            text = f"{data['data'][0]['num_user']} clients"
-
-            text_size = d.textsize(text, f)
-
-            d.text(
-                (
-                    (self._matrix.dimensions[0] // 2) - text_size[0] // 2, 
-                    (self._matrix.dimensions[1] // 2) - text_size[1] // 2
-                ),
-                text,
-                font=f,
-                fill=(255, 255, 255)
-            )
-
-            self._matrix.set_image(image)
 
             sleep(self.REFRESH_INTERVAL)
+
+def request_thread():
+    unifi = UnifiConnection()
+
+    while True:
+        request_e.wait()
+        data = unifi.update_5min_interval()
+        print(data)
+        request_e.clear()
 
 class UnifiConnection():
     ENDPOINT = "https://192.168.1.5:8443"
@@ -75,6 +70,41 @@ class UnifiConnection():
             f"{self.ENDPOINT}/api/logout",
             verify=False
         )
+
+    def update_5min_interval(self, retry_attempts=3):
+        minutes_interval = 35
+
+        attrs = [
+            "time",
+            "wan-tx_bytes",
+            "wan-rx_bytes"
+        ]
+
+        end = time.time() * 1000
+        start = end - (minutes_interval * 60 * 1000)
+
+        success = False
+        for i in range(retry_attempts):
+            response = self._session.post(
+                f"{self.ENDPOINT}/api/s/{self.SITE}/stat/report/5minutes.site",
+                json={
+                    "start": start,
+                    "end": end,
+                    "attrs": attrs
+                },
+                verify=False
+            )
+
+            data = json.loads(response.text)
+
+            if data["meta"]["rc"] == "ok":
+                success = True
+                break
+
+            # Attempt to login if the query failed.
+            self.login()         
+
+        return (success, data)
 
     def update(self, retry_attempts=3):
         """
