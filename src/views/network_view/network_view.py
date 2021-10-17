@@ -13,6 +13,8 @@ from views.network_view.traffic_graph import TrafficGraph
 
 from config import ENV_VALUES, FONTS, SRC_BASE
 
+initial_api_updated = False
+
 pihole_data = None
 health_data = None
 ping_data = None
@@ -37,9 +39,13 @@ class NetworkMonitor():
         self._request_t.start()
 
     def run(self):
+        global initial_api_updated
+
+        initial_api_updated = False
+
         request_e.set()
         
-        while pihole_data == None or health_data == None or traffic_interval_data == None or ping_data == None:
+        while not initial_api_updated:
             msleep(200)
 
         while not self._press_event.is_set():
@@ -184,6 +190,7 @@ class NetworkMonitor():
         return resized
 
 def request_thread():
+    global initial_api_updated
     global pihole_data
     global health_data
     global traffic_interval_data
@@ -200,6 +207,8 @@ def request_thread():
         traffic_interval_data = unifi.update_5min_interval()[1]["data"]
         health_data = unifi.update_health()[1]["data"]
         request_e.clear()
+
+        initial_api_updated = True
 
 class PingConnection():
     ENDPOINT = "8.8.8.8"
