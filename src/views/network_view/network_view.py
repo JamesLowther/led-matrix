@@ -265,7 +265,7 @@ class UnifiConnection():
         )
 
     def update_5min_interval(self, retry_attempts=3):
-        minutes_interval = 35
+        minutes_interval = 65
 
         attrs = [
             "time",
