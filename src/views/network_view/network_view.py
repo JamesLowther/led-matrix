@@ -107,7 +107,7 @@ class NetworkMonitor():
 
         num_clients = health_data[1]["num_sta"]
 
-        client_str = f"{num_clients} users"
+        client_str = f"{num_clients} clnts"
 
         d.text(
             (x_offset, y_offset),

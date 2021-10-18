@@ -2,22 +2,24 @@ import os
 import threading
 
 from views.poweroff_view import PoweroffView
+from views.switch_view import SwitchView
 from views.network_view.network_view import NetworkMonitor
 from views.test_view.test_view import TestView
 from views.iss_view.iss_view import ISSView
 from views.weather_view.weather_view import WeatherView
 
 class ViewHandler():
-    def __init__(self, matrix, press_event, stop_event, timed_mode=False):
+    def __init__(self, matrix, press_event, long_press_event, timed_mode=False):
         self._matrix = matrix
         self._press_event = press_event
-        self._stop_event = stop_event
+        self._long_press_event = long_press_event
 
         self._timed_mode = timed_mode
         self._auto_switch = True
 
     def start(self):
-        poweroffview = PoweroffView(self._matrix, self._press_event)
+        poweroffview = PoweroffView(self._matrix, self._press_event, self._long_press_event)
+        switchview = SwitchView(self._matrix, self._press_event, self._long_press_event)
 
         weatherview = WeatherView(self._matrix, self._press_event)
         networkmanager = NetworkMonitor(self._matrix, self._press_event)
@@ -43,7 +45,7 @@ class ViewHandler():
             }
         ]
 
-        current_view = 0
+        current_view = 1
         
         auto_timer = None
         manual_timer = None
@@ -71,9 +73,9 @@ class ViewHandler():
             
             views[current_view]["view"].run()
 
-            if self._stop_event.is_set():
-                self.handle_shutdown(poweroffview)
-                current_view -= 2
+            if self._long_press_event.is_set():
+                self.handle_shutdown(poweroffview, switchview)
+                current_view -= 1
 
             current_view = (current_view + 1) % len(views)
             self._press_event.clear()
@@ -82,11 +84,19 @@ class ViewHandler():
         self._auto_switch = True
         self._press_event.set()
 
-    def handle_shutdown(self, poweroffview):
-        self._stop_event.clear()
+    def handle_shutdown(self, poweroffview, switchview):
+        self._long_press_event.clear()
         self._press_event.clear()
-        
-        if poweroffview.start_shutdown():
+
+        result = poweroffview.start_shutdown()
+
+        self._press_event.clear()
+        self._long_press_event.clear()
+
+        if result == "switch_mode":
+            self._timed_mode = switchview.show_mode(self._timed_mode)
+
+        elif result == True:
             try:
                 import RPi.GPIO as GPIO
                 GPIO.cleanup()

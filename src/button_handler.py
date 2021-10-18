@@ -9,16 +9,17 @@ import threading
 import time
 
 class ButtonHandler(threading.Thread):
-    BOUNCE_TIME = 300
-    HOLD_TIME = 3000
+    BOUNCE_TIME = 10
+    HOLD_TIME = 2000
 
-    def __init__(self, press_event, stop_event, sigint_stop_event):
+    def __init__(self, press_event, long_press_event, sigint_stop_event):
         threading.Thread.__init__(self)
         self._press_event = press_event
-        self._stop_event = stop_event
+        self._long_press_event = long_press_event
         self._sigint_stop_event = sigint_stop_event
 
         self._last_press = 0
+        self._button_down = False
 
     def run(self):
         if VIRTUAL_BUTTON:
@@ -53,16 +54,21 @@ class ButtonHandler(threading.Thread):
         pressed = not GPIO.input(channel)
 
         if pressed:
-            self._last_press = time.time()
-            self._press_event.set()
+            if not self._button_down:
+                self._last_press = time.time()
+                self._button_down = True
 
         else:
-            if (time.time() - self._last_press) * 1000 >= self.HOLD_TIME:
-                self._stop_event.set()
-                self._press_event.set()
+            if self._button_down:
+                time_pressed = (time.time() - self._last_press) * 1000
+                if time_pressed < self.HOLD_TIME:
+                    self._press_event.set()
 
-            else:
-                self._press_event.set()
+                else:
+                    self._long_press_event.set()
+                    self._press_event.set()
+
+                self._button_down = False
 
     def log(self, text):
         print(f"Button Handler - {text}")

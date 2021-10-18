@@ -27,7 +27,7 @@ class TrafficGraph:
         rx_str = str(rx) + " RX"
 
         if len(tx_str) <= 6 and len(rx_str) <= 6:
-            x_offset = 2
+            x_offset = 1
 
         tx_size = d.textsize(tx_str, f)
         rx_size = d.textsize(rx_str, f)

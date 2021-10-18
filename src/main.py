@@ -14,14 +14,14 @@ sigint_stop_event = threading.Event()
 
 def main():
     press_event = threading.Event()
-    stop_event = threading.Event()
+    long_press_event = threading.Event()
 
-    button_thread = ButtonHandler(press_event, stop_event, sigint_stop_event)
+    button_thread = ButtonHandler(press_event, long_press_event, sigint_stop_event)
     button_thread.start()
 
     matrix = Matrix()
 
-    viewhandler = ViewHandler(matrix, press_event, stop_event, timed_mode=True)
+    viewhandler = ViewHandler(matrix, press_event, long_press_event, timed_mode=True)
     viewhandler.start()
 
 def signal_handler(sig, frame):
