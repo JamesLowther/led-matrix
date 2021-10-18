@@ -1,9 +1,11 @@
+from config import Config
+
 try:
     import RPi.GPIO as GPIO
     GPIO.setwarnings(False)
-    VIRTUAL_BUTTON = False
+    Config.VIRTUAL_MODE = False
 except ModuleNotFoundError:
-    VIRTUAL_BUTTON = True
+    Config.VIRTUAL_MODE = True
 
 import threading
 import time
@@ -22,12 +24,14 @@ class ButtonHandler(threading.Thread):
         self._button_down = False
 
     def run(self):
-        if VIRTUAL_BUTTON:
+        if Config.VIRTUAL_MODE:
             self.log("Virtual button enabled.")
             while True:
-                input()
-                self.press(3)
-
+                k = input()
+                if k == "l":
+                    self.press(3, virtual_press_type="long")
+                else:
+                    self.press(3, virtual_press_type="short")
         else:
             try:
                 GPIO.setmode(GPIO.BCM)
@@ -45,10 +49,15 @@ class ButtonHandler(threading.Thread):
             GPIO.cleanup()
             self.log("Stopped.")
 
-    def press(self, channel):
-        if VIRTUAL_BUTTON:
-            self._press_event.set()
-            return
+    def press(self, channel, virtual_press_type=None):
+        if Config.VIRTUAL_MODE:
+            if virtual_press_type == "short":
+                self._press_event.set()
+                return
+            elif virtual_press_type == "long":
+                self._long_press_event.set()
+                self._press_event.set()
+                return
 
         time.sleep(0.05)
         pressed = not GPIO.input(channel)

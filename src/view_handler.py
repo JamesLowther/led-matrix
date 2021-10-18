@@ -1,6 +1,8 @@
 import os
 import threading
 
+from config import Config
+
 from views.poweroff_view import PoweroffView
 from views.switch_view import SwitchView
 from views.network_view.network_view import NetworkMonitor
@@ -9,12 +11,17 @@ from views.iss_view.iss_view import ISSView
 from views.weather_view.weather_view import WeatherView
 
 class ViewHandler():
-    def __init__(self, matrix, press_event, long_press_event, timed_mode=False):
+    MODES = [
+        "timed",
+        "manual",
+    ]
+
+    def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
         self._press_event = press_event
         self._long_press_event = long_press_event
 
-        self._timed_mode = timed_mode
+        self._mode = "timed"
         self._auto_switch = True
 
     def start(self):
@@ -51,7 +58,7 @@ class ViewHandler():
         self._manual_timer = None
 
         while True:
-            if self._timed_mode:
+            if self._mode == "timed":
                 if self._auto_switch:
                     self._auto_switch = False
                     self._auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
@@ -59,11 +66,7 @@ class ViewHandler():
                     self._auto_timer.start()
                 
                 else:
-                    try:
-                        self._auto_timer.cancel()
-                        self._manual_timer.cancel()
-                    except AttributeError:
-                        pass
+                    self.cancel_timers()
 
                     manual_time = 300 # s.
 
@@ -78,37 +81,47 @@ class ViewHandler():
                 current_view -= 1
 
             current_view = (current_view + 1) % len(views)
-            self._press_event.clear()
+            
+            self.clear_events()
 
-    def handle_timer(self):
-        self._auto_switch = True
-        self._press_event.set()
-
-    def handle_shutdown(self, poweroffview, switchview):
-        self._long_press_event.clear()
-        self._press_event.clear()
-
-        result = poweroffview.start_shutdown()
-
+    def cancel_timers(self):
         try:
             self._auto_timer.cancel()
             self._manual_timer.cancel()
         except AttributeError:
             pass
 
-        self._press_event.clear()
+    def clear_events(self):
         self._long_press_event.clear()
+        self._press_event.clear()
+
+    def handle_timer(self):
+        self._auto_switch = True
+        self._press_event.set()
+
+    def handle_shutdown(self, poweroffview, switchview):
+        self.clear_events()
+        result = poweroffview.start_shutdown()
+
+        self.cancel_timers()
+
+        self.clear_events()
 
         if result == "switch_mode":
-            self._timed_mode = switchview.show_mode(self._timed_mode)
+            self._mode = switchview.show_mode(self._mode, self.MODES)
 
         elif result == True:
-            try:
-                import RPi.GPIO as GPIO
-                GPIO.cleanup()
-            except:
-                pass
-            
-            os.system("systemctl poweroff -i")
+            if Config.VIRTUAL_MODE:
+                self.log("Virtual shutdown requested.")
+            else:
+                try:
+                    import RPi.GPIO as GPIO
+                    GPIO.cleanup()
+                except:
+                    pass
+                
+                os.system("systemctl poweroff -i")
 
-    
+
+    def log(self, text):
+        print(f"View Handler - {text}")

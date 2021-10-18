@@ -2,7 +2,7 @@ from PIL import ImageDraw, ImageFont
 from datetime import datetime
 import os
 
-from config import FONTS
+from config import Config
 
 class RadarView():
     LOCATION_COLOR = "lightsteelblue"
@@ -69,7 +69,7 @@ class RadarView():
 
         color = (170, 170, 170)
 
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
 
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)

@@ -1,7 +1,7 @@
 from PIL import Image, ImageFont, ImageDraw
 import time
 import os
-from config import FONTS
+from config import Config
 
 class PoweroffView():
     COUNTDOWN = 15
@@ -25,7 +25,7 @@ class PoweroffView():
         for i in range(self.COUNTDOWN, 0, -1):
             image = Image.new("RGB", self._matrix.dimensions, color="black")
             
-            font_path = os.path.join(FONTS, "6px-Normal.ttf")
+            font_path = os.path.join(Config.FONTS, "6px-Normal.ttf")
             f = ImageFont.truetype(font_path, 8)
             d = ImageDraw.Draw(image)
 

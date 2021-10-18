@@ -3,7 +3,7 @@ import time
 import numpy as np
 from math import pi, sin, cos, radians
 
-from config import SRC_BASE, FONTS
+from config import Config
 from common import msleep
 import os
 import requests
@@ -71,7 +71,7 @@ class ISSView():
 
         color = (170, 170, 170)
 
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 
@@ -89,7 +89,7 @@ class ISSView():
         """
         Draws the latitude and longitude on the the screen.
         """
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
@@ -412,7 +412,7 @@ class Earth():
         Turns the pixels in an array of bits.
         """
         # Open the map image.
-        path = os.path.join(SRC_BASE, "assets", "issview", "world-map.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "issview", "world-map.png")
         img = Image.open(path).convert("1")
 
         # Transform the image to fit sphere dimensions.

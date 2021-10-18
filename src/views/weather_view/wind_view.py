@@ -4,7 +4,7 @@ import math
 import os
 import time
 
-from config import SRC_BASE, FONTS
+from config import Config
 
 class WindView():
     BG_COLOR = "black"
@@ -109,7 +109,7 @@ class WindView():
             )
 
     def draw_time(self, image):
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
@@ -142,7 +142,7 @@ class WindView():
         )
 
     def draw_windspeed(self, image):
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 

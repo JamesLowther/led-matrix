@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from PIL import Image, ImageFont, ImageDraw
-from config import SRC_BASE, FONTS
+from config import Config
 
 class TemperatureView():
     BG_COLOR = "black"
@@ -23,7 +23,7 @@ class TemperatureView():
         return self._temperature_image
 
     def draw_location_text(self):
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
 
@@ -40,7 +40,7 @@ class TemperatureView():
         )
 
     def draw_current_temp(self):
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(self._temperature_image)
 
@@ -88,7 +88,7 @@ class TemperatureView():
         )
         
     def draw_forecast(self):
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(self._temperature_image)
         
@@ -206,7 +206,7 @@ class TemperatureView():
             x += block_width
 
     def get_icon(self, code, size):
-        path = os.path.join(SRC_BASE, "assets", "weatherview", "icons", f"{code}.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "weatherview", "icons", f"{code}.png")
         image = Image.open(path)
 
         resized = image.resize((size, size), Image.BOX)

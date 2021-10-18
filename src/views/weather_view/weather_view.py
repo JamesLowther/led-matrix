@@ -1,8 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-from config import ENV_VALUES
-from datetime import datetime
+from config import Config
 
 from common import msleep
 from transitions import Transitions
@@ -232,7 +231,7 @@ class WeatherData():
         global weather_data
 
         for location in LOCATIONS:
-            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={ENV_VALUES['OPENWEATHER_API_KEY']}"
+            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={Config.ENV_VALUES['OPENWEATHER_API_KEY']}"
             
             while True:
                 try:

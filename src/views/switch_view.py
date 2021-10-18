@@ -1,19 +1,25 @@
 from PIL import Image, ImageFont, ImageDraw
-from config import FONTS
+from config import Config
 import time
 import os
 
 class SwitchView:
+    COLORS = {
+        "timed": "limegreen",
+        "manual": "salmon"
+    }
+
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
         self._press_event = press_event
         self._long_press_event = long_press_event
 
-    def show_mode(self, current_mode):
-        new_mode = not current_mode
+    def show_mode(self, current_mode, modes):
+        new_mode_i = modes.index(current_mode)
+        new_mode_i = (new_mode_i - 1) % len(modes)
 
         while not self._long_press_event.is_set():
-            new_mode = not new_mode
+            new_mode_i = (new_mode_i + 1) % len(modes)
 
             x_offset = 0
             y_offset = 7
@@ -21,7 +27,7 @@ class SwitchView:
 
             image = Image.new("RGB", self._matrix.dimensions, color="black")
 
-            font_path = os.path.join(FONTS, "6px-Normal.ttf")
+            font_path = os.path.join(Config.FONTS, "6px-Normal.ttf")
             f = ImageFont.truetype(font_path, 8)
             d = ImageDraw.Draw(image)
 
@@ -29,14 +35,15 @@ class SwitchView:
             top_color = (170, 170, 170)
             top_size = d.textsize(top_str, f)
 
-            bottom_str = "MANUAL"
-            bottom_color = "salmon"
-            bottom_size = d.textsize(bottom_str, f)
+            bottom_str = modes[new_mode_i].upper()
 
-            if new_mode:
-                x_offset = 3
-                bottom_str = "TIMED"
-                bottom_color = "limegreen"
+            bottom_color = None
+            try:
+                bottom_color = self.COLORS[modes[new_mode_i]]
+            except KeyError:
+                bottom_color = "DarkViolet"
+
+            bottom_size = d.textsize(bottom_str, f)
 
             d.text(
                 [
@@ -65,4 +72,4 @@ class SwitchView:
             
         self._long_press_event.clear()
 
-        return new_mode
+        return modes[new_mode_i]

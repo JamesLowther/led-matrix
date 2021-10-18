@@ -11,7 +11,7 @@ import subprocess
 
 from views.network_view.traffic_graph import TrafficGraph
 
-from config import ENV_VALUES, FONTS, SRC_BASE
+from config import Config
 
 initial_api_updated = False
 
@@ -82,7 +82,7 @@ class NetworkMonitor():
 
         color = "thistle"
 
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 
@@ -101,7 +101,7 @@ class NetworkMonitor():
 
         color = "rosybrown"
 
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 
@@ -122,7 +122,7 @@ class NetworkMonitor():
 
         color = "rosybrown"
 
-        font_path = os.path.join(FONTS, "resolution-3x4.ttf")
+        font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(image)
 
@@ -155,7 +155,7 @@ class NetworkMonitor():
 
         color = "lightcoral"
 
-        font_path = os.path.join(FONTS, "cg-pixel-4x5.ttf")
+        font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
@@ -182,7 +182,7 @@ class NetworkMonitor():
         )
 
     def get_icon(self, code, size):
-        path = os.path.join(SRC_BASE, "assets", "networkview", f"{code}.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "networkview", f"{code}.png")
         image = Image.open(path)
 
         resized = image.resize((size, size), Image.BOX)
@@ -248,8 +248,8 @@ class UnifiConnection():
         self._session.post(
             f"{self.ENDPOINT}/api/login",
             json={
-                "username": ENV_VALUES["UNIFI_USERNAME"],
-                "password": ENV_VALUES["UNIFI_PASSWORD"]
+                "username": Config.ENV_VALUES["UNIFI_USERNAME"],
+                "password": Config.ENV_VALUES["UNIFI_PASSWORD"]
             },
             verify=False
         )
