@@ -45,10 +45,10 @@ class ViewHandler():
             }
         ]
 
-        current_view = 1
+        current_view = 0
         
-        auto_timer = None
-        manual_timer = None
+        self._auto_timer = None
+        self._manual_timer = None
 
         while True:
             if self._timed_mode:
