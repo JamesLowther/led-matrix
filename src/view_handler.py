@@ -27,11 +27,11 @@ class ViewHandler():
         views = [
             {
                 "view": issview,
-                "time": 900
+                "time": 700
             },
             {
                 "view": networkmanager,
-                "time": 300
+                "time": 700
             },
             {
                 "view": testview,
