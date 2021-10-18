@@ -54,22 +54,22 @@ class ViewHandler():
             if self._timed_mode:
                 if self._auto_switch:
                     self._auto_switch = False
-                    auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
-                    auto_timer.daemon = True
-                    auto_timer.start()
+                    self._auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
+                    self._auto_timer.daemon = True
+                    self._auto_timer.start()
                 
                 else:
                     try:
-                        auto_timer.cancel()
-                        manual_timer.cancel()
+                        self._auto_timer.cancel()
+                        self._manual_timer.cancel()
                     except AttributeError:
                         pass
 
                     manual_time = 300 # s.
 
-                    manual_timer = threading.Timer(manual_time, self.handle_timer)
-                    manual_timer.daemon = True
-                    manual_timer.start()
+                    self._manual_timer = threading.Timer(manual_time, self.handle_timer)
+                    self._manual_timer.daemon = True
+                    self._manual_timer.start()
             
             views[current_view]["view"].run()
 
@@ -89,6 +89,12 @@ class ViewHandler():
         self._press_event.clear()
 
         result = poweroffview.start_shutdown()
+
+        try:
+            self._auto_timer.cancel()
+            self._manual_timer.cancel()
+        except AttributeError:
+            pass
 
         self._press_event.clear()
         self._long_press_event.clear()
