@@ -167,7 +167,7 @@ class NetworkMonitor():
 
         d.text(
             (
-                64 - ms_size[0] - x_offset,
+                self._matrix.dimensions[0] - ms_size[0] - x_offset,
                 y_offset
             ),
             ms_str,
@@ -202,14 +202,14 @@ class NetworkMonitor():
         image.paste(
             icon,
             (
-                64 - percent_size[0] - icon_size - x_offset - x_spacing,
+                self._matrix.dimensions[0] - percent_size[0] - icon_size - x_offset - x_spacing,
                 y_offset
             )
         )
 
         d.text(
             (
-                64 - percent_size[0] - x_offset, 
+                self._matrix.dimensions[0] - percent_size[0] - x_offset, 
                 y_offset + ((icon_size / 2) - (percent_size[1] / 2))
             ),
             percent_str,
@@ -405,7 +405,7 @@ class UnifiConnection():
             except json.decoder.JSONDecodeError:
                 continue
 
-            if data["meta"]["rc"] == "ok":
+            if data["meta"]["rc"] == "ok" and data["data"][1]["status"] == "ok":
                 return data
 
             # Attempt to login if the query failed.

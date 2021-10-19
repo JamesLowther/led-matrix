@@ -36,27 +36,23 @@ class ViewHandler():
         views = [
             {
                 "view": iss_view,
-                # "time": 700
-                "time": 4
+                "time": 700
             },
             {
                 "view": network_view,
-                # "time": 700
-                "time": 4
+                "time": 700
             },
             {
                 "view": test_view,
-                # "time": 60
-                "time": 4
+                "time": 60
             },
             {
                 "view": weather_view,
-                # "time": 358
-                "time": 4
+                "time": 358
             }
         ]
 
-        current_view = 1
+        current_view = 0
         
         self._auto_timer = None
         self._manual_timer = None

@@ -78,8 +78,8 @@ class RadarView():
         time_str = time_str.lstrip("0")
 
         text_size = d.textsize(time_str, f)
-        x = 64 - text_size[0] - x_offset
-        y = 32 - text_size[1] - y_offset
+        x = self._matrix.dimensions[0] - text_size[0] - x_offset
+        y = self._matrix.dimensions[1] - text_size[1] - y_offset
 
         d.text(
             (

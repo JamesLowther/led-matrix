@@ -100,11 +100,15 @@ class TemperatureView():
         neutral_color = (170, 170, 170)
 
         hot_color = "firebrick"
-        warm_color = "peru"
-        cold_color = "lightblue"
-        freezing_color = "cadetblue"
+        warm_color = "chocolate"
+        warmish_color = "peru"
+        coldish_color = "lightblue"
+        cold_color = "cadetblue"
+        freezing_color = "royalblue"
 
         hot = 20
+        warm = 10
+        cold = -10
         freezing = -20
 
         block_width = 9
@@ -137,26 +141,34 @@ class TemperatureView():
             if min_temp_int > 0:
                 if min_temp_int >= hot:
                     min_color = hot_color
+                elif min_temp_int >= warm:
+                    min_color = warm_color 
                 else:
-                    min_color = warm_color
+                    min_color = warmish_color
             elif min_temp_int <= 0:
                 if min_temp_int <= freezing:
                     min_color = freezing_color
-                else:
+                elif min_temp_int <= cold:
                     min_color = cold_color
+                else:
+                    min_color = coldish_color
                 min_temp_int = abs(min_temp_int)
 
             max_color = neutral_color
             if max_temp_int > 0:
                 if max_temp_int >= hot:
                     max_color = hot_color
-                else:
+                elif max_temp_int >= warm:
                     max_color = warm_color
+                else:
+                    max_color = warmish_color
             elif max_temp_int < 0:
                 if max_temp_int <= freezing:
                     max_color = freezing_color
-                else:
+                elif max_temp_int <= cold:
                     max_color = cold_color
+                else:
+                    max_color = coldish_color
                 max_temp_int = abs(max_temp_int)
 
             min_temp = str(min_temp_int)
