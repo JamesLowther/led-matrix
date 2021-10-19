@@ -1,7 +1,10 @@
+from os import confstr
 import urllib3
 import signal
 import threading
 import sys
+
+from config import Config
 
 from button_handler import ButtonHandler
 
@@ -13,6 +16,8 @@ urllib3.disable_warnings()
 sigint_stop_event = threading.Event()
 
 def main():
+    Config.initialize_state()
+
     press_event = threading.Event()
     long_press_event = threading.Event()
 

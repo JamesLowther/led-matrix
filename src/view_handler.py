@@ -21,7 +21,7 @@ class ViewHandler():
         self._press_event = press_event
         self._long_press_event = long_press_event
 
-        self._mode = "timed"
+        self._mode = Config.read_key("mode")
         self._auto_switch = True
 
     def start(self):
@@ -109,6 +109,7 @@ class ViewHandler():
 
         if result == "switch_mode":
             self._mode = switchview.show_mode(self._mode, self.MODES)
+            Config.update_key("mode", self._mode)
 
         elif result == True:
             if Config.VIRTUAL_MODE:

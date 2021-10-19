@@ -8,6 +8,7 @@ python-dotenv = "*"
 pillow = "*"
 requests = "*"
 numpy = "*"
+pyyaml = "*"
 
 [dev-packages]
 
