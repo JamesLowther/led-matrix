@@ -56,7 +56,7 @@ class ViewHandler():
             }
         ]
 
-        current_view = 3
+        current_view = 1
         
         self._auto_timer = None
         self._manual_timer = None

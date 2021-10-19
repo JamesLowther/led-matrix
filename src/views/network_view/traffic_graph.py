@@ -79,7 +79,7 @@ class TrafficGraph:
         tx_prev = None
         rx_prev = None
 
-        step = width / (len(traffic_data) - 1)
+        step = width / max((len(traffic_data) - 1), 1)
 
         max_tx_normal = max_tx - min_tx
         max_rx_normal = max_rx - min_rx
@@ -87,10 +87,10 @@ class TrafficGraph:
         # Draw graph lines.
         for i in range(len(traffic_data)):
             tx_x = x_offset + (step * i)
-            tx_y = y_offset + height - (((traffic_data[i]["wan-tx_bytes"] - min_tx) / max_tx_normal) * height)
+            tx_y = y_offset + height - (((traffic_data[i]["wan-tx_bytes"] - min_tx) / max(max_tx_normal, 1)) * height)
 
             rx_x = x_offset + (step * i)
-            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max_rx_normal) * height)
+            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max(max_rx_normal, 1)) * height)
 
             if i != 0:
                 d.line(

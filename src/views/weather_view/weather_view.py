@@ -92,6 +92,11 @@ class WeatherView():
     def run(self):
         global last_updated
         global radar_api_updated
+        global radar_api_error
+        global weather_api_error
+
+        radar_api_error = False
+        weather_api_error = False
 
         last_updated = 0
         request_e.set()

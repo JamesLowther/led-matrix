@@ -362,10 +362,10 @@ class UnifiConnection():
         end = time.time() * 1000
         start = end - (minutes_interval * 60 * 1000)
 
-        success = False
-        for i in range(retry_attempts):
+        data = None
+        for _ in range(retry_attempts):
             try:
-                response = self._session.post(
+                data = self._session.post(
                     f"{self.ENDPOINT}/api/s/{self.SITE}/stat/report/5minutes.site",
                     json={
                         "start": start,
@@ -373,12 +373,12 @@ class UnifiConnection():
                         "attrs": attrs
                     },
                     verify=False
-                )
+                ).json()
 
             except requests.exceptions.RequestException:
                 continue
-
-            data = json.loads(response.text)
+            except json.decoder.JSONDecodeError:
+                continue
 
             if data["meta"]["rc"] == "ok":
                 return data
@@ -393,17 +393,17 @@ class UnifiConnection():
         Queries the Unifi controller for network information.
         Returns the success status and the JSON data.
         """
-        success = False
-        for i in range(retry_attempts):
+        data = None
+        for _ in range(retry_attempts):
             try:
-                response = self._session.get(
+                data = self._session.get(
                     f"{self.ENDPOINT}/api/s/{self.SITE}/stat/health",
                     verify=False
-                )
+                ).json()
             except requests.exceptions.RequestException:
                 continue
-
-            data = json.loads(response.text)
+            except json.decoder.JSONDecodeError:
+                continue
 
             if data["meta"]["rc"] == "ok":
                 return data
