@@ -8,6 +8,7 @@ from transitions import Transitions
 from views.weather_view.radar_view import RadarView
 from views.weather_view.temperature_view import TemperatureView
 from views.weather_view.wind_view import WindView
+from views.weather_view.moon_view import MoonView
 
 import time
 import requests
@@ -31,37 +32,40 @@ LOCATIONS = [
         "lat": 51.030436,
         "lon": -114.065720
     },
-    {
-        "name": "Seattle",
-        "lat": 47.6062,
-        "lon": -122.3321
-    },
-    {
-        "name": "Tokyo",
-        "lat": 35.6762,
-        "lon": 139.6503
-    },
-    {
-        "name": "Berlin",
-        "lat": 52.5200,
-        "lon": 13.4050
-    },
-    {
-        "name": "London",
-        "lat": 51.5074,
-        "lon": -0.1278
-    }
+    # {
+    #     "name": "Seattle",
+    #     "lat": 47.6062,
+    #     "lon": -122.3321
+    # },
+    # {
+    #     "name": "Tokyo",
+    #     "lat": 35.6762,
+    #     "lon": 139.6503
+    # },
+    # {
+    #     "name": "Berlin",
+    #     "lat": 52.5200,
+    #     "lon": 13.4050
+    # },
+    # {
+    #     "name": "London",
+    #     "lat": 51.5074,
+    #     "lon": -0.1278
+    # }
 ]
 
 WIND_LOCATION = "Calgary"
+MOON_LOCATION = "Calgary"
 
 class WeatherView():
     FRAME_INTERVAL = 1300 # ms.
     HOLD_TIME = 2600 # ms.
     
-    FORECAST_INTERVAL = 16000 # ms.
-
-    WIND_INTERVAL = 30000 # ms.
+    # FORECAST_INTERVAL = 16000 # ms.
+    FORECAST_INTERVAL = 1000
+    WIND_INTERVAL = 1000
+    # WIND_INTERVAL = 30000 # ms.
+    MOON_INTERVAL = 2000 # ms.
 
     RADAR_LOOPS = 5
 
@@ -88,6 +92,7 @@ class WeatherView():
             )
 
         self._wind_view = WindView(self._matrix)
+        self._moon_view = MoonView(self._matrix)
 
     def run(self):
         global last_updated
@@ -97,6 +102,8 @@ class WeatherView():
 
         last_updated = 0
         request_e.set()
+
+        radar_api_error = True
 
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and not radar_api_error and len(self._frames) == 0):
@@ -123,8 +130,13 @@ class WeatherView():
                 if prev_image == -1:
                     return
                 
+                # self.check_update()
+                # prev_image = self.start_wind_loop(prev_image)
+                # if prev_image == -1:
+                #     return
+
                 self.check_update()
-                prev_image = self.start_wind_loop(prev_image)
+                prev_image = self.start_moon_loop(prev_image)
                 if prev_image == -1:
                     return
             
@@ -200,6 +212,22 @@ class WeatherView():
 
         return next_image
 
+    def start_moon_loop(self, prev_image):
+        self._moon_view.update_moon(weather_data[MOON_LOCATION]["daily"][0]["moon_phase"])
+
+        next_image = self._moon_view.generate_moon_image()
+
+        Transitions.horizontal_transition(self._matrix, prev_image, next_image)
+
+        start_time = time.time()
+        while time.time() - start_time <= (self.MOON_INTERVAL / 1000):
+            msleep(500)
+
+            if self._press_event.is_set():
+                    return -1
+
+        return next_image
+
     def check_api_interval(self):
         current_time = time.time()
         if current_time - self._start_time >= self.API_INTERVAL:
@@ -258,7 +286,7 @@ class WeatherData():
             except KeyError:
                 return False
             url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={api_key}"
-            
+
             for i in range(retry_attempts):
                 try:
                     data = requests.get(url).json()
@@ -270,7 +298,7 @@ class WeatherData():
                     msleep(self.RETRY_TIME)
 
             weather_data[location["name"]] = data
-
+            
         weather_api_updated = True
 
 class RadarData():
