@@ -204,7 +204,6 @@ def request_thread():
     while True:
         request_e.wait()
         ping_data = ping.update()
-        print(ping_data)
         pihole_data = pihole.update()
         traffic_interval_data = unifi.update_5min_interval()[1]["data"]
         health_data = unifi.update_health()[1]["data"]
