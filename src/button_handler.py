@@ -12,7 +12,7 @@ import time
 
 class ButtonHandler(threading.Thread):
     BOUNCE_TIME = 10
-    HOLD_TIME = 2000
+    HOLD_TIME = 1000
 
     def __init__(self, press_event, long_press_event, sigint_stop_event):
         threading.Thread.__init__(self)
