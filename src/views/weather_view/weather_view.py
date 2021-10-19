@@ -204,7 +204,7 @@ class WeatherView():
             msleep(sleep)
 
             if self._press_event.is_set():
-                    return -1
+                return -1
 
         return next_image
 
@@ -220,7 +220,7 @@ class WeatherView():
             msleep(500)
 
             if self._press_event.is_set():
-                    return -1
+                return -1
 
         return next_image
 
