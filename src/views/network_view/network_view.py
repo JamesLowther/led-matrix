@@ -79,9 +79,10 @@ class NetworkMonitor():
 
     def draw_error(self, image):
         x_offset = 32
-        y_offset = 3
+        y_offset = 15
 
-        size = 2
+        size_1 = 2
+        size_2 = 4
 
         color = "red"
 
@@ -91,8 +92,18 @@ class NetworkMonitor():
             [
                 x_offset,
                 y_offset,
-                x_offset + size - 1,
-                y_offset + size -1
+                x_offset + size_1 - 1,
+                y_offset + size_1 - 1
+            ],
+            fill=color
+        )
+
+        d.rectangle(
+            [
+                x_offset,
+                y_offset - 5,
+                x_offset + size_1 - 1,
+                y_offset + - 5 + size_2 - 1
             ],
             fill=color
         )
@@ -245,7 +256,7 @@ def request_thread():
             pihole_data = pihole_return
         else:
             pihole_data = {
-                "ads_percentage_today": 0,
+                "ads_percentage_today": 0.0,
                 "status": "disabled"
             }
 
@@ -286,7 +297,7 @@ class PingConnection():
         return float(resp[s_last + 1:last])
 
 class PiHoleConnection():
-    ENDPOINT = "http://193.168.1.5/admin/api.php"
+    ENDPOINT = "http://192.168.1.5/admin/api.php"
 
     def update(self):
         try:
@@ -300,7 +311,7 @@ class PiHoleConnection():
         
 
 class UnifiConnection():
-    ENDPOINT = "https://193.168.1.5:8443"
+    ENDPOINT = "https://192.168.1.5:8443"
     SITE = "default"
 
     def __init__(self):
@@ -324,6 +335,9 @@ class UnifiConnection():
                 verify=False
             )
         except requests.exceptions.RequestException:
+            return
+        
+        except KeyError:
             return
 
     def logout(self):
