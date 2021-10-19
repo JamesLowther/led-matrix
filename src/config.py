@@ -13,6 +13,9 @@ class Config:
 
     VIRTUAL_MODE = False
 
+    # Enable virtual mode even if running on Pi.
+    VIRTUAL_MODE_OVERRIDE = True
+
     # Default state values.
     DEFAULTS = {
         "mode": "timed"
@@ -21,6 +24,8 @@ class Config:
     def initialize_state():
         if not os.path.isfile(Config.STATE_PATH):
             open(Config.STATE_PATH, "a").close()
+        
+        os.chmod(Config.STATE_PATH, 0o664)
 
         yaml_s = Config.read_full()
 

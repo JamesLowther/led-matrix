@@ -22,6 +22,8 @@ def main():
     long_press_event = threading.Event()
 
     button_thread = ButtonHandler(press_event, long_press_event, sigint_stop_event)
+    if Config.VIRTUAL_MODE:
+        button_thread.daemon = True
     button_thread.start()
 
     matrix = Matrix()

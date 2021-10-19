@@ -25,34 +25,34 @@ class ViewHandler():
         self._auto_switch = True
 
     def start(self):
-        poweroffview = PoweroffView(self._matrix, self._press_event, self._long_press_event)
-        switchview = SwitchView(self._matrix, self._press_event, self._long_press_event)
+        poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
+        switch_view = SwitchView(self._matrix, self._press_event, self._long_press_event)
 
-        weatherview = WeatherView(self._matrix, self._press_event)
-        networkmanager = NetworkMonitor(self._matrix, self._press_event)
-        testview = TestView(self._matrix, self._press_event)
-        issview = ISSView(self._matrix, self._press_event)
+        weather_view = WeatherView(self._matrix, self._press_event)
+        network_view = NetworkMonitor(self._matrix, self._press_event)
+        test_view = TestView(self._matrix, self._press_event)
+        iss_view = ISSView(self._matrix, self._press_event)
 
         views = [
             {
-                "view": issview,
+                "view": iss_view,
                 "time": 700
             },
             {
-                "view": networkmanager,
+                "view": network_view,
                 "time": 700
             },
             {
-                "view": testview,
+                "view": test_view,
                 "time": 60
             },
             {
-                "view": weatherview,
+                "view": weather_view,
                 "time": 358
             }
         ]
 
-        current_view = 0
+        current_view = 1
         
         self._auto_timer = None
         self._manual_timer = None
@@ -77,7 +77,7 @@ class ViewHandler():
             views[current_view]["view"].run()
 
             if self._long_press_event.is_set():
-                self.handle_shutdown(poweroffview, switchview)
+                self.handle_shutdown(poweroff_view, switch_view)
                 current_view -= 1
 
             current_view = (current_view + 1) % len(views)

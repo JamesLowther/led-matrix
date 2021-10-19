@@ -23,6 +23,9 @@ class ButtonHandler(threading.Thread):
         self._last_press = 0
         self._button_down = False
 
+        if Config.VIRTUAL_MODE_OVERRIDE:
+            Config.VIRTUAL_MODE = True
+
     def run(self):
         if Config.VIRTUAL_MODE:
             self.log("Virtual button enabled.")

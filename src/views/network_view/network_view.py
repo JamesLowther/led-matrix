@@ -14,6 +14,7 @@ from views.network_view.traffic_graph import TrafficGraph
 from config import Config
 
 initial_api_updated = False
+api_error = False
 
 pihole_data = None
 health_data = None
@@ -203,6 +204,7 @@ def request_thread():
     while True:
         request_e.wait()
         ping_data = ping.update()
+        print(ping_data)
         pihole_data = pihole.update()
         traffic_interval_data = unifi.update_5min_interval()[1]["data"]
         health_data = unifi.update_health()[1]["data"]
