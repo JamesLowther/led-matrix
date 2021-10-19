@@ -22,7 +22,8 @@ radar_api_updated = False
 weather_data = {}
 weather_api_updated = False
 
-api_error = False
+radar_api_error = False
+weather_api_error = False
 
 LOCATIONS = [
     {
@@ -96,32 +97,34 @@ class WeatherView():
         request_e.set()
 
         # Wait for initial frame data to be generated.
-        while(not radar_api_updated and len(self._frames) == 0):
+        while(not radar_api_updated and not radar_api_error):
             msleep(200)
 
-        self.update_frames()
+        self.check_update()
 
         prev_image = None
         while not self._press_event.is_set():
 
             self.check_update()
-            prev_image = self.start_radar_loop(prev_image)
-            if prev_image == -1:
-                return
+            if not radar_api_error:
+                prev_image = self.start_radar_loop(prev_image)
+                if prev_image == -1:
+                    return
 
             # Ensure that weather api data gets set.
-            while len(weather_data) != len(LOCATIONS):
+            while len(weather_data) != len(LOCATIONS) and not weather_api_error:
                 msleep(200)
 
-            self.check_update()
-            prev_image = self.start_temperature_loop(prev_image)
-            if prev_image == -1:
-                return
-            
-            self.check_update()
-            prev_image = self.start_wind_loop(prev_image)
-            if prev_image == -1:
-                return
+            if not weather_api_error:
+                self.check_update()
+                prev_image = self.start_temperature_loop(prev_image)
+                if prev_image == -1:
+                    return
+                
+                self.check_update()
+                prev_image = self.start_wind_loop(prev_image)
+                if prev_image == -1:
+                    return
             
     def start_radar_loop(self, prev_image):
         current_image = None
@@ -152,11 +155,14 @@ class WeatherView():
         for i, location in enumerate(self._location_temperature_views):
             next_image = location.generate_temperature_image(weather_data)
             self.check_api_interval()
-            if i == 0:
-                Transitions.vertical_transition(self._matrix, prev_image, next_image)
+            if prev_image != None:
+                if i == 0:
+                    Transitions.vertical_transition(self._matrix, prev_image, next_image)
 
+                else:
+                    Transitions.horizontal_transition(self._matrix, prev_image, next_image)
             else:
-                Transitions.horizontal_transition(self._matrix, prev_image, next_image)
+                self._matrix.set_image(next_image, unsafe=False)
 
             start_time = time.time()
 
@@ -212,14 +218,27 @@ class WeatherView():
 
 def request_thread():
     global frames
+    global radar_api_error
+    global weather_api_error
 
     weather_data = WeatherData()
     radar_data = RadarData()
 
     while True:
         request_e.wait()
-        radar_data.update()
-        weather_data.update()
+        radar_data_result = radar_data.update()
+        weather_data_result = weather_data.update()
+
+        if radar_data_result == False:
+            radar_api_error = True
+        else:
+            radar_api_error = False
+
+        if weather_data_result == False:
+            weather_api_error = True
+        else:
+            weather_api_error = False
+
         request_e.clear()
 
 class WeatherData():
@@ -227,17 +246,20 @@ class WeatherData():
 
     RETRY_TIME = 2000
 
-    def update(self):
+    def update(self, retry_attempts=3):
         global weather_data
 
         for location in LOCATIONS:
             url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={Config.ENV_VALUES['OPENWEATHER_API_KEY']}"
             
-            while True:
+            for i in range(retry_attempts):
                 try:
                     data = requests.get(url).json()
                     break
-                except requests.exceptions.ConnectionError:
+                except requests.exceptions.RequestException:
+                    if i + 1 == retry_attempts:
+                        return False
+
                     msleep(self.RETRY_TIME)
 
             weather_data[location["name"]] = data
@@ -268,7 +290,8 @@ class RadarData():
         global last_updated
         global new_frames
 
-        self.get_api_file()
+        if self.get_api_file() == False:
+            return False
 
         # Check if the API data changed.
         if self._api_file["generated"] == last_updated:
@@ -277,20 +300,25 @@ class RadarData():
         last_updated = self._api_file["generated"]
 
         new_frames.clear()
-        self.get_past_radar()
-        self.get_nowcast_radar()
+        if self.get_past_radar() == False:
+            return False
+        
+        if self.get_nowcast_radar() == False:
+            return False
 
         radar_api_updated = True
 
-    def get_api_file(self):
-        while True:
+    def get_api_file(self, retry_attempts=3):
+        for i in range(retry_attempts):
             try:
                 self._api_file = requests.get(self.API_FILE_URL).json()
                 break
-            except requests.exceptions.ConnectionError:
+            except requests.exceptions.RequestException:
+                if i + 1 == retry_attempts:
+                    return False
                 msleep(self.RETRY_TIME)
 
-    def get_past_radar(self):
+    def get_past_radar(self, retry_attempts=3):
         global new_frames
 
         size = 512
@@ -303,11 +331,13 @@ class RadarData():
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
             
             radar_image = None
-            while True:
+            for i in range(retry_attempts):
                 try:
                     radar_image = requests.get(url)
                     break
-                except requests.exceptions.ConnectionError:
+                except requests.exceptions.RequestException:
+                    if i + 1 == retry_attempts:
+                        return False
                     msleep(self.RETRY_TIME)
 
             img = Image.open(BytesIO(radar_image.content))
@@ -320,7 +350,7 @@ class RadarData():
                 }
             )
 
-    def get_nowcast_radar(self):
+    def get_nowcast_radar(self, retry_attempts=3):
         global new_frames
 
         size = 512
@@ -333,12 +363,14 @@ class RadarData():
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
             
             radar_image = None
-            while True:
+            for i in range(retry_attempts):
                 try:
                     radar_image = requests.get(url)
                     break
-                except requests.exceptions.ConnectionError:
-                    msleep(1000)
+                except requests.exceptions.RequestException:
+                    if i == retry_attempts:
+                        return False
+                    msleep(self.RETRY_TIME)
 
             img = Image.open(BytesIO(radar_image.content))
             converted_image = self.convert_image(img)
