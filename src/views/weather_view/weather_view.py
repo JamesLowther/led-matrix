@@ -252,6 +252,7 @@ class WeatherData():
         global weather_data
 
         for location in LOCATIONS:
+            api_key = None
             try:
                 api_key = Config.ENV_VALUES['OPENWEATHER_API_KEY']
             except KeyError:
