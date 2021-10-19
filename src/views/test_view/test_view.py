@@ -44,7 +44,7 @@ class TestView():
 
         sphere.rotate(sphere.find_center(), matrix_fix)
 
-        theta = 0.05
+        theta = 0.03
         bgcolor = "black"
         while not self._press_event.is_set():
             image = Image.new("RGB", self.matrix.dimensions, color=bgcolor)
@@ -69,13 +69,6 @@ class TestView():
         c = np.cos(theta)
         s = np.sin(theta)
 
-        # matrix = np.array([
-        #     [c, -s, 0, 0],
-        #     [s, c, 0, 0],
-        #     [0, 0, 1, 0],
-        #     [0, 0, 0, 1]
-        # ])   
-
         matrix1 = np.array([
             [c, 0, s, 0],
             [0, 1, 0, 0],
@@ -91,7 +84,7 @@ class TestView():
         ])  
 
         obj.rotate(center, matrix1)
-        # obj.rotate(center, matrix2)
+        obj.rotate(center, matrix2)
 
 class Object:
     def __init__(self):
