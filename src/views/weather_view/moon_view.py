@@ -11,47 +11,53 @@ class MoonView:
         self._moon_phase = None
 
     def update_moon(self, moon_data):
-        moon_data = 0.25
-
         if moon_data == 0 or moon_data == 1:
             self._moon_phase = {
                 "id": 0,
+                "offset": 4,
                 "phase": "new moon"
             }
         elif 0 < moon_data < 0.25:
             self._moon_phase = {
                 "id": 1,
-                "phase": "waxing crescent"
+                "offset": 2,
+                "phase": "waxing crscnt"
             }
         elif moon_data == 0.25:
             self._moon_phase = {
                 "id": 2,
+                "offset": 2,
                 "phase": "first quarter"
             }
         elif 0.25 < moon_data < 0.5:
             self._moon_phase = {
                 "id": 3,
+                "offset": 2,
                 "phase": "waxing gibbous"
             }
         elif moon_data == 0.5:
             self._moon_phase = {
                 "id": 4,
+                "offset": 4,
                 "phase": "full moon"
             }
         elif 0.5 < moon_data < 0.75:
             self._moon_phase = {
                 "id": 5,
+                "offset": 2,
                 "phase": "waning gibbous"
             }
         elif moon_data == 0.75:
             self._moon_phase = {
                 "id": 6,
+                "offset": 2,
                 "phase": "last quarter"
             }
         elif 0.75 < moon_data < 1:
             self._moon_phase = {
                 "id": 7,
-                "phase": "waning crescent"
+                "offset": 2,
+                "phase": "waning crscnt"
             }
 
     def generate_moon_image(self):
@@ -63,7 +69,7 @@ class MoonView:
         return image
 
     def draw_phase(self, image):
-        x_offset = 0
+        x_offset = -2
         y_offset = 10
 
         spacing = 2
@@ -104,10 +110,10 @@ class MoonView:
         )
 
     def draw_moon(self, image):
-        x_offset = 1
-        y_offset = 1
+        x_offset = self._moon_phase["offset"]
+        y_offset = 4
         
-        size = 29
+        size = 24
 
         moon_id = self._moon_phase["id"]
 

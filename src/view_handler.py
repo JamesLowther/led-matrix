@@ -48,11 +48,11 @@ class ViewHandler():
             },
             {
                 "view": weather_view,
-                "time": 358
+                "time": 390
             }
         ]
 
-        current_view = 3
+        current_view = 0
         
         self._auto_timer = None
         self._manual_timer = None
