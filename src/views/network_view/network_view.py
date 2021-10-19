@@ -1,6 +1,6 @@
 from urllib import request
 from PIL import Image, ImageDraw, ImageFont
-from requests import Session
+from requests import Session, api
 import requests
 import json
 import threading
@@ -41,6 +41,7 @@ class NetworkMonitor():
 
     def run(self):
         global initial_api_updated
+        global api_error
 
         initial_api_updated = False
 
@@ -52,7 +53,10 @@ class NetworkMonitor():
         while not self._press_event.is_set():
 
             image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)     
-            
+
+            if api_error:
+                self.draw_error(image)
+
             self.draw_time(image)
             self.draw_clients(image)
             self.draw_pihole(image)
@@ -72,6 +76,26 @@ class NetworkMonitor():
         if current_time - self._start_time >= self.API_INTERVAL:
             self._start_time = current_time
             request_e.set()
+
+    def draw_error(self, image):
+        x_offset = 32
+        y_offset = 3
+
+        size = 2
+
+        color = "red"
+
+        d = ImageDraw.Draw(image)
+
+        d.rectangle(
+            [
+                x_offset,
+                y_offset,
+                x_offset + size - 1,
+                y_offset + size -1
+            ],
+            fill=color
+        )
 
     def draw_time(self, image):
         """
@@ -191,6 +215,8 @@ class NetworkMonitor():
         return resized
 
 def request_thread():
+    global api_error
+
     global initial_api_updated
     global pihole_data
     global health_data
@@ -203,10 +229,43 @@ def request_thread():
 
     while True:
         request_e.wait()
-        ping_data = ping.update()
-        pihole_data = pihole.update()
-        traffic_interval_data = unifi.update_5min_interval()[1]["data"]
-        health_data = unifi.update_health()[1]["data"]
+        ping_return = ping.update()
+        pihole_return = pihole.update()
+        traffic_interval_return = unifi.update_5min_interval()
+        health_return = unifi.update_health()
+
+        if False in [ping_return, pihole_return, traffic_interval_return, health_return]:
+            api_error = True
+        else:
+            api_error = False
+
+        ping_data = ping_return if ping_return else 0
+
+        if pihole_return:
+            pihole_data = pihole_return
+        else:
+            pihole_data = {
+                "ads_percentage_today": 0,
+                "status": "disabled"
+            }
+
+        if traffic_interval_return:
+            traffic_interval_data = traffic_interval_return["data"]
+        else:
+            traffic_interval_data = []
+
+        if health_return:
+            health_data = health_return["data"]
+        else:
+            health_data = [
+                None,
+                {
+                    "num_sta": 0,
+                    "tx_bytes-r": 0,
+                    "rx_bytes-r": 0
+                }
+            ]
+
         request_e.clear()
 
         initial_api_updated = True
@@ -215,25 +274,33 @@ class PingConnection():
     ENDPOINT = "8.8.8.8"
 
     def update(self):
-        resp = str(subprocess.check_output("ping -c 1 " + self.ENDPOINT, shell=True))
+        resp = None
+        try:
+            resp = str(subprocess.check_output("ping -c 1 " + self.ENDPOINT, shell=True))
+        except subprocess.CalledProcessError:
+            return False
+
         last = resp.rindex("/")
         s_last = resp.rindex("/", 0, last)
 
         return float(resp[s_last + 1:last])
 
 class PiHoleConnection():
-    ENDPOINT = "http://192.168.1.5/admin/api.php"
+    ENDPOINT = "http://193.168.1.5/admin/api.php"
 
     def update(self):
+        try:
+            data = requests.get(
+                self.ENDPOINT
+            ).json()
 
-        data = requests.get(
-            self.ENDPOINT
-        ).json()
-
-        return data
+            return data
+        except requests.exceptions.RequestException:
+            return False
+        
 
 class UnifiConnection():
-    ENDPOINT = "https://192.168.1.5:8443"
+    ENDPOINT = "https://193.168.1.5:8443"
     SITE = "default"
 
     def __init__(self):
@@ -246,14 +313,18 @@ class UnifiConnection():
         Login to the Unifi controller.
         Sets the cookie for the session.
         """
-        self._session.post(
-            f"{self.ENDPOINT}/api/login",
-            json={
-                "username": Config.ENV_VALUES["UNIFI_USERNAME"],
-                "password": Config.ENV_VALUES["UNIFI_PASSWORD"]
-            },
-            verify=False
-        )
+        
+        try:
+            self._session.post(
+                f"{self.ENDPOINT}/api/login",
+                json={
+                    "username": Config.ENV_VALUES["UNIFI_USERNAME"],
+                    "password": Config.ENV_VALUES["UNIFI_PASSWORD"]
+                },
+                verify=False
+            )
+        except requests.exceptions.RequestException:
+            return
 
     def logout(self):
         """
@@ -279,26 +350,29 @@ class UnifiConnection():
 
         success = False
         for i in range(retry_attempts):
-            response = self._session.post(
-                f"{self.ENDPOINT}/api/s/{self.SITE}/stat/report/5minutes.site",
-                json={
-                    "start": start,
-                    "end": end,
-                    "attrs": attrs
-                },
-                verify=False
-            )
+            try:
+                response = self._session.post(
+                    f"{self.ENDPOINT}/api/s/{self.SITE}/stat/report/5minutes.site",
+                    json={
+                        "start": start,
+                        "end": end,
+                        "attrs": attrs
+                    },
+                    verify=False
+                )
+
+            except requests.exceptions.RequestException:
+                continue
 
             data = json.loads(response.text)
 
             if data["meta"]["rc"] == "ok":
-                success = True
-                break
+                return data
 
             # Attempt to login if the query failed.
             self.login()         
 
-        return (success, data)
+        return False
 
     def update_health(self, retry_attempts=3):
         """
@@ -307,18 +381,20 @@ class UnifiConnection():
         """
         success = False
         for i in range(retry_attempts):
-            response = self._session.get(
-                f"{self.ENDPOINT}/api/s/{self.SITE}/stat/health",
-                verify=False
-            )
+            try:
+                response = self._session.get(
+                    f"{self.ENDPOINT}/api/s/{self.SITE}/stat/health",
+                    verify=False
+                )
+            except requests.exceptions.RequestException:
+                continue
 
             data = json.loads(response.text)
 
             if data["meta"]["rc"] == "ok":
-                success = True
-                break
+                return data
 
             # Attempt to login if the query failed.
             self.login()                
 
-        return (success, data)
+        return False
