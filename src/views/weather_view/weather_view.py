@@ -252,7 +252,11 @@ class WeatherData():
         global weather_data
 
         for location in LOCATIONS:
-            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={Config.ENV_VALUES['OPENWEATHER_API_KEY']}"
+            try:
+                api_key = Config.ENV_VALUES['OPENWEATHER_API_KEY']
+            except KeyError:
+                return False
+            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={api_key}"
             
             for i in range(retry_attempts):
                 try:
