@@ -98,8 +98,6 @@ class WeatherView():
         last_updated = 0
         request_e.set()
 
-        radar_api_error = True
-
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and not radar_api_error and len(self._frames) == 0):
             msleep(200)
