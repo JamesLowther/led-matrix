@@ -15,9 +15,9 @@ class TestView():
         b = 23
 
         xyz = []
-        R = 16
-        MAP_WIDTH = 25
-        MAP_HEIGHT = 16
+        R = 15
+        MAP_WIDTH = 10
+        MAP_HEIGHT = 15
 
         for i in range(MAP_HEIGHT + 1):
             lat = (pi / MAP_HEIGHT) * i
