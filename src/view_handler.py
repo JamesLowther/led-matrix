@@ -48,7 +48,7 @@ class ViewHandler():
             },
             {
                 "view": weather_view,
-                "time": 390
+                "time": 410
             }
         ]
 

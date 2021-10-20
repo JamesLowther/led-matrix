@@ -63,7 +63,7 @@ class WeatherView():
     
     FORECAST_INTERVAL = 16000 # ms.
     WIND_INTERVAL = 30000 # ms.
-    MOON_INTERVAL = 16000 # ms.
+    MOON_INTERVAL = 20000 # ms.
 
     RADAR_LOOPS = 5
 
