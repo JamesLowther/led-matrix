@@ -106,16 +106,16 @@ class ViewHandler():
         if self._mode == "manual":
             Config.update_key("view", self._current_view)
 
-    def handle_shutdown(self, poweroffview, switchview):
+    def handle_shutdown(self, poweroff_view, switch_view):
         self.clear_events()
-        result = poweroffview.start_shutdown()
+        result = poweroff_view.start_shutdown()
 
         self.cancel_timers()
 
         self.clear_events()
 
         if result == "switch_mode":
-            self._mode = switchview.show_mode(self._mode, self.MODES)
+            self._mode = switch_view.show_mode(self._mode, self.MODES)
             Config.update_key("mode", self._mode)
 
         elif result == True:
