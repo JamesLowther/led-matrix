@@ -10,7 +10,7 @@ class TrafficGraph:
         rx_color = "crimson"
         
         x_offset = 1
-        y_offset = 17
+        y_offset = 16
 
         y_spacing = 3
 
@@ -54,12 +54,12 @@ class TrafficGraph:
 
     def draw_graph(image, traffic_data):
         x_offset = 2
-        y_offset = 17
+        y_offset = 16
 
         spacing = 8
         
         width = 35
-        height = 5
+        height = 6
 
         tx_color = "goldenrod"
         rx_color = "crimson"

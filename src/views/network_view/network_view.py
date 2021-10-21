@@ -133,7 +133,7 @@ class NetworkMonitor():
 
     def draw_clients(self, image):
         x_offset = 2
-        y_offset = 10
+        y_offset = 9
 
         color = "rosybrown"
 
@@ -154,7 +154,7 @@ class NetworkMonitor():
 
     def draw_ping(self, image):
         x_offset = 1
-        y_offset = 10
+        y_offset = 9
 
         color = "rosybrown"
 
