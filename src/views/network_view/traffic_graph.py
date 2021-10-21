@@ -10,9 +10,9 @@ class TrafficGraph:
         rx_color = "crimson"
         
         x_offset = 1
-        y_offset = 16
+        y_offset = 17
 
-        y_spacing = 3
+        y_spacing = 2
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -54,9 +54,9 @@ class TrafficGraph:
 
     def draw_graph(image, traffic_data):
         x_offset = 2
-        y_offset = 16
+        y_offset = 17
 
-        spacing = 8
+        spacing = 7
         
         width = 35
         height = 6
