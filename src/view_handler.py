@@ -102,6 +102,10 @@ class ViewHandler():
         self._auto_switch = True
         self._press_event.set()
 
+    def save_view(self):
+        if self._mode == "manual":
+            Config.update_key("view", self._current_view)
+
     def handle_shutdown(self, poweroffview, switchview):
         self.clear_events()
         result = poweroffview.start_shutdown()
@@ -115,9 +119,7 @@ class ViewHandler():
             Config.update_key("mode", self._mode)
 
         elif result == True:
-            if self._mode == "manual":
-                Config.update_key("view", self._current_view)
-
+            self.save_view()
             if Config.VIRTUAL_MODE:
                 self.log("Virtual shutdown requested.")
             else:

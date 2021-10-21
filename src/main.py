@@ -14,41 +14,40 @@ from view_handler import ViewHandler
 
 urllib3.disable_warnings()
 
-sigint_stop_event = threading.Event()
-sig_matrix = None
+class Main:
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
 
-def main():
-    global sig_matrix
+        Config.initialize_state()
 
-    Config.initialize_state()
+        self._sigint_stop_event = threading.Event()
+        self._press_event = threading.Event()
+        self._long_press_event = threading.Event()
 
-    press_event = threading.Event()
-    long_press_event = threading.Event()
+        self._button_thread = ButtonHandler(self._press_event, self._long_press_event, self._sigint_stop_event)
+        
+        if Config.VIRTUAL_MODE:
+            self._button_thread.daemon = True
+        self._button_thread.start()
 
-    button_thread = ButtonHandler(press_event, long_press_event, sigint_stop_event)
-    if Config.VIRTUAL_MODE:
-        button_thread.daemon = True
-    button_thread.start()
+        self._matrix = Matrix()
 
-    matrix = Matrix()
-    sig_matrix = matrix
+        self._view_handler = ViewHandler(self._matrix, self._press_event, self._long_press_event)
+        self._view_handler.start()
 
-    viewhandler = ViewHandler(matrix, press_event, long_press_event)
-    viewhandler.start()
+    def signal_handler(self, sig, frame):
+        print("Main - Sending stop event...")
+        self._sigint_stop_event.set()
 
-def signal_handler(sig, frame):
-    print("Main - Sending stop event...")
-    sigint_stop_event.set()
+        self._view_handler.save_view()
 
-    # Hack to clear screen on termination.
-    image = Image.new("RGB", sig_matrix.dimensions, color="black")     
-    sig_matrix.set_image(image)
-    
-    print("Main - Stopped.")
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
+        # Hack to clear screen on termination.
+        image = Image.new("RGB", self._matrix.dimensions, color="black")     
+        self._matrix.set_image(image)
+        
+        print("Main - Stopped.")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    Main()

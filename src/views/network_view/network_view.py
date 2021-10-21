@@ -78,7 +78,7 @@ class NetworkMonitor():
             request_e.set()
 
     def draw_error(self, image):
-        x_offset = 32
+        x_offset = 33
         y_offset = 15
 
         size_1 = 2
