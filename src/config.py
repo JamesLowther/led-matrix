@@ -18,7 +18,8 @@ class Config:
 
     # Default state values.
     DEFAULTS = {
-        "mode": "timed"
+        "mode": "timed",
+        "view": 0
     }
 
     def initialize_state():

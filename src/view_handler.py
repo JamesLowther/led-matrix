@@ -24,6 +24,8 @@ class ViewHandler():
         self._mode = Config.read_key("mode")
         self._auto_switch = True
 
+        self._current_view = 0
+
     def start(self):
         poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
         switch_view = SwitchView(self._matrix, self._press_event, self._long_press_event)
@@ -52,8 +54,9 @@ class ViewHandler():
             }
         ]
 
-        current_view = 1
-        
+        if self._mode == "manual":
+            self._current_view = Config.read_key("view")
+            
         self._auto_timer = None
         self._manual_timer = None
 
@@ -61,7 +64,7 @@ class ViewHandler():
             if self._mode == "timed":
                 if self._auto_switch:
                     self._auto_switch = False
-                    self._auto_timer = threading.Timer(views[current_view]["time"], self.handle_timer)
+                    self._auto_timer = threading.Timer(views[self._current_view]["time"], self.handle_timer)
                     self._auto_timer.daemon = True
                     self._auto_timer.start()
                 
@@ -74,13 +77,13 @@ class ViewHandler():
                     self._manual_timer.daemon = True
                     self._manual_timer.start()
             
-            views[current_view]["view"].run()
+            views[self._current_view]["view"].run()
 
             if self._long_press_event.is_set():
                 self.handle_shutdown(poweroff_view, switch_view)
-                current_view -= 1
+                self._current_view -= 1
 
-            current_view = (current_view + 1) % len(views)
+            self._current_view = (self._current_view + 1) % len(views)
             
             self.clear_events()
 
@@ -112,6 +115,9 @@ class ViewHandler():
             Config.update_key("mode", self._mode)
 
         elif result == True:
+            if self._mode == "manual":
+                Config.update_key("view", self._current_view)
+
             if Config.VIRTUAL_MODE:
                 self.log("Virtual shutdown requested.")
             else:
