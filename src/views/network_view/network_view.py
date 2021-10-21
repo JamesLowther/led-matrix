@@ -196,8 +196,15 @@ class NetworkMonitor():
         d = ImageDraw.Draw(image)
 
         percent = round(pihole_data["ads_percentage_today"], 1)
+
         percent_str = f"{percent}%"
         percent_size = d.textsize(percent_str, f)
+
+        if len(percent_str) <= 4:
+            x_spacing += 3
+
+        elif len(percent_str) >= 6:
+            x_spacing += -2
 
         image.paste(
             icon,
