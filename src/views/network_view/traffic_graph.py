@@ -10,9 +10,9 @@ class TrafficGraph:
         rx_color = "crimson"
         
         x_offset = 1
-        y_offset = 18
+        y_offset = 17
 
-        y_spacing = 0
+        y_spacing = 3
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
@@ -54,10 +54,12 @@ class TrafficGraph:
 
     def draw_graph(image, traffic_data):
         x_offset = 2
-        y_offset = 20
+        y_offset = 17
+
+        spacing = 8
         
         width = 35
-        height = 8
+        height = 5
 
         tx_color = "goldenrod"
         rx_color = "crimson"
@@ -90,7 +92,7 @@ class TrafficGraph:
             tx_y = y_offset + height - (((traffic_data[i]["wan-tx_bytes"] - min_tx) / max(max_tx_normal, 1)) * height)
 
             rx_x = x_offset + (step * i)
-            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max(max_rx_normal, 1)) * height)
+            rx_y = y_offset + height - (((traffic_data[i]["wan-rx_bytes"] - min_rx) / max(max_rx_normal, 1)) * height) + spacing
 
             if i != 0:
                 d.line(
