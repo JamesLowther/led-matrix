@@ -116,7 +116,7 @@ class NetworkMonitor():
         x_offset = 2
         y_offset = 1
 
-        color = "thistle"
+        color = "lightpink"
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
