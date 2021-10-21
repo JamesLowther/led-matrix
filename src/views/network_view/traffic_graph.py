@@ -76,6 +76,9 @@ class TrafficGraph:
             min_tx = min(min_tx, x["wan-tx_bytes"])
             min_rx = min(min_rx, x["wan-rx_bytes"])
 
+        min_rx = 0
+        min_tx = 0
+
         d = ImageDraw.Draw(image)
 
         tx_prev = None
