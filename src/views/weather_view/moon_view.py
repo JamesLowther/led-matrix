@@ -136,7 +136,7 @@ class MoonView:
     
     def draw_date(self, image):
         x_offset = 0
-        y_offset = 26
+        y_offset = 24
         
         color = (170, 170, 170)
 
