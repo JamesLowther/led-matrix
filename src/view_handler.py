@@ -45,12 +45,12 @@ class ViewHandler():
                 "time": 700
             },
             {
-                "view": test_view,
-                "time": 60
-            },
-            {
                 "view": weather_view,
                 "time": 410
+            },
+            {
+                "view": test_view,
+                "time": 120
             }
         ]
 
