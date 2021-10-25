@@ -2,6 +2,7 @@ from PIL import Image, ImageChops, ImageOps, ImageFont, ImageDraw
 import time
 import numpy as np
 from math import pi, sin, cos, radians
+import json
 
 from config import Config
 from common import msleep
@@ -463,9 +464,8 @@ class APIConnection():
         Sends a request to the ISS API to get its location.
         """
         try:
-            r = requests.get(self.ISS_ENDPOINT)
-            loc = r.json()
-        except requests.exceptions.ConnectionError:
+            loc = requests.get(self.ISS_ENDPOINT).json()
+        except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
             return None
 
         return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
@@ -475,9 +475,8 @@ class APIConnection():
         Sends a request to get the number of astronauts on the ISS.
         """
         try:
-            r = requests.get(self.AST_ENDPOINT)
-            results = r.json()
-        except requests.exceptions.ConnectionError:
+            results = requests.get(self.AST_ENDPOINT).json()
+        except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
             return None
 
         count = 0

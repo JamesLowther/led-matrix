@@ -313,9 +313,8 @@ class PiHoleConnection():
             ).json()
 
             return data
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
             return False
-        
 
 class UnifiConnection():
     ENDPOINT = "https://192.168.1.5:8443"
@@ -382,9 +381,7 @@ class UnifiConnection():
                     verify=False
                 ).json()
 
-            except requests.exceptions.RequestException:
-                continue
-            except json.decoder.JSONDecodeError:
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
                 continue
 
             if data["meta"]["rc"] == "ok":
@@ -407,9 +404,7 @@ class UnifiConnection():
                     f"{self.ENDPOINT}/api/s/{self.SITE}/stat/health",
                     verify=False
                 ).json()
-            except requests.exceptions.RequestException:
-                continue
-            except json.decoder.JSONDecodeError:
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
                 continue
 
             if data["meta"]["rc"] == "ok" and data["data"][1]["status"] == "ok":

@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+import json
 
 from config import Config
 
@@ -287,7 +288,7 @@ class WeatherData():
                 try:
                     data = requests.get(url).json()
                     break
-                except requests.exceptions.RequestException:
+                except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
                     if i + 1 == retry_attempts:
                         return False
 
@@ -344,7 +345,7 @@ class RadarData():
             try:
                 self._api_file = requests.get(self.API_FILE_URL).json()
                 break
-            except requests.exceptions.RequestException:
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
                 if i + 1 == retry_attempts:
                     return False
                 msleep(self.RETRY_TIME)
