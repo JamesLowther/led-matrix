@@ -162,7 +162,7 @@ class TemperatureView():
                     max_color = warm_color
                 else:
                     max_color = warmish_color
-            elif max_temp_int < 0:
+            elif max_temp_int <= 0:
                 if max_temp_int <= freezing:
                     max_color = freezing_color
                 elif max_temp_int <= cold:
