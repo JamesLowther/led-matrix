@@ -304,7 +304,7 @@ class PingConnection():
         return float(resp[s_last + 1:last])
 
 class PiHoleConnection():
-    ENDPOINT = "http://192.168.1.5/admin/api.php"
+    ENDPOINT = "http://192.168.1.2/admin/api.php"
 
     def update(self):
         try:
@@ -317,7 +317,7 @@ class PiHoleConnection():
             return False
 
 class UnifiConnection():
-    ENDPOINT = "https://192.168.1.5:8443"
+    ENDPOINT = "https://192.168.1.2:8443"
     SITE = "default"
 
     def __init__(self):
