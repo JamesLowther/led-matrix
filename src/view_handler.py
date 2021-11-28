@@ -93,10 +93,7 @@ class ViewHandler():
                     self._manual_timer.daemon = True
                     self._manual_timer.start()
             
-            view_return = views[self._current_view]["view"].run()
-
-            if view_return == False:
-                self._auto_switch = True
+            views[self._current_view]["view"].run()
 
             if self._long_press_event.is_set():
                 self.handle_shutdown(poweroff_view, switch_view)
