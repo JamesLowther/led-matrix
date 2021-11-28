@@ -119,7 +119,7 @@ class MoonView:
 
         moon_id = self._moon_phase["id"]
 
-        path = os.path.join(Config.SRC_BASE, "assets", "weatherview", "moon_icons", f"{moon_id}.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "weather_view", "moon_icons", f"{moon_id}.png")
         image = Image.open(path)
 
         resized = image.resize((size, size), Image.BOX)

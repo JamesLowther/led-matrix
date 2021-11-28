@@ -413,7 +413,7 @@ class Earth():
         Turns the pixels in an array of bits.
         """
         # Open the map image.
-        path = os.path.join(Config.SRC_BASE, "assets", "issview", "world-map.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "iss_view", "world-map.png")
         img = Image.open(path).convert("1")
 
         # Transform the image to fit sphere dimensions.

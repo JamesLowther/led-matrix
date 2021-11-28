@@ -225,7 +225,7 @@ class NetworkMonitor():
         )
 
     def get_icon(self, code, size):
-        path = os.path.join(Config.SRC_BASE, "assets", "networkview", f"{code}.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "network_view", f"{code}.png")
         image = Image.open(path)
 
         resized = image.resize((size, size), Image.BOX)

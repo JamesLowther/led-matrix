@@ -218,7 +218,7 @@ class TemperatureView():
             x += block_width
 
     def get_icon(self, code, size):
-        path = os.path.join(Config.SRC_BASE, "assets", "weatherview", "icons", f"{code}.png")
+        path = os.path.join(Config.SRC_BASE, "assets", "weather_view", "icons", f"{code}.png")
         image = Image.open(path)
 
         resized = image.resize((size, size), Image.BOX)
