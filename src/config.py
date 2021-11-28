@@ -7,6 +7,7 @@ class Config:
     SRC_BASE = os.path.dirname(__file__)
     FONTS = os.path.join(SRC_BASE, "assets", "fonts")
     STATE_PATH = os.path.join(SRC_BASE, "..", "state.yml")
+    ASSETS_PATH = os.path.join(SRC_BASE, "assets")
 
     # Environment variables.
     ENV_VALUES = dotenv_values()

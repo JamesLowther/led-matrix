@@ -55,12 +55,15 @@ class MatrixWindow():
         self.update_window()
 
     def update_image(self, image):
-        resized_image = image.resize((int(self._canvas["width"]), int(self._canvas["height"])), resample=PIL.Image.BOX)
-        grid_image = self.draw_grid(resized_image)
-        tk_image = ImageTk.PhotoImage(grid_image)
-        self._current_image = tk_image
-        self._canvas.itemconfig(self._image_id, image=self._current_image)
-        self.update_window()
+        try:
+            resized_image = image.resize((int(self._canvas["width"]), int(self._canvas["height"])), resample=PIL.Image.BOX)
+            grid_image = self.draw_grid(resized_image)
+            tk_image = ImageTk.PhotoImage(grid_image)
+            self._current_image = tk_image
+            self._canvas.itemconfig(self._image_id, image=self._current_image)
+            self.update_window()
+        except tk.TclError:
+            pass
 
     def draw_grid(self, image):
         pixel_w = int(self._canvas["width"]) // 64

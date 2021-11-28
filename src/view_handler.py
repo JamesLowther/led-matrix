@@ -8,6 +8,7 @@ from views.switch_view import SwitchView
 from views.network_view.network_view import NetworkMonitor
 from views.test_view.test_view import TestView
 from views.iss_view.iss_view import ISSView
+from views.video_view.video_view import VideoView
 from views.weather_view.weather_view import WeatherView
 
 class ViewHandler():
@@ -24,7 +25,7 @@ class ViewHandler():
         self._mode = Config.read_key("mode")
         self._auto_switch = True
 
-        self._current_view = 0
+        self._current_view = 4
 
     def start(self):
         poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
@@ -34,6 +35,9 @@ class ViewHandler():
         network_view = NetworkMonitor(self._matrix, self._press_event)
         test_view = TestView(self._matrix, self._press_event)
         iss_view = ISSView(self._matrix, self._press_event)
+
+        fireplace_view = VideoView(self._matrix, self._press_event, "fireplace")
+        jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
 
         views = [
             {
@@ -51,6 +55,14 @@ class ViewHandler():
             {
                 "view": test_view,
                 "time": 120
+            },
+            {
+                "view": fireplace_view,
+                "time": 200
+            },
+            {
+                "view": jeremy_view,
+                "time": 200
             }
         ]
 

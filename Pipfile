@@ -9,6 +9,7 @@ pillow = "*"
 requests = "*"
 numpy = "*"
 pyyaml = "*"
+opencv-python = "*"
 
 [dev-packages]
 
