@@ -47,8 +47,14 @@ class NetworkMonitor():
 
         request_e.set()
         
+        initial_wait = 0
         while not initial_api_updated:
             msleep(200)
+            initial_wait += 200
+            
+            if initial_wait >= 5000:
+                return
+
 
         while not self._press_event.is_set():
 

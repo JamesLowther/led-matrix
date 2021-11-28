@@ -4,6 +4,7 @@ import numpy as np
 import os, shutil
 import argparse
 import json
+import tarfile
 
 def pixelate(img, w, h):
     return cv2.resize(img, (w, h), interpolation=cv2.INTER_LINEAR)
@@ -23,7 +24,7 @@ def main():
     parser.add_argument("-n", "--num-frames", type=int,
                         help="number of frames to convert. -1 for all. default -1", default=-1)
     parser.add_argument("-f", "--fps", type=int,
-                        help="fps of new video. default 5", default=5)
+                        help="fps of new video. default 24", default=24)
     parser.add_argument("-o", "--offset", type=int,
                         help="video offset. default 0", default=0)
 
@@ -37,6 +38,8 @@ def main():
     # Open files.
     cap = cv2.VideoCapture(args.input_file)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    tar = tarfile.open(f"{args.output_dir}.tar.gz", "w:gz") 
 
     if args.num_frames != -1:
         frame_count = min(frame_count, args.num_frames)
@@ -52,8 +55,8 @@ def main():
     print()
 
     # Make output dir.
-    if os.path.exists(args.output_dir):
-        r = input(f"Path {args.output_dir} exists. Overwrite? [y/N]: ")
+    if os.path.exists(args.output_dir) or os.path.exists(f"{args.output_dir}.tar.gz"):
+        r = input(f"Files for {args.output_dir} already exist. Overwrite? [y/N]: ")
         if r.lower() != "y":
             exit(0)
 
@@ -79,8 +82,10 @@ def main():
             resized = pixelate(frame, args.width, args.height)
 
             file_name = str(current_frame-1).zfill(len(str(frame_count-1)))
+            file_path = f"./{args.output_dir}/{file_name}.png"
 
-            cv2.imwrite(f"./{args.output_dir}/{file_name}.png", resized)
+            cv2.imwrite(file_path, resized)
+            tar.add(file_path)
         else:
             break
 
@@ -94,9 +99,12 @@ def main():
         "fps": args.fps
     }
     
-    with open(os.path.join(args.output_dir, "metadata.json"), "w") as of:
+    meta_path = os.path.join(args.output_dir, "metadata.json")
+    with open(meta_path, "w") as of:
         json.dump(metadata, of)
         of.close()
+
+    tar.add(meta_path)
 
     print("\nDone.")
 

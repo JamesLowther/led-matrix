@@ -17,6 +17,8 @@ class ViewHandler():
         "manual",
     ]
 
+    START_VIEW = 5
+
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
         self._press_event = press_event
@@ -25,17 +27,19 @@ class ViewHandler():
         self._mode = Config.read_key("mode")
         self._auto_switch = True
 
-        self._current_view = 4
+        self._current_view = self.START_VIEW
 
     def start(self):
         poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
         switch_view = SwitchView(self._matrix, self._press_event, self._long_press_event)
 
+        # Real-time views.
         weather_view = WeatherView(self._matrix, self._press_event)
         network_view = NetworkMonitor(self._matrix, self._press_event)
         test_view = TestView(self._matrix, self._press_event)
         iss_view = ISSView(self._matrix, self._press_event)
 
+        # Video views.
         fireplace_view = VideoView(self._matrix, self._press_event, "fireplace")
         jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
 
@@ -89,7 +93,10 @@ class ViewHandler():
                     self._manual_timer.daemon = True
                     self._manual_timer.start()
             
-            views[self._current_view]["view"].run()
+            view_return = views[self._current_view]["view"].run()
+
+            if view_return == False:
+                self._auto_switch = True
 
             if self._long_press_event.is_set():
                 self.handle_shutdown(poweroff_view, switch_view)
