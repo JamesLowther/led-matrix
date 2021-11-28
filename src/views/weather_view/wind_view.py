@@ -6,7 +6,7 @@ import time
 
 from config import Config
 
-class WindView():
+class WindView:
     BG_COLOR = "black"
     WIND_COLOR = (200, 200, 200)
 

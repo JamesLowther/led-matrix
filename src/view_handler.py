@@ -11,7 +11,7 @@ from views.iss_view.iss_view import ISSView
 from views.video_view.video_view import VideoView
 from views.weather_view.weather_view import WeatherView
 
-class ViewHandler():
+class ViewHandler:
     MODES = [
         "timed",
         "manual",

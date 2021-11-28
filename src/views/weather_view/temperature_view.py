@@ -4,7 +4,7 @@ from datetime import datetime
 from PIL import Image, ImageFont, ImageDraw
 from config import Config
 
-class TemperatureView():
+class TemperatureView:
     BG_COLOR = "black"
 
     def __init__(self, matrix, location):

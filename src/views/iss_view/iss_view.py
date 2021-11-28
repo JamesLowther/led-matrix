@@ -15,7 +15,7 @@ iss_coords = (0, 0)
 number_ast = 0
 api_error = False
 
-class ISSView():
+class ISSView:
     REFRESH_INTERVAL = 150 # ms.
     API_INTERVAL= 5 # s.
     BG_COLOUR = "black"
@@ -215,7 +215,7 @@ class ISSView():
             fill=color
         )
 
-class Earth():
+class Earth:
     HOME_COORDS = (51.030436, -114.065720)
 
     EARTH_COLOR = (140, 140, 140, 255)
@@ -455,7 +455,7 @@ def request_thread():
 
         request_e.clear()
         
-class APIConnection():
+class APIConnection:
     ISS_ENDPOINT = "http://api.open-notify.org/iss-now.json"
     AST_ENDPOINT = "http://api.open-notify.org/astros.json"
 

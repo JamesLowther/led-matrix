@@ -4,7 +4,7 @@ import os
 
 from config import Config
 
-class RadarView():
+class RadarView:
     LOCATION_COLOR = "lightsteelblue"
 
     def __init__(self, matrix):

@@ -58,7 +58,7 @@ LOCATIONS = [
 WIND_LOCATION = "Calgary"
 MOON_LOCATION = "Calgary"
 
-class WeatherView():
+class WeatherView:
     FRAME_INTERVAL = 1300 # ms.
     HOLD_TIME = 2600 # ms.
     
@@ -268,7 +268,7 @@ def request_thread():
 
         request_e.clear()
 
-class WeatherData():
+class WeatherData:
     EXCLUDE = "minutely,hourly"
 
     RETRY_TIME = 2000
@@ -298,7 +298,7 @@ class WeatherData():
             
         weather_api_updated = True
 
-class RadarData():
+class RadarData:
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
     
     RETRY_TIME = 2000

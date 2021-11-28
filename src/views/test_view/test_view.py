@@ -3,7 +3,7 @@ import time
 import numpy as np
 from math import pi, sin, cos
 
-class TestView():
+class TestView:
     def __init__(self, matrix, press_event):
         self.matrix = matrix
         self._press_event = press_event

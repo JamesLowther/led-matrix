@@ -3,7 +3,7 @@ import time
 import os
 from config import Config
 
-class PoweroffView():
+class PoweroffView:
     COUNTDOWN = 15
 
     def __init__(self, matrix, press_event, long_press_event):

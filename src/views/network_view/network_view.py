@@ -23,7 +23,7 @@ traffic_interval_data = None
 
 request_e = threading.Event()
 
-class NetworkMonitor():
+class NetworkMonitor:
     API_INTERVAL = 5 # s.
 
     REFRESH_INTERVAL = 800 # ms.
@@ -288,7 +288,7 @@ def request_thread():
 
         initial_api_updated = True
 
-class PingConnection():
+class PingConnection:
     ENDPOINT = "8.8.8.8"
 
     def update(self):
@@ -303,7 +303,7 @@ class PingConnection():
 
         return float(resp[s_last + 1:last])
 
-class PiHoleConnection():
+class PiHoleConnection:
     ENDPOINT = "http://192.168.1.2/admin/api.php"
 
     def update(self):
@@ -316,7 +316,7 @@ class PiHoleConnection():
         except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
             return False
 
-class UnifiConnection():
+class UnifiConnection:
     ENDPOINT = "https://192.168.1.2:8443"
     SITE = "default"
 

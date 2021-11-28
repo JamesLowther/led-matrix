@@ -5,7 +5,7 @@ except ModuleNotFoundError:
 
 import argparse
 
-class Matrix():
+class Matrix:
     def __init__(self):
         self._parser = argparse.ArgumentParser()
 

@@ -34,7 +34,7 @@ class RGBMatrixOptions:
         self.disable_hardware_pulsing = None
         self.hardware_mapping = None
 
-class MatrixWindow():
+class MatrixWindow:
     WIDTH = 1024
     HEIGHT = WIDTH // 2
 
