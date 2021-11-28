@@ -17,7 +17,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 5
+    START_VIEW = 4
 
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
@@ -62,11 +62,11 @@ class ViewHandler:
             },
             {
                 "view": fireplace_view,
-                "time": 200
+                "time": 300
             },
             {
                 "view": jeremy_view,
-                "time": 200
+                "time": 300
             }
         ]
 
