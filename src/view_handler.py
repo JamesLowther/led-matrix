@@ -17,7 +17,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 4
+    START_VIEW = 0
 
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
