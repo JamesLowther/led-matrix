@@ -66,7 +66,7 @@ class ViewHandler:
             },
             {
                 "view": jeremy_view,
-                "time": 300
+                "time": 120
             }
         ]
 
