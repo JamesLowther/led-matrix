@@ -93,6 +93,7 @@ class ViewHandler:
                     self._manual_timer.daemon = True
                     self._manual_timer.start()
             
+            self.save_view()
             views[self._current_view]["view"].run()
 
             if self._long_press_event.is_set():
@@ -135,7 +136,6 @@ class ViewHandler:
             Config.update_key("mode", self._mode)
 
         elif result == True:
-            self.save_view()
             if Config.VIRTUAL_MODE:
                 self.log("Virtual shutdown requested.")
             else:

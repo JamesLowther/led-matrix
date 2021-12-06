@@ -1,12 +1,13 @@
 import os
+import stat
 from dotenv import dotenv_values
-import yaml
+import json
 
 class Config:
     # Paths.
     SRC_BASE = os.path.dirname(__file__)
     FONTS = os.path.join(SRC_BASE, "assets", "fonts")
-    STATE_PATH = os.path.join(SRC_BASE, "..", "state.yml")
+    STATE_PATH = os.path.join(SRC_BASE, "..", "state.json")
     ASSETS_PATH = os.path.join(SRC_BASE, "assets")
 
     # Environment variables.
@@ -24,43 +25,45 @@ class Config:
     }
 
     def initialize_state():
+        json_s = None
         if not os.path.isfile(Config.STATE_PATH):
             open(Config.STATE_PATH, "a").close()
-        
-        os.chmod(Config.STATE_PATH, 0o664)
+            json_s = dict()
+        else:
+            json_s = Config.read_full()
 
-        yaml_s = Config.read_full()
+        os.chmod(Config.STATE_PATH,
+            stat.S_IREAD | stat.S_IWRITE |
+            stat.S_IRGRP | stat.S_IWGRP |
+            stat.S_IROTH
+        )            
 
-        if yaml_s == None:
-            yaml_s = dict()
-
-        if not set(Config.DEFAULTS.keys()).issubset(set(yaml_s.keys())):
+        if not set(Config.DEFAULTS.keys()).issubset(set(json_s.keys())):
             for key in Config.DEFAULTS.keys():
-                if not key in yaml_s.keys():
-                    yaml_s[key] = Config.DEFAULTS[key]
+                if not key in json_s.keys():
+                    json_s[key] = Config.DEFAULTS[key]
 
-            Config.update_full(yaml_s)
+            Config.update_full(json_s)
 
     def read_full():
         state = open(Config.STATE_PATH, "r")
-        yaml_s = yaml.load(state, Loader=yaml.FullLoader)
+        json_s = json.load(state)
         state.close()
 
-        return yaml_s
+        return json_s
 
     def read_key(key):
-        yaml_s = Config.read_full()
-        
-        return yaml_s[key]
+        json_s = Config.read_full()
+        return json_s[key]
 
     def update_full(data):
         state = open(Config.STATE_PATH, "w")
-        yaml.dump(data, state)
+        json.dump(data, state)
         state.close()
 
     def update_key(key, value):
-        yaml_s = Config.read_full()
-        yaml_s[key] = value
-        Config.update_full(yaml_s)
+        json_s = Config.read_full()
+        json_s[key] = value
+        Config.update_full(json_s)
 
         
