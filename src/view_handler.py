@@ -41,7 +41,7 @@ class ViewHandler:
 
         # Video views.
         fireplace_view = VideoView(self._matrix, self._press_event, "fireplace")
-        jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
+        # jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
 
         views = [
             {
@@ -64,10 +64,10 @@ class ViewHandler:
                 "view": fireplace_view,
                 "time": 300
             },
-            {
-                "view": jeremy_view,
-                "time": 120
-            }
+            # {
+            #     "view": jeremy_view,
+            #     "time": 120
+            # }
         ]
 
         if self._mode == "manual":
