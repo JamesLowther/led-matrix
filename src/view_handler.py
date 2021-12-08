@@ -29,6 +29,9 @@ class ViewHandler:
 
         self._current_view = self.START_VIEW
 
+        if self._mode == "manual":
+            self._current_view = Config.read_key("view")
+
     def start(self):
         poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
         switch_view = SwitchView(self._matrix, self._press_event, self._long_press_event)
@@ -69,9 +72,6 @@ class ViewHandler:
             #     "time": 120
             # }
         ]
-
-        if self._mode == "manual":
-            self._current_view = Config.read_key("view")
             
         self._auto_timer = None
         self._manual_timer = None
