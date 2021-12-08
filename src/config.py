@@ -65,5 +65,3 @@ class Config:
         json_s = Config.read_full()
         json_s[key] = value
         Config.update_full(json_s)
-
-        
