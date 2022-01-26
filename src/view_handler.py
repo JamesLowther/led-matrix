@@ -18,6 +18,7 @@ class ViewHandler:
     ]
 
     START_VIEW = 0
+    MANUAL_TIME = 300
 
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
@@ -25,6 +26,10 @@ class ViewHandler:
         self._long_press_event = long_press_event
 
         self._mode = Config.read_key("mode")
+        if self._mode not in self.MODES:
+            self._mode = "timed"
+            Config.update_key("mode", self._mode)
+
         self._auto_switch = True
 
         self._current_view = self.START_VIEW
@@ -44,57 +49,74 @@ class ViewHandler:
 
         # Video views.
         fireplace_view = VideoView(self._matrix, self._press_event, "fireplace")
-        # jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
+        jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
 
         views = [
             {
                 "view": iss_view,
-                "time": 700
+                "time": 700,
+                "auto": True
             },
             {
                 "view": network_view,
-                "time": 700
+                "time": 700,
+                "auto": True
             },
             {
                 "view": weather_view,
-                "time": 410
+                "time": 410,
+                "auto": True
             },
             {
                 "view": test_view,
-                "time": 120
+                "time": 120,
+                "auto": True
             },
             {
                 "view": fireplace_view,
-                "time": 300
+                "time": 300,
+                "auto": True
             },
-            # {
-            #     "view": jeremy_view,
-            #     "time": 120
-            # }
+            {
+                "view": jeremy_view,
+                "time": 120,
+                "auto": False
+            }
         ]
+
+        if self._current_view >= len(views):
+            self._current_view = self.START_VIEW
+            Config.update_key("view", self._current_view)
             
         self._auto_timer = None
         self._manual_timer = None
 
+        skip = False
+
         while True:
             if self._mode == "timed":
                 if self._auto_switch:
-                    self._auto_switch = False
-                    self._auto_timer = threading.Timer(views[self._current_view]["time"], self.handle_timer)
-                    self._auto_timer.daemon = True
-                    self._auto_timer.start()
+                    if not views[self._current_view]["auto"]:
+                        skip = True
+
+                    else:
+                        self._auto_switch = False
+                        self._auto_timer = threading.Timer(views[self._current_view]["time"], self.handle_timer)
+                        self._auto_timer.daemon = True
+                        self._auto_timer.start()
                 
                 else:
                     self.cancel_timers()
 
-                    manual_time = 300 # s.
-
-                    self._manual_timer = threading.Timer(manual_time, self.handle_timer)
+                    self._manual_timer = threading.Timer(self.MANUAL_TIME, self.handle_timer)
                     self._manual_timer.daemon = True
                     self._manual_timer.start()
             
-            self.save_view()
-            views[self._current_view]["view"].run()
+            if not skip:
+                self.save_view()
+                views[self._current_view]["view"].run()
+
+            skip = False
 
             if self._long_press_event.is_set():
                 self.handle_shutdown(poweroff_view, switch_view)
@@ -102,7 +124,7 @@ class ViewHandler:
 
             self._current_view = (self._current_view + 1) % len(views)
             
-            self.clear_events()
+            self.clear_events()        
 
     def cancel_timers(self):
         try:
