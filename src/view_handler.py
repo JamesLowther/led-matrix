@@ -17,7 +17,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 0
+    START_VIEW = 6
     MANUAL_TIME = 300
 
     def __init__(self, matrix, press_event, long_press_event):
@@ -50,6 +50,7 @@ class ViewHandler:
         # Video views.
         fireplace_view = VideoView(self._matrix, self._press_event, "fireplace")
         jeremy_view = VideoView(self._matrix, self._press_event, "jeremy")
+        balls_view = VideoView(self._matrix, self._press_event, "balls")
 
         views = [
             {
@@ -78,10 +79,15 @@ class ViewHandler:
                 "auto": True
             },
             {
+                "view": balls_view,
+                "time": 158,
+                "auto": True
+            },
+            {
                 "view": jeremy_view,
                 "time": 120,
                 "auto": False
-            }
+            },
         ]
 
         if self._current_view >= len(views):
