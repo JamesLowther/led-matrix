@@ -17,7 +17,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 6
+    START_VIEW = 0
     MANUAL_TIME = 300
 
     def __init__(self, matrix, press_event, long_press_event):
