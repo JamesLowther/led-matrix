@@ -16,7 +16,7 @@ class Config:
     VIRTUAL_MODE = False
 
     # Enable virtual mode even if running on Pi.
-    VIRTUAL_MODE_OVERRIDE = True
+    VIRTUAL_MODE_OVERRIDE = False
 
     # Default state values.
     DEFAULTS = {
