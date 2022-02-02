@@ -30,7 +30,7 @@ class VideoView:
             msleep(self._sleep)
 
             if not self._loop and current_frame == (len(self._frames) - 1):
-                break
+                return True
 
             current_frame = (current_frame + 1) % len(self._frames)
 
