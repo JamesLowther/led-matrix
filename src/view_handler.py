@@ -72,6 +72,11 @@ class ViewHandler:
                         "view": VideoView(self._matrix, self._press_event, "pillows", loop=False),
                         "time": 120,
                         "auto": True
+                    },
+                    {
+                        "view": VideoView(self._matrix, self._press_event, "kevin", loop=False),
+                        "time": 120,
+                        "auto": True
                     }
                 ],
                 "probability": 1
