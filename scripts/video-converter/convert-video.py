@@ -39,8 +39,6 @@ def main():
     cap = cv2.VideoCapture(args.input_file)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    tar = tarfile.open(f"{args.output_dir}.tar.gz", "w:gz") 
-
     if args.num_frames != -1:
         frame_count = min(frame_count, args.num_frames)
     
@@ -59,6 +57,8 @@ def main():
         r = input(f"Files for {args.output_dir} already exist. Overwrite? [y/N]: ")
         if r.lower() != "y":
             exit(0)
+
+    tar = tarfile.open(f"{args.output_dir}.tar.gz", "w:gz") 
 
     # Delete existing output path.
     if os.path.isfile(args.output_dir):

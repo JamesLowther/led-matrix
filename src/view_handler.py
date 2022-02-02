@@ -63,8 +63,13 @@ class ViewHandler:
             },
             {
                 "random": [
+                    # {
+                    #     "view": VideoView(self._matrix, self._press_event, "balls", loop=False),
+                    #     "time": 120,
+                    #     "auto": True
+                    # },
                     {
-                        "view": VideoView(self._matrix, self._press_event, "balls", loop=False),
+                        "view": VideoView(self._matrix, self._press_event, "pillows", loop=False),
                         "time": 120,
                         "auto": True
                     }
@@ -147,7 +152,7 @@ class ViewHandler:
         
         while "random" in view.keys():
             r = randint(1,100)
-            if r <= view["probability"] * 100:
+            if not self._auto_switch or r <= view["probability"] * 100:
                 return choice(view["random"])
 
             self.increment_view()
