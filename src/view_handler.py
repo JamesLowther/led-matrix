@@ -74,7 +74,7 @@ class ViewHandler:
                     #     "auto": True
                     # },
                     {
-                        "view": VideoView(self._matrix, self._press_event, "kevin", loop=False),
+                        "view": VideoView(self._matrix, self._press_event, "obi", loop=False),
                         "time": 120,
                         "auto": True
                     }
