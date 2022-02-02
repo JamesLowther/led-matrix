@@ -18,7 +18,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 0      # Index of view to start with.
+    START_VIEW = 5      # Index of view to start with.
     MANUAL_TIME = 300   # How long to hold view after manual press.
 
     def __init__(self, matrix, press_event, long_press_event):
@@ -69,7 +69,7 @@ class ViewHandler:
                         "auto": True
                     }
                 ],
-                "probability": 0.8
+                "probability": 1
             },
             {
                 "view": VideoView(self._matrix, self._press_event, "jeremy"),
