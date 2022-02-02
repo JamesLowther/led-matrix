@@ -18,7 +18,7 @@ class ViewHandler:
         "manual",
     ]
 
-    START_VIEW = 5      # Index of view to start with.
+    START_VIEW = 0      # Index of view to start with.
     MANUAL_TIME = 300   # How long to hold view after manual press.
 
     def __init__(self, matrix, press_event, long_press_event):
