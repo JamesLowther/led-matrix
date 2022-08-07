@@ -223,7 +223,7 @@ class ViewHandler:
                 # os.setuid(0)
                 # os.setgid(0)
                 print(os.getuid())
-                print(os.getsid())
+                print(os.getgid())
                 os.system("systemctl poweroff -i")
 
     def log(self, text):
