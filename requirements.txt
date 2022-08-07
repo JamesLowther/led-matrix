@@ -1,0 +1,5 @@
+python-dotenv
+pillow
+requests
+numpy
+opencv-python
