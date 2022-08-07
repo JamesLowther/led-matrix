@@ -1,0 +1,7 @@
+[Allow pi user to shutdown the system]
+Identity=unix-user:*
+Action=org.freedesktop.login1.set-wall-message;org.freedesktop.login1.power-off;org.freedesktop.login1.power-off-multiple-sessions;org.freedesktop.login1.power-off-ignore-inhibit
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+
