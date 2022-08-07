@@ -1,5 +1,7 @@
 # Led Matrix
 
+The adafruit matrix library install script can be found at https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/main/rgb-matrix.sh.
+
 ## Env file
 Create .env in the root of the repository with the following format:
 ```
