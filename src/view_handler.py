@@ -220,10 +220,6 @@ class ViewHandler:
                 except:
                     pass
 
-                # os.setuid(0)
-                # os.setgid(0)
-                # print(os.getuid())
-                # print(os.getgid())
                 os.system("sudo systemctl poweroff -i")
 
     def log(self, text):
