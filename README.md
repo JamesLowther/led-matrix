@@ -1,5 +1,14 @@
 # Led Matrix
 
+## Env file
+Create .env in the root of the repository with the following format:
+```
+UNIFI_USERNAME=...
+UNIFI_PASSWORD=...
+
+OPENWEATHER_API_KEY=...
+```
+
 ## Polkit
 Add the following to `/etc/polkit-1/localauthority/50-local.d/54-allow-poweroff.pkla`:
 
