@@ -27,7 +27,7 @@ class ViewHandler:
         self._long_press_event = long_press_event
 
         self._auto_switch = True
-        
+
         self.init_views()
         self.init_mode()
 
@@ -124,11 +124,11 @@ class ViewHandler:
                     else:
                         self._auto_switch = False
                         self.start_auto_timer()
-                
+
                 # View was changed manually. Start the manual timer.
                 else:
                     self.start_manual_timer()
-            
+
             # Start the view.
             if not skip:
                 self.save_view()
@@ -147,14 +147,14 @@ class ViewHandler:
 
             # Increment the view.
             self.increment_view()
-            
+
             # Reset state.
             self.cancel_timers()
             self.clear_events()
 
     def get_next_view(self):
         view = self._views[self._current_view]
-        
+
         while "random" in view.keys():
             r = randint(1,100)
             if not self._auto_switch or r <= view["probability"] * 100:
@@ -219,7 +219,9 @@ class ViewHandler:
                     GPIO.cleanup()
                 except:
                     pass
-                
+
+                os.setuid(0)
+                os.setgid(0)
                 os.system("systemctl poweroff -i")
 
     def log(self, text):
