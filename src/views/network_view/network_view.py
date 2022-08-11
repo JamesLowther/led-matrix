@@ -24,9 +24,9 @@ traffic_interval_data = None
 request_e = threading.Event()
 
 class NetworkMonitor:
-    API_INTERVAL = 5 # s.
+    API_INTERVAL = 10 # s.
 
-    REFRESH_INTERVAL = 800 # ms.
+    REFRESH_INTERVAL = 10000 # ms.
     BG_COLOR = "black"
 
     def __init__(self, matrix, press_event):
@@ -46,13 +46,13 @@ class NetworkMonitor:
         initial_api_updated = False
 
         request_e.set()
-        
+
         while not initial_api_updated:
             msleep(200)
 
         while not self._press_event.is_set():
 
-            image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)     
+            image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
 
             if api_error:
                 self.draw_error(image)
@@ -112,7 +112,7 @@ class NetworkMonitor:
         """
         Draws the current time.
         """
-        
+
         x_offset = 2
         y_offset = 1
 
@@ -216,7 +216,7 @@ class NetworkMonitor:
 
         d.text(
             (
-                self._matrix.dimensions[0] - percent_size[0] - x_offset, 
+                self._matrix.dimensions[0] - percent_size[0] - x_offset,
                 y_offset + ((icon_size / 2) - (percent_size[1] / 2))
             ),
             percent_str,
@@ -330,7 +330,7 @@ class UnifiConnection:
         Login to the Unifi controller.
         Sets the cookie for the session.
         """
-        
+
         try:
             self._session.post(
                 f"{self.ENDPOINT}/api/login",
@@ -342,14 +342,14 @@ class UnifiConnection:
             )
         except requests.exceptions.RequestException:
             return
-        
+
         except KeyError:
             return
 
     def logout(self):
         """
         Logout of the Unifi controller.
-        Deletes the cookie for the session. 
+        Deletes the cookie for the session.
         """
         self._session.post(
             f"{self.ENDPOINT}/api/logout",
@@ -388,7 +388,7 @@ class UnifiConnection:
                 return data
 
             # Attempt to login if the query failed.
-            self.login()         
+            self.login()
 
         return False
 
@@ -411,6 +411,6 @@ class UnifiConnection:
                 return data
 
             # Attempt to login if the query failed.
-            self.login()                
+            self.login()
 
         return False
