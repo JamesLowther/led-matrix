@@ -304,7 +304,7 @@ class PingConnection:
         return float(resp[s_last + 1:last])
 
 class PiHoleConnection:
-    ENDPOINT = "https://pihole.local.jameslowther.com/api.php"
+    ENDPOINT = "https://pihole.lab.jameslowther.com/admin/api.php"
 
     def update(self):
         try:
