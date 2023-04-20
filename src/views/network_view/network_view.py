@@ -195,7 +195,7 @@ class NetworkMonitor:
         f = ImageFont.truetype(font_path, 5)
         d = ImageDraw.Draw(image)
 
-        percent = round(pihole_data["ads_percentage_today"], 1)
+        percent = round(float(pihole_data["ads_percentage_today"]), 1)
 
         percent_str = f"{percent}%"
         percent_size = d.textsize(percent_str, f)
