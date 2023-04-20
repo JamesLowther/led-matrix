@@ -220,7 +220,7 @@ class ViewHandler:
                 except:
                     pass
 
-                os.system("shutdown now")
+                os.system("sudo systemctl poweroff -i")
 
     def log(self, text):
         print(f"View Handler - {text}")

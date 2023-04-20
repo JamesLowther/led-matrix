@@ -26,7 +26,7 @@ class Main:
         self._long_press_event = threading.Event()
 
         self._button_thread = ButtonHandler(self._press_event, self._long_press_event, self._sigint_stop_event)
-        
+
         if Config.VIRTUAL_MODE:
             self._button_thread.daemon = True
         self._button_thread.start()
@@ -43,9 +43,9 @@ class Main:
         self._view_handler.save_view()
 
         # Hack to clear screen on termination.
-        image = Image.new("RGB", self._matrix.dimensions, color="black")     
+        image = Image.new("RGB", self._matrix.dimensions, color="black")
         self._matrix.set_image(image)
-        
+
         print("Main - Stopped.")
         sys.exit(0)
 
