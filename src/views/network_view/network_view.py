@@ -309,7 +309,7 @@ class PiHoleConnection:
     def update(self):
         try:
             data = requests.get(
-                f"{self.ENDPOINT}&auth={Config.ENV_VALUES['PIHOLE_API_TOKEN']}"
+                f"{self.ENDPOINT}?summary&auth={Config.ENV_VALUES['PIHOLE_API_TOKEN']}"
             ).json()
 
             return data
