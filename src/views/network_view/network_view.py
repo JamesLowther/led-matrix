@@ -317,7 +317,7 @@ class PiHoleConnection:
             return False
 
 class UnifiConnection:
-    ENDPOINT = "https://unifi.local.jameslowther.com"
+    ENDPOINT = "https://unifi.lab.jameslowther.com"
     SITE = "default"
 
     def __init__(self):
