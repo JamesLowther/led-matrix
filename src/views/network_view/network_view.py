@@ -26,7 +26,7 @@ request_e = threading.Event()
 class NetworkMonitor:
     API_INTERVAL = 10 # s.
 
-    REFRESH_INTERVAL = 10000 # ms.
+    REFRESH_INTERVAL = 150 # ms.
     BG_COLOR = "black"
 
     def __init__(self, matrix, press_event):
