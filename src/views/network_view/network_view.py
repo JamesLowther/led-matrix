@@ -272,6 +272,19 @@ def request_thread():
         else:
             traffic_interval_data = []
 
+        for x in traffic_interval_data:
+            try:
+                x["wan-tx_bytes"]
+            except KeyError:
+                x["wan-tx_bytes"] = 0
+                api_error = True
+
+            try:
+                x["wan-rx_bytes"]
+            except KeyError:
+                x["wan-rx_bytes"] = 0
+                api_error = True
+
         if health_return:
             health_data = health_return["data"]
         else:
