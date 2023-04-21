@@ -35,7 +35,7 @@ class Config:
         os.chmod(Config.STATE_PATH,
             stat.S_IREAD | stat.S_IWRITE |
             stat.S_IRGRP | stat.S_IWGRP |
-            stat.S_IROTH
+            stat.S_IROTH | stat.S_IWOTH
         )            
 
         if not set(Config.DEFAULTS.keys()).issubset(set(json_s.keys())):
