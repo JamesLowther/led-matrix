@@ -20,6 +20,7 @@ class Matrix:
         self._parser.add_argument("--led-pwm-lsb-nanoseconds", action="store", help="Base time-unit for the on-time in the lowest significant bit in nanoseconds. Default: 130", default=130, type=int)
         self._parser.add_argument("--led-show-refresh", action="store_true", help="Shows the current refresh rate of the LED panel")
         self._parser.add_argument("--led-slowdown-gpio", action="store", help="Slow down writing to GPIO. Range: 0..4. Default: 4", default=4, type=int)
+        self._parser.add_argument("--led-limit-refresh", action="store", help="Limit refresh rate to a specific Hz. Default: 0", default=0, type=int)
         self._parser.add_argument("--led-no-hardware-pulse", action="store", help="Don't use hardware pin-pulse generation")
         self._parser.add_argument("--led-rgb-sequence", action="store", help="Switch if your matrix has led colors swapped. Default: RGB", default="RGB", type=str)
         self._parser.add_argument("--led-pixel-mapper", action="store", help="Apply pixel mappers. e.g \"Rotate:90\"", default="", type=str)
@@ -49,6 +50,7 @@ class Matrix:
         options.pwm_lsb_nanoseconds = self.args.led_pwm_lsb_nanoseconds
         options.led_rgb_sequence = self.args.led_rgb_sequence
         options.pixel_mapper_config = self.args.led_pixel_mapper
+        options.limit_refresh_rate_hz = self.args.led_limit_refresh
 
         if self.args.led_show_refresh:
             options.show_refresh_rate = 1
