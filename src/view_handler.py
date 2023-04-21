@@ -160,6 +160,7 @@ class ViewHandler:
     def draw_startup(self):
         image = Image.new("RGB", self._matrix.dimensions, color="black")
         self._matrix.set_image(image)
+        self.draw_loading()
 
     def draw_loading(self):
         image = self._matrix.current_image
@@ -167,15 +168,15 @@ class ViewHandler:
 
         dimensions = self._matrix.dimensions
         size = 2
-        x_offset = 1
-        y_offset = 1
+        x_offset = 0
+        y_offset = 0
 
         d.rectangle(
             [
                 dimensions[0] - size - x_offset,
                 y_offset,
                 dimensions[0] - x_offset,
-                y_offset + size
+                y_offset + size - 1
             ],
             fill="darkgoldenrod"
         )
