@@ -28,6 +28,8 @@ class Matrix:
 
         self.process()
 
+        self.current_image = None
+
     def process(self):
         """
         Parse any command line arguments and set the matrix options.
@@ -64,4 +66,5 @@ class Matrix:
         self.dimensions = (self.matrix.width, self.matrix.height)
 
     def set_image(self, image, unsafe=True):
+        self.current_image = image
         self.matrix.SetImage(image, unsafe=unsafe)

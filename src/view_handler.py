@@ -2,6 +2,8 @@ import os
 import threading
 from random import randint, choice
 
+from PIL import Image, ImageFont, ImageDraw
+
 from config import Config
 
 from views.poweroff_view import PoweroffView
@@ -107,6 +109,8 @@ class ViewHandler:
             Config.update_key("view", self._current_view)
 
     def start(self):
+        self.draw_startup()
+
         self._auto_timer = None
         self._manual_timer = None
 
@@ -132,6 +136,7 @@ class ViewHandler:
             # Start the view.
             if not skip:
                 self.save_view()
+                self.draw_loading()
                 result = self._view["view"].run()
 
                 # View quit on its own. Considered an auto switch.
@@ -151,6 +156,32 @@ class ViewHandler:
             # Reset state.
             self.cancel_timers()
             self.clear_events()
+
+    def draw_startup(self):
+        image = Image.new("RGB", self._matrix.dimensions, color="black")
+        self._matrix.set_image(image)
+
+    def draw_loading(self):
+        image = self._matrix.current_image
+        d = ImageDraw.Draw(image)
+
+        dimensions = self._matrix.dimensions
+        size = 2
+        x_offset = 1
+        y_offset = 1
+
+        d.rectangle(
+            [
+                dimensions[0] - size - x_offset,
+                y_offset,
+                dimensions[0] - x_offset,
+                y_offset + size
+            ],
+            fill="darkgoldenrod"
+        )
+
+        self._matrix.set_image(image)
+
 
     def get_next_view(self):
         view = self._views[self._current_view]
