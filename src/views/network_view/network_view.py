@@ -24,7 +24,7 @@ traffic_interval_data = None
 request_e = threading.Event()
 
 class NetworkMonitor:
-    API_INTERVAL = 10 # s.
+    API_INTERVAL = 8 # s.
 
     REFRESH_INTERVAL = 150 # ms.
     BG_COLOR = "black"
@@ -55,7 +55,7 @@ class NetworkMonitor:
         while not self._press_event.is_set():
             current_t = time.time()
 
-            if current_t - last_refresh >= API_INTERVAL:
+            if current_t - last_refresh >= self.API_INTERVAL:
                 last_refresh = current_time                
 
                 image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
