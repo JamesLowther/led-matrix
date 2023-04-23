@@ -55,7 +55,7 @@ class NetworkMonitor:
         while not self._press_event.is_set():
             current_t = time.time()
 
-            if current_t- last_refresh >= API_INTERVAL:
+            if current_t - last_refresh >= API_INTERVAL:
                 last_refresh = current_time                
 
                 image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
