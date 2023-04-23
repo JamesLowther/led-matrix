@@ -50,22 +50,28 @@ class NetworkMonitor:
         while not initial_api_updated:
             msleep(200)
 
+        last_refresh = 0
+
         while not self._press_event.is_set():
+            current_t = time.time()
 
-            image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
+            if current_t- last_refresh >= API_INTERVAL:
+                last_refresh = current_time                
 
-            if api_error:
-                self.draw_error(image)
+                image = Image.new("RGB", self._matrix.dimensions, color=self.BG_COLOR)
 
-            self.draw_time(image)
-            self.draw_clients(image)
-            self.draw_pihole(image)
-            self.draw_ping(image)
+                if api_error:
+                    self.draw_error(image)
 
-            TrafficGraph.draw_graph(image, traffic_interval_data)
-            TrafficGraph.draw_tx_rx(image, health_data)
+                self.draw_time(image)
+                self.draw_clients(image)
+                self.draw_pihole(image)
+                self.draw_ping(image)
 
-            self._matrix.set_image(image)
+                TrafficGraph.draw_graph(image, traffic_interval_data)
+                TrafficGraph.draw_tx_rx(image, health_data)
+
+                self._matrix.set_image(image)
 
             self.check_api_interval()
 
