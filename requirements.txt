@@ -3,5 +3,3 @@ pillow
 requests
 urllib3
 numpy
-opencv-python
-RPi.GPIO
