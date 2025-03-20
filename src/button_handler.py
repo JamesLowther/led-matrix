@@ -62,8 +62,7 @@ class ButtonHandler(threading.Thread):
             return
 
         if not button.was_held:
-            print("released")
-            # self._press_event.set()
+            self._press_event.set()
 
         button.was_held = False
 
@@ -95,9 +94,8 @@ class ButtonHandler(threading.Thread):
 
         button.was_held = True
 
-        print("held")
-        # self._long_press_event.set()
-        # self._press_event.set()
+        self._long_press_event.set()
+        self._press_event.set()
 
     def log(self, text):
         print(f"Button Handler - {text}")
