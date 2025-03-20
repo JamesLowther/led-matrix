@@ -181,7 +181,7 @@ class Matrix:
 
         else:
             options.drop_priv_user = "led-matrix"
-            # options.drop_priv_group = "gpio"
+            options.drop_priv_group = "gpio"
 
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
