@@ -35,14 +35,14 @@ class ButtonHandler(threading.Thread):
                 if k == "l":
                     self.hold(None)
                 else:
-                    self.press(None)
+                    self.release(None)
         else:
             try:
                 button = gpiozero.Button(3)
                 button.hold_time = self.HOLD_TIME
 
-                button.when_pressed = self.press
-                button.when_held = self.hold
+                button.when_released = self.released
+                button.when_held = self.held
 
             except RuntimeError as e:
                 self.log(e)
@@ -55,12 +55,15 @@ class ButtonHandler(threading.Thread):
             gpiozero.close()
             self.log("Stopped.")
 
-    def press(self, button):
+    def released(self, button):
         if Config.VIRTUAL_MODE:
             self._press_event.set()
             return
 
-        self._press_event.set()
+        if not button.was_held:
+            self._press_event.set()
+
+        button.was_held = False
 
         # time.sleep(0.05)
         # pressed = not GPIO.input(channel)
@@ -82,11 +85,13 @@ class ButtonHandler(threading.Thread):
 
         #         self._button_down = False
 
-    def hold(self, button):
+    def held(self, button):
         if Config.VIRTUAL_MODE:
             self._long_press_event.set()
             self._press_event.set()
             return
+
+        button.held = True
 
         self._long_press_event.set()
         self._press_event.set()
