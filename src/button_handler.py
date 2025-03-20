@@ -66,26 +66,6 @@ class ButtonHandler(threading.Thread):
 
         button.was_held = False
 
-        # time.sleep(0.05)
-        # pressed = not GPIO.input(channel)
-
-        # if pressed:
-        #     if not self._button_down:
-        #         self._last_press = time.time()
-        #         self._button_down = True
-
-        # else:
-        #     if self._button_down:
-        #         time_pressed = (time.time() - self._last_press) * 1000
-        #         if time_pressed < self.HOLD_TIME:
-        #             self._press_event.set()
-
-        #         else:
-        #             self._long_press_event.set()
-        #             self._press_event.set()
-
-        #         self._button_down = False
-
     def held(self, button):
         if Config.VIRTUAL_MODE:
             self._long_press_event.set()
