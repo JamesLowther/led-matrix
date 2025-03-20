@@ -3,6 +3,7 @@ from config import Config
 try:
     import gpiozero
 
+    gpiozero.Button.was_held = False
     Config.VIRTUAL_MODE = False
 except ModuleNotFoundError:
     Config.VIRTUAL_MODE = True
@@ -91,7 +92,7 @@ class ButtonHandler(threading.Thread):
             self._press_event.set()
             return
 
-        button.held = True
+        button.was_held = True
 
         self._long_press_event.set()
         self._press_event.set()
