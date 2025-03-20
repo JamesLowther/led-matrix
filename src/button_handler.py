@@ -1,7 +1,6 @@
 from config import Config
 
 try:
-    import gpiozero
     from gpiozero import Button
 
     Button.was_held = False
@@ -48,13 +47,13 @@ class ButtonHandler(threading.Thread):
 
             except RuntimeError as e:
                 self.log(e)
-                gpiozero.close()
+                button.close()
                 return
 
             self._sigint_stop_event.wait()
 
             self.log("Stopping...")
-            gpiozero.close()
+            button.close()
             self.log("Stopped.")
 
     def released(self, button):
