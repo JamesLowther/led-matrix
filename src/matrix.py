@@ -178,6 +178,8 @@ class Matrix:
 
         if not self.args.drop_privileges:
             options.drop_privileges = False
+            options.drop_priv_user = "led-matrix"
+            options.drop_priv_group = "led-matrix"
 
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
