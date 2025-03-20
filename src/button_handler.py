@@ -40,7 +40,7 @@ class ButtonHandler(threading.Thread):
                     self.release(None)
         else:
             try:
-                button = Button(3, bounce_time=None)
+                button = Button(3, bounce_time=3)
                 button.hold_time = self.HOLD_TIME
 
                 button.when_released = self.released
