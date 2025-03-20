@@ -1,14 +1,15 @@
 from config import Config
 
 try:
-    import RPi.GPIO as GPIO
-    GPIO.setwarnings(False)
+    import gpiozero
+
     Config.VIRTUAL_MODE = False
 except ModuleNotFoundError:
     Config.VIRTUAL_MODE = True
 
 import threading
 import time
+
 
 class ButtonHandler(threading.Thread):
     BOUNCE_TIME = 10
@@ -32,55 +33,63 @@ class ButtonHandler(threading.Thread):
             while True:
                 k = input()
                 if k == "l":
-                    self.press(3, virtual_press_type="long")
+                    self.hold(None)
                 else:
-                    self.press(3, virtual_press_type="short")
+                    self.press(None)
         else:
             try:
-                GPIO.setmode(GPIO.BCM)
-                GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                GPIO.add_event_detect(3, GPIO.BOTH, callback=self.press, bouncetime=self.BOUNCE_TIME)
+                button = gpiozero.Button(3)
+                button.hold_time = self.HOLD_TIME
+
+                button.when_pressed = self.press
+                button.when_helf = self.hold
 
             except RuntimeError as e:
                 self.log(e)
-                GPIO.cleanup()
+                gpiozero.close()
                 return
 
             self._sigint_stop_event.wait()
 
             self.log("Stopping...")
-            GPIO.cleanup()
+            gpiozero.close()
             self.log("Stopped.")
 
-    def press(self, channel, virtual_press_type=None):
+    def press(self, button):
         if Config.VIRTUAL_MODE:
-            if virtual_press_type == "short":
-                self._press_event.set()
-                return
-            elif virtual_press_type == "long":
-                self._long_press_event.set()
-                self._press_event.set()
-                return
+            self._press_event.set()
+            return
 
-        time.sleep(0.05)
-        pressed = not GPIO.input(channel)
+        self._press_event.set()
 
-        if pressed:
-            if not self._button_down:
-                self._last_press = time.time()
-                self._button_down = True
+        # time.sleep(0.05)
+        # pressed = not GPIO.input(channel)
 
-        else:
-            if self._button_down:
-                time_pressed = (time.time() - self._last_press) * 1000
-                if time_pressed < self.HOLD_TIME:
-                    self._press_event.set()
+        # if pressed:
+        #     if not self._button_down:
+        #         self._last_press = time.time()
+        #         self._button_down = True
 
-                else:
-                    self._long_press_event.set()
-                    self._press_event.set()
+        # else:
+        #     if self._button_down:
+        #         time_pressed = (time.time() - self._last_press) * 1000
+        #         if time_pressed < self.HOLD_TIME:
+        #             self._press_event.set()
 
-                self._button_down = False
+        #         else:
+        #             self._long_press_event.set()
+        #             self._press_event.set()
+
+        #         self._button_down = False
+
+    def hold(self, button):
+        if Config.VIRTUAL_MODE:
+            self._long_press_event.set()
+            self._press_event.set()
+            return
+
+        self._long_press_event.set()
+        self._press_event.set()
 
     def log(self, text):
         print(f"Button Handler - {text}")
