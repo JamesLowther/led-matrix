@@ -43,6 +43,7 @@ class ButtonHandler(threading.Thread):
                 button = Button(3, bounce_time=0.05)
                 button.hold_time = self.HOLD_TIME
 
+                button.when_pressed = self.pressed
                 button.when_released = self.released
                 button.when_held = self.held
 
@@ -57,13 +58,16 @@ class ButtonHandler(threading.Thread):
             gpiozero.close()
             self.log("Stopped.")
 
+    def pressed(self, button):
+        print("pressed")
+
     def released(self, button):
         if Config.VIRTUAL_MODE:
             self._press_event.set()
             return
 
         if not button.was_held:
-            print("pressed")
+            print("released")
             # self._press_event.set()
 
         button.was_held = False
