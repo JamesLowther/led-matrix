@@ -2,8 +2,9 @@ from config import Config
 
 try:
     import gpiozero
+    from gpiozero import Button
 
-    gpiozero.Button.was_held = False
+    Button.was_held = False
     Config.VIRTUAL_MODE = False
 except ModuleNotFoundError:
     Config.VIRTUAL_MODE = True
@@ -39,7 +40,7 @@ class ButtonHandler(threading.Thread):
                     self.release(None)
         else:
             try:
-                button = gpiozero.Button(3)
+                button = Button(3)
                 button.hold_time = self.HOLD_TIME
 
                 button.when_released = self.released
