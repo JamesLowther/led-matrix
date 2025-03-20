@@ -178,6 +178,8 @@ class Matrix:
 
         if not self.args.drop_privileges:
             options.drop_privileges = False
+
+        else:
             options.drop_priv_user = "led-matrix"
             options.drop_priv_group = "led-matrix"
 
