@@ -14,14 +14,15 @@ from views.iss_view.iss_view import ISSView
 from views.video_view.video_view import VideoView
 from views.weather_view.weather_view import WeatherView
 
+
 class ViewHandler:
     MODES = [
         "timed",
         "manual",
     ]
 
-    START_VIEW = 0      # Index of view to start with.
-    MANUAL_TIME = 300   # How long to hold view after manual press.
+    START_VIEW = 0  # Index of view to start with.
+    MANUAL_TIME = 300  # How long to hold view after manual press.
 
     def __init__(self, matrix, press_event, long_press_event):
         self._matrix = matrix
@@ -34,59 +35,69 @@ class ViewHandler:
         self.init_mode()
 
     def init_views(self):
-        self._poweroff_view = PoweroffView(self._matrix, self._press_event, self._long_press_event)
-        self._switch_view = SwitchView(self._matrix, self._press_event, self._long_press_event)
+        self._poweroff_view = PoweroffView(
+            self._matrix, self._press_event, self._long_press_event
+        )
+        self._switch_view = SwitchView(
+            self._matrix, self._press_event, self._long_press_event
+        )
 
         self._views = [
             {
                 "view": ISSView(self._matrix, self._press_event),
                 "time": 700,
-                "auto": True
+                "auto": True,
             },
-            {
-                "view": NetworkMonitor(self._matrix, self._press_event),
-                "time": 700,
-                "auto": True
-            },
-            {
-                "view": WeatherView(self._matrix, self._press_event),
-                "time": 410,
-                "auto": True
-            },
+            # {
+            #     "view": NetworkMonitor(self._matrix, self._press_event),
+            #     "time": 700,
+            #     "auto": True
+            # },
+            # {
+            #     "view": WeatherView(self._matrix, self._press_event),
+            #     "time": 410,
+            #     "auto": True,
+            # },
             {
                 "view": TestView(self._matrix, self._press_event),
                 "time": 120,
-                "auto": True
+                "auto": True,
             },
             {
                 "view": VideoView(self._matrix, self._press_event, "fireplace"),
                 "time": 300,
-                "auto": True
+                "auto": True,
             },
             {
                 "random": [
                     {
-                        "view": VideoView(self._matrix, self._press_event, "balls", loop=False),
+                        "view": VideoView(
+                            self._matrix, self._press_event, "balls", loop=False
+                        ),
                         "time": 120,
-                        "auto": True
+                        "auto": True,
                     },
                     {
-                        "view": VideoView(self._matrix, self._press_event, "pillows", loop=False),
+                        "view": VideoView(
+                            self._matrix, self._press_event, "pillows", loop=False
+                        ),
                         "time": 120,
-                        "auto": True
+                        "auto": True,
                     },
                     {
-                        "view": VideoView(self._matrix, self._press_event, "obi", loop=False),
+                        "view": VideoView(
+                            self._matrix, self._press_event, "obi", loop=False
+                        ),
                         "time": 120,
-                        "auto": True
-                    }
+                        "auto": True,
+                    },
                 ],
-                "probability": 0.1
+                "probability": 0.1,
             },
             {
                 "view": VideoView(self._matrix, self._press_event, "jeremy"),
                 "time": 120,
-                "auto": False
+                "auto": False,
             },
         ]
 
@@ -176,19 +187,18 @@ class ViewHandler:
                 dimensions[0] - size - x_offset,
                 y_offset,
                 dimensions[0] - x_offset,
-                y_offset + size - 1
+                y_offset + size - 1,
             ],
-            fill="darkgoldenrod"
+            fill="darkgoldenrod",
         )
 
         self._matrix.set_image(image)
-
 
     def get_next_view(self):
         view = self._views[self._current_view]
 
         while "random" in view.keys():
-            r = randint(1,100)
+            r = randint(1, 100)
             if not self._auto_switch or r <= view["probability"] * 100:
                 return choice(view["random"])
 
@@ -248,6 +258,7 @@ class ViewHandler:
             else:
                 try:
                     import RPi.GPIO as GPIO
+
                     GPIO.cleanup()
                 except:
                     pass
