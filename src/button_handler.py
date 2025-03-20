@@ -42,7 +42,7 @@ class ButtonHandler(threading.Thread):
                 button.hold_time = self.HOLD_TIME
 
                 button.when_pressed = self.press
-                button.when_helf = self.hold
+                button.when_held = self.hold
 
             except RuntimeError as e:
                 self.log(e)
