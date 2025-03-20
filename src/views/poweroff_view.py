@@ -43,7 +43,7 @@ class PoweroffView:
             if i == 1:
                 text_2_str = f"{i} second"
             else:
-                text_2_size = f"{i} seconds"
+                text_2_str = f"{i} seconds"
 
             text_2_size = d.textsize(text_2_str, f)
 
