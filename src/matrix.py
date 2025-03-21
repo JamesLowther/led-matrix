@@ -180,7 +180,7 @@ class Matrix:
             options.drop_privileges = False
 
         else:
-            # options.drop_priv_user = "led-matrix"
+            options.drop_priv_user = "dietpi"
             options.drop_priv_group = "gpio"
 
         self.matrix = RGBMatrix(options=options)
