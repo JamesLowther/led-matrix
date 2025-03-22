@@ -218,7 +218,7 @@ class ISSView:
 class Earth:
     HOME_COORDS = (51.030436, -114.065720)
 
-    EARTH_COLOR = (255, 171, 145, 255)
+    EARTH_COLOR = (140, 140, 140, 255)
     ISS_COLOR = (255, 0, 0, 255)
     HOME_COLOR = (0, 255, 0, 255)
 
