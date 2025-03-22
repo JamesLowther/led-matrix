@@ -16,6 +16,8 @@ urllib3.disable_warnings()
 
 class Main:
     def __init__(self):
+        self._matrix = Matrix()
+
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
 
@@ -30,8 +32,6 @@ class Main:
         if Config.VIRTUAL_MODE:
             self._button_thread.daemon = True
         self._button_thread.start()
-
-        self._matrix = Matrix()
 
         self._view_handler = ViewHandler(self._matrix, self._press_event, self._long_press_event)
         self._view_handler.start()

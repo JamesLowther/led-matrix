@@ -3,6 +3,7 @@ import time
 import os
 from config import Config
 
+
 class PoweroffView:
     COUNTDOWN = 15
 
@@ -24,7 +25,7 @@ class PoweroffView:
 
         for i in range(self.COUNTDOWN, 0, -1):
             image = Image.new("RGB", self._matrix.dimensions, color="black")
-            
+
             font_path = os.path.join(Config.FONTS, "6px-Normal.ttf")
             f = ImageFont.truetype(font_path, 8)
             d = ImageDraw.Draw(image)
@@ -33,26 +34,27 @@ class PoweroffView:
             text_1_size = d.textsize(text_1_str, f)
 
             d.text(
-                (
-                    (self._matrix.dimensions[0] / 2) - (text_1_size[0] / 2), 
-                    y_offset
-                ),
+                ((self._matrix.dimensions[0] / 2) - (text_1_size[0] / 2), y_offset),
                 text_1_str,
                 font=f,
-                fill=(170, 170, 170)
+                fill=(170, 170, 170),
             )
 
-            text_2_str = f"{i} second(s)"
+            if i == 1:
+                text_2_str = f"{i} second"
+            else:
+                text_2_str = f"{i} seconds"
+
             text_2_size = d.textsize(text_2_str, f)
 
             d.text(
                 (
-                    (self._matrix.dimensions[0] / 2) - (text_2_size[0] / 2), 
-                    y_offset + spacing
+                    (self._matrix.dimensions[0] / 2) - (text_2_size[0] / 2),
+                    y_offset + spacing,
                 ),
                 text_2_str,
                 font=f,
-                fill=(170, 170, 170)
+                fill=(170, 170, 170),
             )
 
             text_3_str = "PRESS TO CANCEL"
@@ -61,11 +63,11 @@ class PoweroffView:
             d.text(
                 (
                     (self._matrix.dimensions[0] / 2) - (text_3_size[0] / 2),
-                    y_offset + spacing + spacing_2
+                    y_offset + spacing + spacing_2,
                 ),
                 text_3_str,
                 font=f,
-                fill=(184, 134, 11)
+                fill=(184, 134, 11),
             )
 
             self._matrix.set_image(image)
@@ -79,7 +81,3 @@ class PoweroffView:
                 return False
 
         return True
-
-            
-
-
