@@ -92,7 +92,7 @@ class ViewHandler:
                         "auto": True,
                     },
                 ],
-                "probability": 0.1,
+                "probability": 0.01,
             },
             {
                 "view": VideoView(self._matrix, self._press_event, "jeremy"),
