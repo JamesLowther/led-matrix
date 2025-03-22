@@ -21,7 +21,7 @@ class WindView:
     def __init__(self, matrix):
         self._matrix = matrix
         self._particles = []
-        
+
     def initialize_particles(self, windspeed):
         self.update_windspeed(windspeed)
 
@@ -41,13 +41,13 @@ class WindView:
         x_variation = 4
 
         x = random.randint(x_offset, x_offset + x_variation)
-        
+
         if x_offset == 0:
             x = random.randint(24, 64)
 
-        y = random.randint(0, 32) 
+        y = random.randint(0, 32)
         x_offset = random.randint(self.MIN_LENGTH, self.MAX_LENGTH)
-        
+
         y_offset = 0
         if random.randint(0, 10) == 0:
                 y_offset += random.choice((-1, 1))
@@ -68,7 +68,7 @@ class WindView:
         self.update_particles()
         self.draw_particles(image)
         self.draw_time(image)
-        self.draw_windspeed(image)        
+        self.draw_windspeed(image)
         return image
 
     def spawn_particles(self):
@@ -79,7 +79,7 @@ class WindView:
             if random.randint(0, spawn_rate) == 0:
                 p = self.create_particle(x_offset=spawn_start)
                 self._particles.append(p)
-        
+
     def update_particles(self):
         x_change = 1 * (self._windspeed * 4) / self.MAX_WINDSPEED
 
@@ -180,5 +180,3 @@ class Particle:
         self.y0 = y0
         self.x1 = x1
         self.y1 = y1
-
-    

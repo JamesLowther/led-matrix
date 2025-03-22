@@ -69,7 +69,7 @@ class SwitchView:
 
             self._press_event.wait()
             self._press_event.clear()
-            
+
         self._long_press_event.clear()
 
         return modes[new_mode_i]

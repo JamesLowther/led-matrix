@@ -63,4 +63,3 @@ class Transitions:
 
             matrix.set_image(cropped, unsafe=unsafe)
             msleep(TRANSITION_INTERVAL)
-            

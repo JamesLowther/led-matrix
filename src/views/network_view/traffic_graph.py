@@ -8,7 +8,7 @@ class TrafficGraph:
     def draw_tx_rx(image, health_data):
         tx_color = "goldenrod"
         rx_color = "crimson"
-        
+
         x_offset = 1
         y_offset = 17
 
@@ -57,7 +57,7 @@ class TrafficGraph:
         y_offset = 17
 
         spacing = 7
-        
+
         width = 35
         height = 6
 
@@ -113,6 +113,6 @@ class TrafficGraph:
                     ],
                     fill=rx_color
                 )
-        
+
             tx_prev = (tx_x, tx_y)
             rx_prev = (rx_x, rx_y)

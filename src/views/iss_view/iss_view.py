@@ -51,13 +51,13 @@ class ISSView:
             self.draw_time(image)
             self.draw_coords(image)
             self.draw_ast(image)
-            
+
             if api_error:
                 self.draw_error(image)
 
             self._earth.draw(image)
             self._earth.update_spin()
-            
+
             self._matrix.set_image(image)
 
             msleep(self.REFRESH_INTERVAL)
@@ -66,7 +66,7 @@ class ISSView:
         """
         Draws the current time.
         """
-        
+
         x_offset = 2
         y_offset = 1
 
@@ -85,7 +85,7 @@ class ISSView:
             fill=color
         )
 
-        
+
     def draw_coords(self, image):
         """
         Draws the latitude and longitude on the the screen.
@@ -137,7 +137,7 @@ class ISSView:
         size = 2
         x_spacing = 2
         y_spacing = 1
-        
+
         line_length = 7
 
         colors = [
@@ -185,7 +185,7 @@ class ISSView:
         """
         Draws the error indicator if there are connection problems with the API.
         """
-        
+
         x_offset = 59
         y_offset = 27
 
@@ -223,7 +223,7 @@ class Earth:
     HOME_COLOR = (0, 255, 0, 255)
 
     MAP_CALIBRATION = 1
-    
+
     RADIUS = 13
     MAP_WIDTH = 80
     MAP_HEIGHT = 40
@@ -248,20 +248,20 @@ class Earth:
         self._home_nodes_backup = None
 
         self._current_spin = 0
-        
+
         self.add_nodes()
         self.convert_map()
-    
+
     def convert_coords(self, lat, lon):
         """
         Converts latitude and longitude to Cartesian coordinates.
-        In this case the y coordinate is on the vertical plane 
+        In this case the y coordinate is on the vertical plane
         and x and z are on the horizontal plane.
         """
         x = round(self.RADIUS * sin(lat) * cos(lon), 2)
         y = round(self.RADIUS * cos(lat), 2)
         z = round(self.RADIUS * sin(lat) * sin(lon), 2)
-        
+
         return (x, y, z)
 
     def add_nodes(self):
@@ -334,7 +334,7 @@ class Earth:
                 [0, 1, 0, 0],
                 [-s, 0, c, 0],
                 [0, 0, 0, 1]
-            ])    
+            ])
 
             self.rotate(matrix_y)
 
@@ -360,8 +360,8 @@ class Earth:
                 i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and
                 node[2] > 1 and self._map[i]):
                 image.putpixel(
-                    (self.X + int(node[0]), 
-                    self.Y + int(node[1]) * -1), 
+                    (self.X + int(node[0]),
+                    self.Y + int(node[1]) * -1),
                     self.EARTH_COLOR
                 )
 
@@ -390,7 +390,7 @@ class Earth:
 
         c = np.cos(angle)
         s = np.sin(angle)
-        
+
         matrix_x = np.array([
             [c, -s, 0, 0],
             [s, c, 0, 0],
@@ -426,7 +426,7 @@ class Earth:
             for x in range(shifted.width):
                 pixel = shifted.getpixel((x, y))
                 self._map.append(int(pixel == 255))
-                    
+
     def update_coords(self):
         """
         Updates the coordinates for the ISS.
@@ -454,7 +454,7 @@ def request_thread():
             number_ast = ast_return
 
         request_e.clear()
-        
+
 class APIConnection:
     ISS_ENDPOINT = "http://api.open-notify.org/iss-now.json"
     AST_ENDPOINT = "http://api.open-notify.org/astros.json"
@@ -483,5 +483,5 @@ class APIConnection:
         for person in results["people"]:
             if person["craft"] == "ISS":
                 count += 1
-        
+
         return count

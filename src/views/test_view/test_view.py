@@ -40,7 +40,7 @@ class TestView:
             [0, c, -s, 0],
             [0, s, c, 0],
             [0, 0, 0, 1]
-        ])  
+        ])
 
         sphere.rotate(sphere.find_center(), matrix_fix)
 
@@ -74,14 +74,14 @@ class TestView:
             [0, 1, 0, 0],
             [-s, 0, c, 0],
             [0, 0, 0, 1]
-        ])    
+        ])
 
         matrix2 = np.array([
             [1, 0, 0, 0],
             [0, c, -s, 0],
             [0, s, c, 0],
             [0, 0, 0, 1]
-        ])  
+        ])
 
         obj.rotate(center, matrix1)
         obj.rotate(center, matrix2)
@@ -94,11 +94,11 @@ class Object:
         ones_column = np.ones((len(node_array), 1))
         ones_added = np.hstack((node_array, ones_column))
         self.nodes = np.vstack((self.nodes, ones_added))
-    
+
     def find_center(self):
         mean = self.nodes.mean(axis=0)
         return mean
-    
+
     def rotate(self, center, matrix):
         for i, node in enumerate(self.nodes):
             # print(f"before:{self.nodes[i]}")

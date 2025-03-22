@@ -53,11 +53,11 @@ class ViewHandler:
             #     "time": 700,
             #     "auto": True
             # },
-            # {
-            #     "view": WeatherView(self._matrix, self._press_event),
-            #     "time": 410,
-            #     "auto": True,
-            # },
+            {
+                "view": WeatherView(self._matrix, self._press_event),
+                "time": 410,
+                "auto": True,
+            },
             {
                 "view": TestView(self._matrix, self._press_event),
                 "time": 120,

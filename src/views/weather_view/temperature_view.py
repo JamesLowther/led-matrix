@@ -80,18 +80,18 @@ class TemperatureView:
         icon = self.get_icon(data["weather"][0]["icon"], 7)
 
         self._temperature_image.paste(
-            icon, 
+            icon,
             (
-                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 3, 
+                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 3,
                 y_offset - 2
             )
         )
-        
+
     def draw_forecast(self):
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
         f = ImageFont.truetype(font_path, 4)
         d = ImageDraw.Draw(self._temperature_image)
-        
+
         data = self._weather_data[self._location]["daily"]
 
         x_offset = 1
@@ -117,7 +117,7 @@ class TemperatureView:
         x = x_offset
 
         for i, forecast in enumerate(data):
-            
+
             day = datetime.fromtimestamp(forecast["dt"]).strftime("%A")[0]
             day_size = d.textsize(day, f)
 
@@ -142,7 +142,7 @@ class TemperatureView:
                 if min_temp_int >= hot:
                     min_color = hot_color
                 elif min_temp_int >= warm:
-                    min_color = warm_color 
+                    min_color = warm_color
                 else:
                     min_color = warmish_color
             elif min_temp_int <= 0:
@@ -208,9 +208,9 @@ class TemperatureView:
 
             icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
             self._temperature_image.paste(
-                icon, 
+                icon,
                 (
-                    icon_x, 
+                    icon_x,
                     icon_y
                 )
             )
