@@ -205,11 +205,11 @@ class Matrix:
             options.drop_privileges = False
 
         else:
-            if self.led_drop_privs_user:
-                options.drop_priv_user = self.led_drop_privs_user
+            if self.args.led_drop_privs_user:
+                options.drop_priv_user = self.args.led_drop_privs_user
 
-            if self.led_drop_privs_group:
-                options.drop_priv_group = self.led_drop_privs_group
+            if self.args.led_drop_privs_group:
+                options.drop_priv_group = self.args.led_drop_privs_group
 
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
