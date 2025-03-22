@@ -218,7 +218,7 @@ class ISSView:
 class Earth:
     HOME_COORDS = (51.030436, -114.065720)
 
-    EARTH_COLOR = (140, 140, 140, 255)
+    EARTH_COLOR = (255, 171, 145, 255)
     ISS_COLOR = (255, 0, 0, 255)
     HOME_COLOR = (0, 255, 0, 255)
 
@@ -358,11 +358,11 @@ class Earth:
         for i, node in enumerate(self._earth_nodes):
             if (i > self.MAP_WIDTH - 1 and
                 i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and
-                node[2] > 1 and self._map[i]):
+                node[2] > 1 and self._map[i][0]):
                 image.putpixel(
                     (self.X + int(node[0]),
                     self.Y + int(node[1]) * -1),
-                    self.EARTH_COLOR
+                    self._map[i][1]
                 )
 
         # Draw the ISS.
@@ -414,7 +414,7 @@ class Earth:
         """
         # Open the map image.
         path = os.path.join(Config.SRC_BASE, "assets", "iss_view", "world-map.png")
-        img = Image.open(path).convert("1")
+        img = Image.open(path).convert("RGB")
 
         # Transform the image to fit sphere dimensions.
         resized = img.resize((self.MAP_WIDTH + 1, self.MAP_HEIGHT + 1), Image.BOX)
@@ -425,7 +425,7 @@ class Earth:
         for y in range(shifted.height):
             for x in range(shifted.width):
                 pixel = shifted.getpixel((x, y))
-                self._map.append(int(pixel == 255))
+                self._map.append((int(pixel != (0, 0, 0)), self.EARTH_COLOR))
 
     def update_coords(self):
         """
