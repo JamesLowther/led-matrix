@@ -15,7 +15,8 @@ import time
 import requests
 import threading
 
-request_e = threading.Event()
+request_e_radar = threading.Event()
+request_e_weather = threading.Event()
 
 new_frames = []
 last_updated = 0
@@ -68,19 +69,25 @@ class WeatherView:
 
     RADAR_LOOPS = 5
 
-    API_INTERVAL = 300 # s.
+    RADAR_API_INTERVAL = 300 # s.
+    WEATHER_API_INTERVAL = 900 # s.
 
     def __init__(self, matrix, press_event):
         self._matrix = matrix
         self._press_event = press_event
 
-        self._start_time = time.time()
+        self._start_time_radar = time.time()
+        self._start_time_weather = time.time()
 
         self._frames = []
 
-        self._request_t = threading.Thread(name="requests", target=request_thread)
-        self._request_t.daemon = True
-        self._request_t.start()
+        self._request_t_radar = threading.Thread(name="requests_radar", target=request_thread_radar)
+        self._request_t_radar.daemon = True
+        self._request_t_radar.start()
+
+        self._request_t_weather = threading.Thread(name="requests_weather", target=request_thread_weather)
+        self._request_t_weather.daemon = True
+        self._request_t_weather.start()
 
         self._radar_view = RadarView(self._matrix)
 
@@ -100,7 +107,8 @@ class WeatherView:
         global weather_api_error
 
         last_updated = 0
-        request_e.set()
+        request_e_radar.set()
+        request_e_weather.set()
 
         # Wait for initial frame data to be generated.
         while(not radar_api_updated and not radar_api_error and len(self._frames) == 0):
@@ -227,9 +235,13 @@ class WeatherView:
 
     def check_api_interval(self):
         current_time = time.time()
-        if current_time - self._start_time >= self.API_INTERVAL:
-            self._start_time = current_time
-            request_e.set()
+        if current_time - self._start_time_radar >= self.RADAR_API_INTERVAL:
+            self._start_time_radar = current_time
+            request_e_radar.set()
+
+        if current_time - self._start_time_weather >= self.WEATHER_API_INTERVAL:
+            self._start_time_weather = current_time
+            request_e_weather.set()
 
     def check_update(self):
         global radar_api_updated
@@ -243,30 +255,37 @@ class WeatherView:
         self._frames = new_frames.copy()
         radar_api_updated = False
 
-def request_thread():
-    global frames
+def request_thread_radar():
     global radar_api_error
-    global weather_api_error
 
-    weather_data = WeatherData()
     radar_data = RadarData()
 
     while True:
-        request_e.wait()
+        request_e_radar.wait()
         radar_data_result = radar_data.update()
-        weather_data_result = weather_data.update()
 
         if radar_data_result == False:
             radar_api_error = True
         else:
             radar_api_error = False
 
+        request_e_radar.clear()
+
+def request_thread_weather():
+    global weather_api_error
+
+    weather_data = WeatherData()
+
+    while True:
+        request_e_weather.wait()
+        weather_data_result = weather_data.update()
+
         if weather_data_result == False:
             weather_api_error = True
         else:
             weather_api_error = False
 
-        request_e.clear()
+        request_e_weather.clear()
 
 class WeatherData:
     EXCLUDE = "minutely,hourly,alerts"
