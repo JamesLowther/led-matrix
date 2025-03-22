@@ -13,7 +13,7 @@ import time
 
 
 class ButtonHandler(threading.Thread):
-    BOUNCE_TIME = 10
+    BOUNCE_TIME = 0.01
     HOLD_TIME = 1
 
     def __init__(self, press_event, long_press_event, sigint_stop_event):
@@ -39,7 +39,7 @@ class ButtonHandler(threading.Thread):
                     self.release(None)
         else:
             try:
-                button = Button(3, bounce_time=0.01)
+                button = Button(3, bounce_time=self.BOUNCE_TIME)
                 button.hold_time = self.HOLD_TIME
 
                 button.when_released = self.released
