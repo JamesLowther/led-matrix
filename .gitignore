@@ -1,5 +1,6 @@
 state.json
 .direnv/
+.lgd-nfy*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

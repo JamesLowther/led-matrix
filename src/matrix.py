@@ -18,6 +18,7 @@ class Matrix:
             default=32,
             type=int,
         )
+
         self._parser.add_argument(
             "--led-cols",
             action="store",
@@ -25,6 +26,7 @@ class Matrix:
             default=64,
             type=int,
         )
+
         self._parser.add_argument(
             "-c",
             "--led-chain",
@@ -33,6 +35,7 @@ class Matrix:
             default=1,
             type=int,
         )
+
         self._parser.add_argument(
             "-P",
             "--led-parallel",
@@ -41,6 +44,7 @@ class Matrix:
             default=1,
             type=int,
         )
+
         self._parser.add_argument(
             "-p",
             "--led-pwm-bits",
@@ -49,6 +53,7 @@ class Matrix:
             default=11,
             type=int,
         )
+
         self._parser.add_argument(
             "-b",
             "--led-brightness",
@@ -57,13 +62,15 @@ class Matrix:
             default=100,
             type=int,
         )
+
         self._parser.add_argument(
             "-m",
             "--led-gpio-mapping",
             help="Hardware Mapping: regular, adafruit-hat, adafruit-hat-pwm",
-            choices=["regular", "adafruit-hat", "adafruit-hat-pwm"],
+            choices=["regular", "regular-pi1", "adafruit-hat", "adafruit-hat-pwm"],
             type=str,
         )
+
         self._parser.add_argument(
             "--led-scan-mode",
             action="store",
@@ -72,6 +79,7 @@ class Matrix:
             choices=range(2),
             type=int,
         )
+
         self._parser.add_argument(
             "--led-pwm-lsb-nanoseconds",
             action="store",
@@ -79,30 +87,27 @@ class Matrix:
             default=130,
             type=int,
         )
+
         self._parser.add_argument(
             "--led-show-refresh",
             action="store_true",
             help="Shows the current refresh rate of the LED panel",
         )
+
         self._parser.add_argument(
             "--led-slowdown-gpio",
             action="store",
             help="Slow down writing to GPIO. Range: 0..4. Default: 4",
-            default=4,
+            default=1,
             type=int,
         )
-        self._parser.add_argument(
-            "--led-limit-refresh",
-            action="store",
-            help="Limit refresh rate to a specific Hz. Default: 0",
-            default=0,
-            type=int,
-        )
+
         self._parser.add_argument(
             "--led-no-hardware-pulse",
             action="store",
             help="Don't use hardware pin-pulse generation",
         )
+
         self._parser.add_argument(
             "--led-rgb-sequence",
             action="store",
@@ -110,6 +115,7 @@ class Matrix:
             default="RGB",
             type=str,
         )
+
         self._parser.add_argument(
             "--led-pixel-mapper",
             action="store",
@@ -117,6 +123,7 @@ class Matrix:
             default="",
             type=str,
         )
+
         self._parser.add_argument(
             "--led-row-addr-type",
             action="store",
@@ -125,6 +132,7 @@ class Matrix:
             type=int,
             choices=[0, 1, 2],
         )
+
         self._parser.add_argument(
             "--led-multiplexing",
             action="store",
@@ -132,11 +140,29 @@ class Matrix:
             default=0,
             type=int,
         )
+
         self._parser.add_argument(
             "--led-no-drop-privs",
             dest="drop_privileges",
             help="Don't drop privileges from 'root' after initializing the hardware.",
             action="store_false",
+        )
+
+
+        self._parser.add_argument(
+            "--led-drop-privs-user",
+            action="store",
+            help="User to drop privileges to.",
+            default="",
+            type=str
+        )
+
+        self._parser.add_argument(
+            "--led-drop-privs-group",
+            action="store",
+            help="Group to drop privileges to.",
+            default="",
+            type=str
         )
 
         self.process()
@@ -180,8 +206,11 @@ class Matrix:
             options.drop_privileges = False
 
         else:
-            options.drop_priv_user = "dietpi"
-            options.drop_priv_group = "gpio"
+            if self.led_drop_privs_user:
+                options.drop_priv_user = self.led_drop_privs_user
+
+            if self.led_drop_privs_group:
+                options.drop_priv_group = self.led_drop_privs_group
 
         self.matrix = RGBMatrix(options=options)
         self.dimensions = (self.matrix.width, self.matrix.height)
