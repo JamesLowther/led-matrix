@@ -12,7 +12,7 @@ import threading
 
 request_e = threading.Event()
 iss_coords = (0, 0)
-number_ast = 0
+number_ast = None
 api_error = False
 
 class ISSView:
@@ -39,6 +39,10 @@ class ISSView:
         Starts the ISSView.
         """
         start_time = time.time()
+
+        # Wait for initial API call.
+        while(iss_coords == (0, 0) or number_ast is None):
+            msleep(200)
 
         while not self._press_event.is_set():
             current_time = time.time()
