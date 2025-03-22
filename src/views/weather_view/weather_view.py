@@ -61,7 +61,7 @@ MOON_LOCATION = "Calgary"
 class WeatherView:
     FRAME_INTERVAL = 1300 # ms.
     HOLD_TIME = 2600 # ms.
-    
+
     FORECAST_INTERVAL = 16000 # ms.
     WIND_INTERVAL = 30000 # ms.
     MOON_INTERVAL = 20000 # ms.
@@ -126,7 +126,7 @@ class WeatherView:
                 prev_image = self.start_temperature_loop(prev_image)
                 if prev_image == -1:
                     return
-                
+
                 self.check_update()
                 prev_image = self.start_wind_loop(prev_image)
                 if prev_image == -1:
@@ -136,7 +136,7 @@ class WeatherView:
                 prev_image = self.start_moon_loop(prev_image)
                 if prev_image == -1:
                     return
-            
+
     def start_radar_loop(self, prev_image):
         current_image = None
         for _ in range(self.RADAR_LOOPS):
@@ -269,7 +269,7 @@ def request_thread():
         request_e.clear()
 
 class WeatherData:
-    EXCLUDE = "minutely,hourly"
+    EXCLUDE = "minutely,hourly,alerts"
 
     RETRY_TIME = 2000
 
@@ -282,7 +282,7 @@ class WeatherData:
                 api_key = Config.ENV_VALUES['OPENWEATHER_API_KEY']
             except KeyError:
                 return False
-            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={api_key}"
+            url = f"https://api.openweathermap.org/data/3.0/onecall?lat={location['lat']}&lon={location['lon']}&exclude={self.EXCLUDE}&appid={api_key}"
 
             for i in range(retry_attempts):
                 try:
@@ -295,12 +295,12 @@ class WeatherData:
                     msleep(self.RETRY_TIME)
 
             weather_data[location["name"]] = data
-            
+
         weather_api_updated = True
 
 class RadarData:
     API_FILE_URL = "https://api.rainviewer.com/public/weather-maps.json"
-    
+
     RETRY_TIME = 2000
 
     NUMBER_PAST = 5     # Max 12.
@@ -316,7 +316,7 @@ class RadarData:
 
     def __init__(self):
         self._api_file = None
-    
+
     def update(self):
         global radar_api_updated
         global last_updated
@@ -334,7 +334,7 @@ class RadarData:
         new_frames.clear()
         if self.get_past_radar() == False:
             return False
-        
+
         if self.get_nowcast_radar() == False:
             return False
 
@@ -358,10 +358,10 @@ class RadarData:
         number_data = len(self._api_file["radar"]["past"])
 
         past_api_data = self._api_file["radar"]["past"][number_data - self.NUMBER_PAST:]
-        
+
         for data in past_api_data:
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
-            
+
             radar_image = None
             for i in range(retry_attempts):
                 try:
@@ -390,10 +390,10 @@ class RadarData:
         number_data = len(self._api_file["radar"]["nowcast"])
 
         nowcast_api_data = self._api_file["radar"]["nowcast"][number_data - self.NUMBER_NOWCAST:]
-        
+
         for data in nowcast_api_data:
             url = f"{self._api_file['host']}{data['path']}/{size}/{self.ZOOM}/{self.LATITUDE}/{self.LONGITUDE}/{self.COLOR}/{self.SMOOTH}_{self.SNOW}.png"
-            
+
             radar_image = None
             for i in range(retry_attempts):
                 try:

@@ -14,9 +14,9 @@ class RadarView:
         self.draw_location(image)
         self.draw_borders(image)
         self.draw_time(image, time)
-    
+
     def draw_location(self, image):
-        x_offset = 31 
+        x_offset = 31
         y_offset = 15
 
         w = 2

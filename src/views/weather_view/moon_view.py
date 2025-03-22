@@ -103,7 +103,7 @@ class MoonView:
 
         d.text(
             (
-                (self._matrix.dimensions[0] / 4) * 3 - (bottom_size[0] / 2) + x_offset, 
+                (self._matrix.dimensions[0] / 4) * 3 - (bottom_size[0] / 2) + x_offset,
                 y_offset + top_size[1] + spacing
             ),
             bottom_str,
@@ -114,7 +114,7 @@ class MoonView:
     def draw_moon(self, image):
         x_offset = self._moon_phase["offset"]
         y_offset = 1
-        
+
         size = 22
 
         moon_id = self._moon_phase["id"]
@@ -133,11 +133,11 @@ class MoonView:
         )
 
         return image
-    
+
     def draw_date(self, image):
         x_offset = 0
         y_offset = 25
-        
+
         color = (170, 170, 170)
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
@@ -150,7 +150,7 @@ class MoonView:
 
         d.text(
             (
-                (self._matrix.dimensions[0] / 2)- (date_size[0] / 2) + x_offset, 
+                (self._matrix.dimensions[0] / 2)- (date_size[0] / 2) + x_offset,
                 y_offset
             ),
             date_str,
