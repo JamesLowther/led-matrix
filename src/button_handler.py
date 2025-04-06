@@ -34,9 +34,9 @@ class ButtonHandler(threading.Thread):
             while True:
                 k = input()
                 if k == "l":
-                    self.hold(None)
+                    self.held(None)
                 else:
-                    self.release(None)
+                    self.released(None)
         else:
             try:
                 button = Button(3, bounce_time=self.BOUNCE_TIME)
