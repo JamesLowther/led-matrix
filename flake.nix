@@ -12,6 +12,8 @@
       ...
     }:
     let
+      inherit (nixpkgs) lib;
+
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       python = pkgs.python311Full;
     in
