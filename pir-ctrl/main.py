@@ -17,7 +17,7 @@ def motion_function():
 def no_motion_function():
     logger.info("Motion stopped. Stopping led-matrix.service...")
     subprocess.run(["systemctl", "stop", "led-matrix.service"], check=True)
-    logger.info("led-matrix.service stop")
+    logger.info("led-matrix.service stopped")
 
 
 def main():
