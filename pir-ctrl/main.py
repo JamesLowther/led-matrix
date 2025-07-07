@@ -1,6 +1,7 @@
 from signal import pause
 import subprocess
 import logging
+import time
 
 import gpiozero
 
@@ -21,6 +22,8 @@ def motion_function():
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to start service: {e}")
 
+        time.sleep(3)
+
     logger.info("led-matrix.service started")
 
 
@@ -33,6 +36,8 @@ def no_motion_function():
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to stop service: {e}")
+
+        time.sleep(3)
 
     logger.info("led-matrix.service stopped")
 
