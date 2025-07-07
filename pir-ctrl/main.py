@@ -7,16 +7,33 @@ import gpiozero
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+SERVICE_ATTEMPTS = 3
+
 
 def motion_function():
     logger.info("Motion detected. Starting led-matrix.service...")
-    subprocess.run(["systemctl", "start", "led-matrix.service"], check=True)
+
+    for i in range(SERVICE_ATTEMPTS):
+        try:
+            subprocess.run(["systemctl", "start", "led-matrix.service"], check=True)
+            break
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to start service: {e}")
+
     logger.info("led-matrix.service started")
 
 
 def no_motion_function():
     logger.info("Motion stopped. Stopping led-matrix.service...")
-    subprocess.run(["systemctl", "stop", "led-matrix.service"], check=True)
+
+    for i in range(SERVICE_ATTEMPTS):
+        try:
+            subprocess.run(["systemctl", "stop", "led-matrix.service"], check=True)
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to stop service: {e}")
+
     logger.info("led-matrix.service stopped")
 
 
