@@ -15,9 +15,10 @@ iss_coords = (0, 0)
 number_ast = None
 api_error = False
 
+
 class ISSView:
-    REFRESH_INTERVAL = 150 # ms.
-    API_INTERVAL= 5 # s.
+    REFRESH_INTERVAL = 150  # ms.
+    API_INTERVAL = 5  # s.
     BG_COLOUR = "black"
 
     def __init__(self, matrix, press_event):
@@ -40,9 +41,17 @@ class ISSView:
         """
         start_time = time.time()
 
+        counter = 0
+
         # Wait for initial API call.
-        while(iss_coords == (0, 0) or number_ast is None):
+        while (iss_coords == (0, 0) or number_ast is None) and counter < 10:
             msleep(200)
+            counter += 1
+
+        # The initial call failed. We'll add some fake values.
+        if counter >= 10:
+            iss_coords = (0, 0)
+            number_ast = 7
 
         while not self._press_event.is_set():
             current_time = time.time()
@@ -82,13 +91,7 @@ class ISSView:
 
         time_str = time.strftime("%I:%M %p")
 
-        d.text(
-            (x_offset, y_offset),
-            time_str,
-            font=f,
-            fill=color
-        )
-
+        d.text((x_offset, y_offset), time_str, font=f, fill=color)
 
     def draw_coords(self, image):
         """
@@ -112,24 +115,14 @@ class ISSView:
         if len(lat) > truncate_len:
             lat = lat[:truncate_len]
 
-        d.text(
-            (x_offset, y_offset),
-            lat,
-            font=f,
-            fill=color
-        )
+        d.text((x_offset, y_offset), lat, font=f, fill=color)
 
         # Draw longitude.
         lon = str(round(iss_coords[1], 3))
         if len(lon) > truncate_len:
             lon = lon[:truncate_len]
 
-        d.text(
-            (x_offset, y_offset + spacing),
-            lon,
-            font=f,
-            fill=color
-        )
+        d.text((x_offset, y_offset + spacing), lon, font=f, fill=color)
 
     def draw_ast(self, image):
         """
@@ -154,7 +147,7 @@ class ISSView:
             "darkslategrey",
             "olivedrab",
             "sienna",
-            "mediumorchid"
+            "mediumorchid",
         ]
 
         if number_ast > line_length:
@@ -168,9 +161,9 @@ class ISSView:
                     x_offset + ((size + x_spacing) * i),
                     y_offset,
                     x_offset + ((size + x_spacing) * i) + size - 1,
-                    y_offset + size - 1
+                    y_offset + size - 1,
                 ],
-                fill=colors[i % len(colors)]
+                fill=colors[i % len(colors)],
             )
 
         if number_ast > line_length:
@@ -180,9 +173,9 @@ class ISSView:
                         x_offset + ((size + x_spacing) * i),
                         y_offset + (size + y_spacing),
                         x_offset + ((size + x_spacing) * i) + size - 1,
-                        y_offset + size - 1 + (size + y_spacing)
+                        y_offset + size - 1 + (size + y_spacing),
                     ],
-                    fill=colors[(line_length + i) % len(colors)]
+                    fill=colors[(line_length + i) % len(colors)],
                 )
 
     def draw_error(self, image):
@@ -200,13 +193,8 @@ class ISSView:
         d = ImageDraw.Draw(image)
 
         d.ellipse(
-            [
-                x_offset,
-                y_offset,
-                x_offset + circle_d,
-                y_offset + circle_d
-            ],
-            outline=color
+            [x_offset, y_offset, x_offset + circle_d, y_offset + circle_d],
+            outline=color,
         )
 
         d.line(
@@ -214,10 +202,11 @@ class ISSView:
                 x_offset + 1,
                 y_offset + 1,
                 x_offset + circle_d - 1,
-                y_offset + circle_d - 1
+                y_offset + circle_d - 1,
             ],
-            fill=color
+            fill=color,
         )
+
 
 class Earth:
     HOME_COORDS = (51.030436, -114.065720)
@@ -289,7 +278,9 @@ class Earth:
         self._earth_nodes = np.vstack((self._earth_nodes, ones_added))
 
         # Build home array of nodes.
-        home_coords = self.convert_coords(radians(90 - self.HOME_COORDS[0]), radians(180 - self.HOME_COORDS[1]))
+        home_coords = self.convert_coords(
+            radians(90 - self.HOME_COORDS[0]), radians(180 - self.HOME_COORDS[1])
+        )
         ones_column = np.ones((1, 1))
         ones_added = np.hstack(([home_coords], ones_column))
         self._home_nodes = np.vstack((np.zeros((0, 4)), ones_added))
@@ -333,12 +324,9 @@ class Earth:
             c = np.cos(self.SPIN_THETA)
             s = np.sin(self.SPIN_THETA)
 
-            matrix_y = np.array([
-                [c, 0, s, 0],
-                [0, 1, 0, 0],
-                [-s, 0, c, 0],
-                [0, 0, 0, 1]
-            ])
+            matrix_y = np.array(
+                [[c, 0, s, 0], [0, 1, 0, 0], [-s, 0, c, 0], [0, 0, 0, 1]]
+            )
 
             self.rotate(matrix_y)
 
@@ -360,13 +348,14 @@ class Earth:
         """
         # Draw the Earth.
         for i, node in enumerate(self._earth_nodes):
-            if (i > self.MAP_WIDTH - 1 and
-                i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH) and
-                node[2] > 1 and self._map[i][0]):
+            if (
+                i > self.MAP_WIDTH - 1
+                and i < (self.MAP_WIDTH * self.MAP_HEIGHT - self.MAP_WIDTH)
+                and node[2] > 1
+                and self._map[i][0]
+            ):
                 image.putpixel(
-                    (self.X + int(node[0]),
-                    self.Y + int(node[1]) * -1),
-                    self._map[i][1]
+                    (self.X + int(node[0]), self.Y + int(node[1]) * -1), self._map[i][1]
                 )
 
         # Draw the ISS.
@@ -395,12 +384,7 @@ class Earth:
         c = np.cos(angle)
         s = np.sin(angle)
 
-        matrix_x = np.array([
-            [c, -s, 0, 0],
-            [s, c, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
+        matrix_x = np.array([[c, -s, 0, 0], [s, c, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
         tilted_nodes = np.copy(self._earth_nodes)
 
@@ -436,7 +420,10 @@ class Earth:
         Updates the coordinates for the ISS.
         """
         global iss_coords
-        self._iss_coords = self.convert_coords(radians(90 - iss_coords[0]), radians(180 - iss_coords[1]))
+        self._iss_coords = self.convert_coords(
+            radians(90 - iss_coords[0]), radians(180 - iss_coords[1])
+        )
+
 
 def request_thread():
     global iss_coords
@@ -459,6 +446,7 @@ def request_thread():
 
         request_e.clear()
 
+
 class APIConnection:
     ISS_ENDPOINT = "http://api.open-notify.org/iss-now.json"
     AST_ENDPOINT = "http://api.open-notify.org/astros.json"
@@ -472,7 +460,10 @@ class APIConnection:
         except (requests.exceptions.RequestException, json.decoder.JSONDecodeError):
             return None
 
-        return (float(loc["iss_position"]["latitude"]), float(loc["iss_position"]["longitude"]))
+        return (
+            float(loc["iss_position"]["latitude"]),
+            float(loc["iss_position"]["longitude"]),
+        )
 
     def get_ast_number(self):
         """
