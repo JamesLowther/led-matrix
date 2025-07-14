@@ -50,6 +50,8 @@ class ISSView:
 
         # The initial call failed. We'll add some fake values.
         if counter >= 10:
+            global iss_coords, number_ast
+
             iss_coords = (0, 0)
             number_ast = 7
 
