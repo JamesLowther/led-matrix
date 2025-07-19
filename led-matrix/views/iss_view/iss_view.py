@@ -52,7 +52,7 @@ class ISSView:
 
         # The initial call failed. We'll add some fake values.
         if counter >= 10:
-            iss_coords = (0, 0)
+            iss_coords = (14.882, -51.77)
             number_ast = 7
 
         while not self._press_event.is_set():
