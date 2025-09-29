@@ -11,6 +11,7 @@ services:
       GPIOZERO_PIN_FACTORY: pigpio
       PIGPIO_ADDR: localhost
       PIGPIO_PORT: 8888
+      TZ: America/Edmonton
     profiles:
       - led-matrix
 
