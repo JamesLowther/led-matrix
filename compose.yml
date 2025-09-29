@@ -1,0 +1,27 @@
+services:
+  led-matrix:
+    build: ./led-matrix
+    container_name: led-matrix
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    volumes:
+      - ./state.json:/app/state.json
+    environment:
+      GPIOZERO_PIN_FACTORY: pigpio
+      PIGPIO_ADDR: localhost
+      PIGPIO_PORT: 8888
+    profiles:
+      - led-matrix
+
+  pir-ctrl:
+    build: ./pir-ctrl
+    container_name: pir-ctrl
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      GPIOZERO_PIN_FACTORY: pigpio
+      PIGPIO_ADDR: localhost
+      PIGPIO_PORT: 8888
