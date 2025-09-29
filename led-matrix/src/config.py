@@ -30,7 +30,10 @@ class Config:
             open(Config.STATE_PATH, "a").close()
             json_s = dict()
         else:
-            json_s = Config.read_full()
+            try:
+                json_s = Config.read_full()
+            except json.decoder.JSONDecodeError:
+                json_s = dict()
 
         os.chmod(Config.STATE_PATH,
             stat.S_IREAD | stat.S_IWRITE |
