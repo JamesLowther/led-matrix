@@ -19,6 +19,10 @@ RUN make build-python \
 ################################################################
 # led-matrix
 ################################################################
+ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN groupadd -g 1000 app && useradd -g 1000 -u 1000 -s /usr/sbin/nologin -d /app app
+
 WORKDIR /app
 
 COPY requirements.txt requirements-pi.txt .
@@ -26,4 +30,4 @@ RUN pip install -r ./requirements-pi.txt
 
 COPY ./src ./src
 
-CMD ["python3", "./src/main.py", "--led-no-drop-privs", "--led-slowdown-gpio=2", "--led-brightness=85"]
+CMD ["python3", "./src/main.py", "--led-drop-privs-user=app", "--led-drop-privs-group=app", "--led-slowdown-gpio=2", "--led-brightness=85"]
