@@ -88,7 +88,9 @@ class ISSView:
         color = (170, 170, 170)
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         time_str = time.strftime("%I:%M %p")
@@ -100,7 +102,9 @@ class ISSView:
         Draws the latitude and longitude on the the screen.
         """
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         color = (170, 170, 170)

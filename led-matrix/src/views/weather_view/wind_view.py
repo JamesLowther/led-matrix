@@ -110,23 +110,25 @@ class WindView:
 
     def draw_time(self, image):
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         y_offset = 1
 
         time_str = time.strftime("%I:%M %p")
         time_str = time_str.lstrip("0")
-        time_size = d.textsize(time_str, f)
+        time_length = int(d.textlength(time_str, f))
 
-        x = (self._matrix.dimensions[0] // 2) - (time_size[0] // 2)
+        x = (self._matrix.dimensions[0] // 2) - (time_length // 2)
 
         d.rectangle(
             [
                 x,
                 0,
-                x + time_size[0],
-                y_offset * 2 + time_size[1]
+                x + time_length,
+                y_offset * 2 + font_size
             ],
             fill = self.BG_COLOR
         )
@@ -143,22 +145,24 @@ class WindView:
 
     def draw_windspeed(self, image):
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         y_offset = 1
 
         speed_str = f"{round(self._display_windspeed, 1)} km/h"
-        speed_size = d.textsize(speed_str, f)
+        speed_length = int(d.textlength(speed_str, f))
 
-        x = (self._matrix.dimensions[0] // 2) - (speed_size[0] // 2)
+        x = (self._matrix.dimensions[0] // 2) - (speed_length // 2)
 
 
         d.rectangle(
             [
                 x,
-                self._matrix.dimensions[1] - speed_size[1] - y_offset,
-                x + speed_size[0],
+                self._matrix.dimensions[1] - font_size - y_offset,
+                x + speed_length,
                 self._matrix.dimensions[1] - y_offset
             ],
             fill = self.BG_COLOR
@@ -167,7 +171,7 @@ class WindView:
         d.text(
             (
                 x,
-                self._matrix.dimensions[1] - speed_size[1] - y_offset,
+                self._matrix.dimensions[1] - font_size - y_offset,
             ),
             speed_str,
             font=f,

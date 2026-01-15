@@ -28,12 +28,14 @@ class SwitchView:
             image = Image.new("RGB", self._matrix.dimensions, color="black")
 
             font_path = os.path.join(Config.FONTS, "6px-Normal.ttf")
-            f = ImageFont.truetype(font_path, 8)
+            font_size = 8
+
+            f = ImageFont.truetype(font_path, font_size)
             d = ImageDraw.Draw(image)
 
             top_str = "Mode set to"
             top_color = (170, 170, 170)
-            top_size = d.textsize(top_str, f)
+            top_length = int(d.textlength(top_str, f))
 
             bottom_str = modes[new_mode_i].upper()
 
@@ -43,11 +45,11 @@ class SwitchView:
             except KeyError:
                 bottom_color = "DarkViolet"
 
-            bottom_size = d.textsize(bottom_str, f)
+            bottom_length = int(d.textlength(bottom_str, f))
 
             d.text(
                 [
-                    (self._matrix.dimensions[0] / 2) - (top_size[0] / 2),
+                    (self._matrix.dimensions[0] / 2) - (top_length / 2),
                     y_offset
                 ],
                 top_str,
@@ -57,7 +59,7 @@ class SwitchView:
 
             d.text(
                 [
-                    (self._matrix.dimensions[0] / 2) - (bottom_size[0] / 2) + x_offset,
+                    (self._matrix.dimensions[0] / 2) - (bottom_length / 2) + x_offset,
                     y_offset + y_spacing
                 ],
                 bottom_str,

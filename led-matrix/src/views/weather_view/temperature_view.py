@@ -24,7 +24,9 @@ class TemperatureView:
 
     def draw_location_text(self):
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(self._temperature_image)
 
         x_offset = 2
@@ -41,7 +43,9 @@ class TemperatureView:
 
     def draw_current_temp(self):
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(self._temperature_image)
 
         x_offset = 2
@@ -55,11 +59,11 @@ class TemperatureView:
 
         current_temp = str(int(data["feels_like"] - 273.15))
 
-        size = d.textsize(current_temp, f)
+        length = int(d.textlength(current_temp, f))
 
         d.text(
             (
-                self._matrix.dimensions[0] - size[0] - x_offset - radius - 1,
+                self._matrix.dimensions[0] - length - x_offset - radius - 1,
                 y_offset
             ),
             current_temp,
@@ -82,14 +86,16 @@ class TemperatureView:
         self._temperature_image.paste(
             icon,
             (
-                self._matrix.dimensions[0] - size[0] - x_offset - icon.width - radius - 3,
+                self._matrix.dimensions[0] - length - x_offset - icon.width - radius - 3,
                 y_offset - 2
             )
         )
 
     def draw_forecast(self):
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(self._temperature_image)
 
         data = self._weather_data[self._location]["daily"]
@@ -119,9 +125,9 @@ class TemperatureView:
         for i, forecast in enumerate(data):
 
             day = datetime.fromtimestamp(forecast["dt"]).strftime("%A")[0]
-            day_size = d.textsize(day, f)
+            day_length = int(d.textlength(day, f))
 
-            day_x = x + (block_width // 2) - (day_size[0] // 2)
+            day_x = x + (block_width // 2) - (day_length // 2)
             day_y = y_offset
 
             d.text(
@@ -174,11 +180,11 @@ class TemperatureView:
             min_temp = str(min_temp_int)
             max_temp = str(max_temp_int)
 
-            min_temp_size = d.textsize(min_temp, f)
-            max_temp_size = d.textsize(max_temp, f)
+            min_temp_length = int(d.textlength(min_temp, f))
+            max_temp_length = int(d.textlength(max_temp, f))
 
-            max_x = x + (block_width // 2) - (max_temp_size[0] // 2)
-            max_y = y_offset + day_size[1]
+            max_x = x + (block_width // 2) - (max_temp_length // 2)
+            max_y = y_offset + font_size
 
             d.text(
                 (
@@ -190,8 +196,8 @@ class TemperatureView:
                 fill=max_color
             )
 
-            min_x = x + (block_width // 2) - (min_temp_size[0] // 2)
-            min_y = y_offset + day_size[1] + max_temp_size[1]
+            min_x = x + (block_width // 2) - (min_temp_length // 2)
+            min_y = y_offset + (font_size * 2)
 
             d.text(
                 (
@@ -204,7 +210,7 @@ class TemperatureView:
             )
 
             icon_x = x + (block_width // 2) - (icon_size // 2)
-            icon_y = y_offset + day_size[1] + max_temp_size[1] + min_temp_size[1] + 2
+            icon_y = y_offset + (font_size * 3) + 2
 
             icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
             self._temperature_image.paste(

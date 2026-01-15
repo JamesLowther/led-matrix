@@ -64,14 +64,13 @@ class RadarView:
         )
 
     def draw_time(self, image, time):
-        font_size = 4
-
         x_offset = 1
         y_offset = 1
 
         color = (170, 170, 170)
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
+        font_size = 4
 
         f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
@@ -79,9 +78,9 @@ class RadarView:
         time_str = datetime.fromtimestamp(time).strftime("%I:%M %p")
         time_str = time_str.lstrip("0")
 
-        text_size = d.textsize(time_str, f)
-        x = self._matrix.dimensions[0] - text_size[0] - x_offset
-        y = self._matrix.dimensions[1] - text_size[1] - y_offset
+        text_length = int(d.textlength(time_str, f))
+        x = self._matrix.dimensions[0] - text_length - x_offset
+        y = self._matrix.dimensions[1] - font_size - y_offset
 
         d.text(
             (

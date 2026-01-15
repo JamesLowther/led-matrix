@@ -27,14 +27,16 @@ class PoweroffView:
             image = Image.new("RGB", self._matrix.dimensions, color="black")
 
             font_path = os.path.join(Config.FONTS, "6px-Normal.ttf")
-            f = ImageFont.truetype(font_path, 8)
+            font_size = 8
+
+            f = ImageFont.truetype(font_path, font_size)
             d = ImageDraw.Draw(image)
 
             text_1_str = "Shutting down in"
-            text_1_size = d.textsize(text_1_str, f)
+            text_1_length = int(d.textlength(text_1_str, f))
 
             d.text(
-                ((self._matrix.dimensions[0] / 2) - (text_1_size[0] / 2), y_offset),
+                ((self._matrix.dimensions[0] / 2) - (text_1_length / 2), y_offset),
                 text_1_str,
                 font=f,
                 fill=(170, 170, 170),
@@ -45,11 +47,11 @@ class PoweroffView:
             else:
                 text_2_str = f"{i} seconds"
 
-            text_2_size = d.textsize(text_2_str, f)
+            text_2_length = int(d.textlength(text_2_str, f))
 
             d.text(
                 (
-                    (self._matrix.dimensions[0] / 2) - (text_2_size[0] / 2),
+                    (self._matrix.dimensions[0] / 2) - (text_2_length / 2),
                     y_offset + spacing,
                 ),
                 text_2_str,
@@ -58,11 +60,11 @@ class PoweroffView:
             )
 
             text_3_str = "PRESS TO CANCEL"
-            text_3_size = d.textsize(text_3_str, f)
+            text_3_length = int(d.textlength(text_3_str, f))
 
             d.text(
                 (
-                    (self._matrix.dimensions[0] / 2) - (text_3_size[0] / 2),
+                    (self._matrix.dimensions[0] / 2) - (text_3_length / 2),
                     y_offset + spacing + spacing_2,
                 ),
                 text_3_str,
