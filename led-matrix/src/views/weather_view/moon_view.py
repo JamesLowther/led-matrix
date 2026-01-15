@@ -106,7 +106,7 @@ class MoonView:
         d.text(
             (
                 (self._matrix.dimensions[0] / 4) * 3 - (bottom_length / 2) + x_offset,
-                y_offset + font_size + spacing
+                y_offset + (font_size + 1) + spacing
             ),
             bottom_str,
             font=f,

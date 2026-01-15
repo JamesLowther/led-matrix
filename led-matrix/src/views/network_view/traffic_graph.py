@@ -47,7 +47,7 @@ class TrafficGraph:
         d.text(
             [
                 64 - rx_length - x_offset,
-                y_offset + font_size + y_spacing
+                y_offset + (font_size + 1) + y_spacing
             ],
             rx_str,
             font=f,

@@ -128,7 +128,7 @@ class WindView:
                 x,
                 0,
                 x + time_length,
-                y_offset * 2 + font_size
+                y_offset * 2 + (font_size + 1)
             ],
             fill = self.BG_COLOR
         )
@@ -161,7 +161,7 @@ class WindView:
         d.rectangle(
             [
                 x,
-                self._matrix.dimensions[1] - font_size - y_offset,
+                self._matrix.dimensions[1] - (font_size + 1) - y_offset,
                 x + speed_length,
                 self._matrix.dimensions[1] - y_offset
             ],
@@ -171,7 +171,7 @@ class WindView:
         d.text(
             (
                 x,
-                self._matrix.dimensions[1] - font_size - y_offset,
+                self._matrix.dimensions[1] - (font_size + 1) - y_offset,
             ),
             speed_str,
             font=f,

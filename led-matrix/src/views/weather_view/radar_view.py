@@ -80,7 +80,7 @@ class RadarView:
 
         text_length = int(d.textlength(time_str, f))
         x = self._matrix.dimensions[0] - text_length - x_offset
-        y = self._matrix.dimensions[1] - font_size - y_offset
+        y = self._matrix.dimensions[1] - (font_size + 1) - y_offset
 
         d.text(
             (

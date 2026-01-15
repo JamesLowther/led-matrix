@@ -184,7 +184,7 @@ class TemperatureView:
             max_temp_length = int(d.textlength(max_temp, f))
 
             max_x = x + (block_width // 2) - (max_temp_length // 2)
-            max_y = y_offset + font_size
+            max_y = y_offset + font_size + 1
 
             d.text(
                 (
@@ -197,7 +197,7 @@ class TemperatureView:
             )
 
             min_x = x + (block_width // 2) - (min_temp_length // 2)
-            min_y = y_offset + (font_size * 2)
+            min_y = y_offset + ((font_size + 1) * 2)
 
             d.text(
                 (
@@ -210,7 +210,7 @@ class TemperatureView:
             )
 
             icon_x = x + (block_width // 2) - (icon_size // 2)
-            icon_y = y_offset + (font_size * 3) + 2
+            icon_y = y_offset + ((font_size + 1) * 3) + 2
 
             icon = self.get_icon(forecast["weather"][0]["icon"], icon_size)
             self._temperature_image.paste(
