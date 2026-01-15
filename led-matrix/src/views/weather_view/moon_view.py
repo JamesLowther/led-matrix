@@ -79,7 +79,9 @@ class MoonView:
         color = (170, 170, 170)
 
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         phase = self._moon_phase["phase"]
@@ -88,12 +90,12 @@ class MoonView:
         top_str = phase_s[0]
         bottom_str = phase_s[1]
 
-        top_size = d.textsize(top_str, f)
-        bottom_size = d.textsize(bottom_str, f)
+        top_length = int(d.textlength(top_str, f))
+        bottom_length = int(d.textlength(bottom_str, f))
 
         d.text(
             (
-                (self._matrix.dimensions[0] / 4) * 3 - (top_size[0] / 2) + x_offset,
+                (self._matrix.dimensions[0] / 4) * 3 - (top_length / 2) + x_offset,
                 y_offset
             ),
             top_str,
@@ -103,8 +105,8 @@ class MoonView:
 
         d.text(
             (
-                (self._matrix.dimensions[0] / 4) * 3 - (bottom_size[0] / 2) + x_offset,
-                y_offset + top_size[1] + spacing
+                (self._matrix.dimensions[0] / 4) * 3 - (bottom_length / 2) + x_offset,
+                y_offset + (font_size + 1) + spacing
             ),
             bottom_str,
             font=f,
@@ -141,16 +143,18 @@ class MoonView:
         color = (170, 170, 170)
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         now = datetime.now()
         date_str = now.strftime("%b. %-d, %Y")
-        date_size = d.textsize(date_str, f)
+        date_length = int(d.textlength(date_str, f))
 
         d.text(
             (
-                (self._matrix.dimensions[0] / 2)- (date_size[0] / 2) + x_offset,
+                (self._matrix.dimensions[0] / 2)- (date_length / 2) + x_offset,
                 y_offset
             ),
             date_str,

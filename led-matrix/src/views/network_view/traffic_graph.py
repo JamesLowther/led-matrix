@@ -15,7 +15,9 @@ class TrafficGraph:
         y_spacing = 2
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         wan_data = health_data[1]
@@ -29,12 +31,12 @@ class TrafficGraph:
         if len(tx_str) <= 6 and len(rx_str) <= 6:
             x_offset = 1
 
-        tx_size = d.textsize(tx_str, f)
-        rx_size = d.textsize(rx_str, f)
+        tx_length = int(d.textlength(tx_str, f))
+        rx_length = int(d.textlength(rx_str, f))
 
         d.text(
             [
-                64 - tx_size[0] - x_offset,
+                64 - tx_length - x_offset,
                 y_offset
             ],
             tx_str,
@@ -44,8 +46,8 @@ class TrafficGraph:
 
         d.text(
             [
-                64 - rx_size[0] - x_offset,
-                y_offset + tx_size[1] + y_spacing
+                64 - rx_length - x_offset,
+                y_offset + (font_size + 1) + y_spacing
             ],
             rx_str,
             font=f,

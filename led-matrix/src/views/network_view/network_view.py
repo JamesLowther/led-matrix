@@ -125,7 +125,9 @@ class NetworkMonitor:
         color = "lightpink"
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         time_str = time.strftime("%I:%M %p")
@@ -144,7 +146,9 @@ class NetworkMonitor:
         color = "rosybrown"
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         num_clients = health_data[1]["num_sta"]
@@ -165,15 +169,17 @@ class NetworkMonitor:
         color = "rosybrown"
 
         font_path = os.path.join(Config.FONTS, "resolution-3x4.ttf")
-        f = ImageFont.truetype(font_path, 4)
+        font_size = 4
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         ms_str = str(round(ping_data, 1)) + " ms"
-        ms_size = d.textsize(ms_str, f)
+        ms_length = int(d.textlength(ms_str, f))
 
         d.text(
             (
-                self._matrix.dimensions[0] - ms_size[0] - x_offset,
+                self._matrix.dimensions[0] - ms_length - x_offset,
                 y_offset
             ),
             ms_str,
@@ -198,13 +204,15 @@ class NetworkMonitor:
         color = "lightcoral"
 
         font_path = os.path.join(Config.FONTS, "cg-pixel-4x5.ttf")
-        f = ImageFont.truetype(font_path, 5)
+        font_size = 5
+
+        f = ImageFont.truetype(font_path, font_size)
         d = ImageDraw.Draw(image)
 
         percent = round(float(pihole_data["ads_percentage_today"]), 1)
 
         percent_str = f"{percent}%"
-        percent_size = d.textsize(percent_str, f)
+        percent_length = int(d.textlength(percent_str, f))
 
         if len(percent_str) <= 4:
             x_spacing += 3
@@ -215,15 +223,15 @@ class NetworkMonitor:
         image.paste(
             icon,
             (
-                self._matrix.dimensions[0] - percent_size[0] - icon_size - x_offset - x_spacing,
+                self._matrix.dimensions[0] - percent_length - icon_size - x_offset - x_spacing,
                 y_offset
             )
         )
 
         d.text(
             (
-                self._matrix.dimensions[0] - percent_size[0] - x_offset,
-                y_offset + ((icon_size / 2) - (percent_size[1] / 2))
+                self._matrix.dimensions[0] - percent_length - x_offset,
+                y_offset + ((icon_size / 2) - (font_size / 2))
             ),
             percent_str,
             font=f,
