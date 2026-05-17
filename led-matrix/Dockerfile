@@ -9,11 +9,12 @@ RUN apt-get update -y \
     && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
         git \
         build-essential \
-        cython3 \
-        python3-dev \
         python3-venv \
         python3-pip \
+        python3-dev \
+        python-dev-is-python3 \
         python3-pil \
+        cython3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv /opt/venv
@@ -22,15 +23,11 @@ ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip setuptools
 
-RUN git clone https://github.com/hzeller/rpi-rgb-led-matrix.git /opt/rpi-rgb-led-matrix
-WORKDIR /opt/rpi-rgb-led-matrix
-
-ARG HARDWARE_DESC="adafruit-hat-pwm"
-RUN make build-python HARDWARE_DESC="$HARDWARE_DESC" \
-    && make install-python HARDWARE_DESC="$HARDWARE_DESC"
-
 WORKDIR /build
-COPY requirements.txt requirements-pi.txt .
+
+RUN pip install --no-cache-dir git+https://github.com/hzeller/rpi-rgb-led-matrix
+
+COPY requirements.txt requirements-pi.txt ./
 RUN pip install --no-cache-dir -r ./requirements-pi.txt
 
 ################################################################
@@ -47,6 +44,8 @@ ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 RUN apt-get update -y \
     && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
          python3 \
+         python-dev-is-python3 \
+         cython3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 1000 app \
@@ -63,5 +62,6 @@ CMD [ \
     "--led-drop-privs-user=app", \
     "--led-drop-privs-group=app", \
     "--led-slowdown-gpio=2", \
-    "--led-brightness=85" \
+    "--led-brightness=85", \
+    "--led-gpio-mapping=adafruit-hat-pwm" \
 ]
