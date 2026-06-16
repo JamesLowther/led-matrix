@@ -1,16 +1,14 @@
 import os
 import threading
-from random import randint, choice
-
-from PIL import Image, ImageFont, ImageDraw
+from random import choice, randint
 
 from config import Config
-
+from PIL import Image, ImageDraw, ImageFont
+from views.iss_view.iss_view import ISSView
+from views.network_view.network_view import NetworkMonitor
 from views.poweroff_view import PoweroffView
 from views.switch_view import SwitchView
-from views.network_view.network_view import NetworkMonitor
 from views.test_view.test_view import TestView
-from views.iss_view.iss_view import ISSView
 from views.video_view.video_view import VideoView
 from views.weather_view.weather_view import WeatherView
 
@@ -263,7 +261,7 @@ class ViewHandler:
                 except:
                     pass
 
-                os.system("sudo systemctl poweroff -i")
+                open("/poweroff", "w").close()
 
     def log(self, text):
         print(f"View Handler - {text}")
